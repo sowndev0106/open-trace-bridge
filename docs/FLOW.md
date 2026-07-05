@@ -140,7 +140,9 @@ https://6666.sowndev.com/api/events?text=<url-encode raw text>&userId=<...>&user
 
 > Trạng thái: **ĐÃ IMPLEMENT + smoke test pass (2026-07-05)** — design: `REQUIREMENT.md` §3–§10, plan: `superpowers/plans/2026-07-05-step2-dynamic-investigation.md`, diagram: `DIAGRAMS.md`
 >
-> Smoke test đã verify: agent trả lời thật từ repo clone; session continuity (hỏi tiếp nhớ ngữ cảnh cùng session); `payment-bot /new` đóng conversation cũ, tạo mới; 17 unit test pass. Bug tìm được khi smoke: spawn opencode với stdin pipe mở làm treo tới timeout 5 phút — fix bằng `stdio: ['ignore',...]`. pm2 đã restart chạy code mới trên port 6666.
+> Smoke test đã verify: agent trả lời thật từ repo clone; session continuity (hỏi tiếp nhớ ngữ cảnh cùng session); `payment-bot /new` đóng conversation cũ, tạo mới; 17 unit test pass. Bug tìm được khi smoke: spawn opencode với stdin pipe mở làm treo tới timeout 5 phút — fix bằng `stdio: ['ignore',...]`.
+>
+> **Runtime chính thức: Docker (`docker compose up -d`), pm2 đã gỡ hẳn** (2026-07-05). Container chạy Express 6666 + `opencode serve` 4096 (bind 127.0.0.1 host); auth.json của opencode đã copy từ host vào volume container, đã verify opencode chạy được bên trong container. Lưu ý: session opencode cũ thời pm2 nằm ở host, không có trong container — conversation cũ nào còn giữ session id cũ sẽ lỗi "session not found", cứ `/new` là xong.
 >
 > Việc còn lại: (1) cập nhật URL Power Automate sang `/api/events/<slug>`; (2) tạo webhook nhận kết quả trong Teams (flow "When a Teams webhook request is received" → Post card in chat) rồi dán URL vào project; (3) Task 11 Docker — file đã viết sẵn, chưa build/test.
 
