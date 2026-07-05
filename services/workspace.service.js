@@ -86,6 +86,64 @@ function cloneUrlFor(repo) {
   return repo.git_url;
 }
 
+// Indirection over execFile('git', ...) so tests can stub git invocations.
+const git = { run: (args, opts) => execFileP('git', args, opts) };
+
+function workspacePathFor(project) {
+  return path.join(WORKSPACES_DIR, project.slug);
+}
+
+function redactGitError(text, repo) {
+  let s = String(text || '');
+  if (repo.token) s = s.split(repo.token).join('***');
+  return s.slice(0, 1000);
+}
+
+// Force-sync one repo into ws: remote always wins. Local commits, branch
+// moves, and untracked files are discarded on every sync.
+async function syncRepo(repo, ws) {
+  const dir = path.join(ws, repoDirName(repo.git_url));
+  const keysDir = path.join(WORKSPACES_DIR, '.keys');
+  fs.mkdirSync(ws, { recursive: true });
+  fs.mkdirSync(keysDir, { recursive: true });
+  const keyFile = path.join(keysDir, `repo-${repo.id}`);
+  const env = gitEnvFor(repo, keyFile);
+  const branch = repo.branch || 'main';
+  try {
+    if (fs.existsSync(path.join(dir, '.git'))) {
+      await git.run(['-C', dir, 'fetch', '--depth', '1', 'origin', branch], { env, timeout: 300000 });
+      await git.run(['-C', dir, 'checkout', '-B', branch, `origin/${branch}`], { env, timeout: 60000 });
+      await git.run(['-C', dir, 'clean', '-fd'], { env, timeout: 60000 });
+    } else {
+      await git.run(['clone', '--depth', '1', '--branch', branch, cloneUrlFor(repo), dir], { env, timeout: 300000 });
+    }
+  } catch (err) {
+    throw new Error(`Git failed for repo ${repo.git_url}: ${redactGitError(err.stderr || err.message, repo)}`);
+  }
+}
+
+// Remove checkouts of repos no longer configured. Only touches direct child
+// directories that contain .git; AGENTS.md, opencode.json, and anything we
+// did not clone are left alone.
+function pruneRemovedRepos(ws, repoRows) {
+  if (!fs.existsSync(ws)) return;
+  const keep = new Set(repoRows.map((r) => repoDirName(r.git_url)));
+  for (const entry of fs.readdirSync(ws, { withFileTypes: true })) {
+    if (!entry.isDirectory() || keep.has(entry.name)) continue;
+    if (fs.existsSync(path.join(ws, entry.name, '.git'))) {
+      fs.rmSync(path.join(ws, entry.name), { recursive: true, force: true });
+    }
+  }
+}
+
+function writeWorkspaceFiles(project, apiGroups) {
+  const ws = workspacePathFor(project);
+  fs.mkdirSync(ws, { recursive: true });
+  fs.writeFileSync(path.join(ws, 'AGENTS.md'), buildAgentsMd(project, apiGroups));
+  fs.writeFileSync(path.join(ws, 'opencode.json'), JSON.stringify(buildOpencodeConfig(project), null, 2));
+  return ws;
+}
+
 async function ensureWorkspace(project, repoRows, apiGroups) {
   const ws = path.join(WORKSPACES_DIR, project.slug);
   const keysDir = path.join(WORKSPACES_DIR, '.keys');
@@ -113,4 +171,7 @@ async function ensureWorkspace(project, repoRows, apiGroups) {
   return ws;
 }
 
-module.exports = { buildAgentsMd, buildOpencodeConfig, getInternalToken, ensureWorkspace, repoDirName };
+module.exports = {
+  buildAgentsMd, buildOpencodeConfig, getInternalToken, ensureWorkspace, repoDirName,
+  git, workspacePathFor, redactGitError, syncRepo, pruneRemovedRepos, writeWorkspaceFiles,
+};
