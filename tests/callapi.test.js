@@ -5,6 +5,10 @@ const { resetDbForTest } = require('../lib/db');
 const projects = require('../models/project.model');
 const apis = require('../models/api.model');
 const { executeApiCall } = require('../services/callapi.service');
+const {
+  parseCurlApiGroupInput,
+  redactApiSecrets,
+} = require('../services/curlApiGroup.service');
 
 beforeEach(() => resetDbForTest());
 
@@ -37,4 +41,60 @@ test('rejects path escaping base url', async () => {
   await assert.rejects(
     executeApiCall({ project: p, groupName: 'txn', method: 'GET', path: 'https://evil.com/x', params: {} }),
     /base URL/i);
+});
+
+test('parses pasted curl into an API group using bearer auth', () => {
+  const parsed = parseCurlApiGroupInput({
+    name: 'transaction-api',
+    curl_command: `curl -X POST \
+      -H "Authorization: Bearer sk_live_123" \
+      -H "Accept: application/json" \
+      "https://api.internal.example/v1/transactions/search?limit=10"`,
+    description_md: 'Search transactions by reference id.',
+  });
+
+  assert.deepStrictEqual(parsed, {
+    name: 'transaction-api',
+    base_url: 'https://api.internal.example/v1',
+    api_key: 'Bearer sk_live_123',
+    auth_header: 'Authorization',
+    allowed_methods: 'POST',
+    description_md: 'Search transactions by reference id.',
+  });
+});
+
+test('parses pasted curl using default GET and x-api-key auth', () => {
+  const parsed = parseCurlApiGroupInput({
+    name: '',
+    curl_command: `curl "https://ledger.example.com/accounts/acct_123/balance" -H "x-api-key: key_abc"`,
+    description_md: 'Fetch account balance.',
+  });
+
+  assert.strictEqual(parsed.name, 'ledger-api');
+  assert.strictEqual(parsed.base_url, 'https://ledger.example.com/accounts/acct_123');
+  assert.strictEqual(parsed.api_key, 'key_abc');
+  assert.strictEqual(parsed.auth_header, 'x-api-key');
+  assert.strictEqual(parsed.allowed_methods, 'GET');
+  assert.strictEqual(parsed.description_md, 'Fetch account balance.');
+});
+
+test('redacts configured API keys from generated markdown', () => {
+  const text = 'Use Bearer sk_live_123 for this endpoint. key_abc must not appear.';
+  const redacted = redactApiSecrets(text, [
+    { api_key: 'Bearer sk_live_123' },
+    { api_key: 'key_abc' },
+  ]);
+
+  assert.strictEqual(redacted, 'Use [REDACTED_API_KEY] for this endpoint. [REDACTED_API_KEY] must not appear.');
+});
+
+test('curl parser rejects missing curl command and missing URL', () => {
+  assert.throws(
+    () => parseCurlApiGroupInput({ name: 'x', curl_command: '', description_md: '' }),
+    /Curl command is required/i
+  );
+  assert.throws(
+    () => parseCurlApiGroupInput({ name: 'x', curl_command: 'curl -H "Authorization: Bearer x"', description_md: '' }),
+    /valid http or https URL/i
+  );
 });
