@@ -33,6 +33,30 @@ test('repos and api groups per project', () => {
   assert.strictEqual(apis.findByProjectAndName(p.id, 'txn-api').id, g.id);
 });
 
+test('repo sync status lifecycle: pending -> syncing -> error stamps synced_at', () => {
+  const p = projects.create({ slug: 'sync-p', name: 'Sync P', keyword: '', system_prompt: '',
+    teams_webhook_url: '', max_msg_length: 20000 });
+  const r = repos.create({ project_id: p.id, git_url: 'https://github.com/acme/a.git' });
+  assert.strictEqual(r.sync_status, 'pending');
+  assert.strictEqual(r.synced_at, null);
+
+  repos.setSyncStatus(r.id, { status: 'syncing' });
+  let row = repos.listByProject(p.id)[0];
+  assert.strictEqual(row.sync_status, 'syncing');
+  assert.strictEqual(row.synced_at, null);
+
+  repos.setSyncStatus(r.id, { status: 'error', error: 'clone failed' });
+  row = repos.listByProject(p.id)[0];
+  assert.strictEqual(row.sync_status, 'error');
+  assert.strictEqual(row.sync_error, 'clone failed');
+  assert.ok(row.synced_at);
+
+  repos.setSyncStatus(r.id, { status: 'success' });
+  row = repos.listByProject(p.id)[0];
+  assert.strictEqual(row.sync_status, 'success');
+  assert.strictEqual(row.sync_error, null);
+});
+
 test('conversation lifecycle + messages', () => {
   const p = projects.create({ slug: 'c', name: 'C', keyword: 'k', system_prompt: '', teams_webhook_url: '' });
   assert.strictEqual(convs.findActive(p.id, 'teams-conv-1'), undefined);

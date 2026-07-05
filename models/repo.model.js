@@ -12,4 +12,12 @@ function listByProject(project_id) {
 }
 function remove(id) { getDb().prepare('DELETE FROM repos WHERE id = ?').run(id); }
 
-module.exports = { create, listByProject, remove };
+function setSyncStatus(id, { status, error = null }) {
+  getDb().prepare(
+    `UPDATE repos SET sync_status = ?, sync_error = ?,
+       synced_at = CASE WHEN ? IN ('success','error') THEN datetime('now') ELSE synced_at END
+     WHERE id = ?`
+  ).run(status, error, status, id);
+}
+
+module.exports = { create, listByProject, remove, setSyncStatus };
