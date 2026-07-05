@@ -2,6 +2,9 @@ const { spawn } = require('child_process');
 
 const TIMEOUT_MS = 300000;
 
+// Indirection over spawn so tests can stub opencode invocations.
+const proc = { spawn };
+
 function parseRunOutput(stdout) {
   let sessionId = null;
   const chunks = [];
@@ -21,7 +24,9 @@ function runPrompt({ dir, sessionId, text }) {
     if (sessionId) args.push('-s', sessionId);
     args.push(text);
     // stdin must be ignored; an open pipe makes opencode wait for EOF until timeout.
-    const child = spawn('opencode', args, { cwd: dir, env: process.env, stdio: ['ignore', 'pipe', 'pipe'] });
+    // PWD must match cwd: opencode prefers $PWD over process.cwd() when binding
+    // the session directory, and spawn() does not update PWD to follow cwd.
+    const child = proc.spawn('opencode', args, { cwd: dir, env: { ...process.env, PWD: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
 
     let stdout = '', stderr = '';
     const timer = setTimeout(() => {
@@ -42,4 +47,4 @@ function runPrompt({ dir, sessionId, text }) {
   });
 }
 
-module.exports = { parseRunOutput, runPrompt };
+module.exports = { parseRunOutput, runPrompt, proc };
