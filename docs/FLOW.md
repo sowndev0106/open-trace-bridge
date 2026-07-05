@@ -31,6 +31,25 @@ Main decisions:
 - Send results asynchronously through each project's Teams webhook to avoid Power Automate timeouts.
 - Run the app with Docker instead of pm2.
 
+## Source sync
+
+Implemented on 2026-07-05.
+
+- Saving a project, adding a repo, or deleting a repo force-syncs the project's
+  repos into `workspaces/<slug>/` in the background. Remote always wins:
+  `fetch` + `checkout -B <branch> origin/<branch>` + `clean -fd`; local changes
+  and force-pushed history are discarded. Removed repos are pruned.
+- Per-repo status (`pending` / `syncing` / `success` / `error`, last synced
+  time, error detail) is visible on the project list and edit pages. The edit
+  page has a **Sync now** button, and `GET /admin/projects/:id/sync-status`
+  serves the status as JSON (admin port only).
+- Incoming messages run opencode directly in the ready workspace. If the
+  workspace is missing or the last sync failed, the message force-syncs inline
+  first, so questions never fail just because nobody pressed Save.
+- The `/pull-source` chat command (like `/new`, after the project keyword)
+  re-syncs on demand and posts a per-repo summary back to Teams. It does not
+  touch the active opencode session.
+
 ## Runtime
 
 Docker runs the Express app and `opencode serve` in the same container.

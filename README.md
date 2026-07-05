@@ -69,6 +69,12 @@ https://<public-host>/api/events/<project-slug>?text=...&conversationId=...&user
 
 Use `<keyword> /new` in Teams to close the active conversation and start a new OpenCode session.
 
+Saving a project (or adding/removing repos) force-syncs its sources into the
+project workspace in the background; the admin UI shows per-repo sync status
+and offers a **Sync now** button. Use `<keyword> /pull-source` in Teams to
+re-pull the sources to the latest remote state on demand — the result is posted
+back through the project webhook.
+
 ## Development
 
 Run the test suite with:
