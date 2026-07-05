@@ -6,6 +6,7 @@
   const errorList = Array.isArray(errors) ? errors : (error ? [error] : []);
   const repoValues = repoDraft || {};
   const apiValues = apiDraft || {};
+  const syncBadgeClass = { success: 'status-active', error: 'status-error', syncing: 'status-syncing', pending: 'status-muted' };
 %>
 
 <section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -94,19 +95,29 @@
           <h2 class="section-heading">Repos</h2>
           <p class="mt-1 text-sm text-ink-500"><%= repos.length %> connected repositories.</p>
         </div>
+        <form class="inline-form" method="post" action="/admin/projects/<%= project.id %>/sync">
+          <button class="btn btn-secondary" type="submit">Sync now</button>
+        </form>
       </div>
 
       <% if (repos.length) { %>
         <div class="table-shell mb-5 shadow-none">
           <div class="table-scroll">
             <table class="data-table">
-              <thead><tr><th>Git URL</th><th>Auth</th><th>Branch</th><th class="text-right">Actions</th></tr></thead>
+              <thead><tr><th>Git URL</th><th>Auth</th><th>Branch</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
               <tbody>
                 <% for (const r of repos) { %>
                 <tr>
                   <td><%= r.git_url %></td>
                   <td><span class="status-badge status-muted"><%= r.auth_type %></span></td>
                   <td><%= r.branch %></td>
+                  <td data-repo-status="<%= r.id %>">
+                    <span class="status-badge <%= syncBadgeClass[r.sync_status] || 'status-muted' %>"><%= r.sync_status %></span>
+                    <% if (r.synced_at) { %><div class="mt-1 text-xs text-ink-500"><%= r.synced_at %></div><% } %>
+                    <% if (r.sync_status === 'error' && r.sync_error) { %>
+                      <div class="mt-1 max-w-xs truncate text-xs text-rose-700" title="<%= r.sync_error %>"><%= r.sync_error %></div>
+                    <% } %>
+                  </td>
                   <td>
                     <div class="flex justify-end">
                       <form class="inline-form" method="post" action="/admin/projects/<%= project.id %>/repos/<%= r.id %>/delete">
@@ -205,6 +216,22 @@
       </form>
     </div>
   </section>
+<% } %>
+
+<% if (project && project.id && repos.some((r) => r.sync_status === 'pending' || r.sync_status === 'syncing')) { %>
+<script>
+  (function () {
+    var timer = setInterval(function () {
+      fetch('/admin/projects/<%= project.id %>/sync-status')
+        .then(function (r) { return r.json(); })
+        .then(function (s) {
+          var busy = s.repos.some(function (r) { return r.sync_status === 'pending' || r.sync_status === 'syncing'; });
+          if (!busy) { clearInterval(timer); location.reload(); }
+        })
+        .catch(function () {});
+    }, 3000);
+  })();
+</script>
 <% } %>
 
 <%- include('../layout-foot') %>

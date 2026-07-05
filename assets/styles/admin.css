@@ -175,6 +175,14 @@
     @apply border-slate-200 bg-slate-100 text-ink-500;
   }
 
+  .status-error {
+    @apply border-rose-200 bg-rose-50 text-rose-700;
+  }
+
+  .status-syncing {
+    @apply border-amber-200 bg-amber-50 text-amber-700;
+  }
+
   .empty-state {
     @apply rounded-lg border border-dashed border-line bg-white px-6 py-10 text-center;
   }

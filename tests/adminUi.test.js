@@ -266,3 +266,41 @@ test('sync-status endpoint returns derived project status and per-repo rows', as
 
   await request(adminApp).get('/admin/projects/999/sync-status').expect(404);
 });
+
+test('projects list shows a source sync badge per project', async () => {
+  const project = seedProject();
+  const repo = repos.create({ project_id: project.id, git_url: 'https://github.com/acme/payment.git',
+    auth_type: 'none', branch: 'main' });
+  repos.setSyncStatus(repo.id, { status: 'success' });
+
+  const res = await request(adminApp).get('/admin/projects').expect(200);
+  const $ = cheerio.load(res.text);
+  assert.match($('thead').text(), /Source/);
+  assert.strictEqual($('[data-project-sync]').first().text().trim(), 'success');
+});
+
+test('project edit shows per-repo status, error detail, and a Sync now button', async () => {
+  const project = seedProject();
+  const repo = repos.create({ project_id: project.id, git_url: 'https://github.com/acme/payment.git',
+    auth_type: 'none', branch: 'main' });
+  repos.setSyncStatus(repo.id, { status: 'error', error: 'auth denied' });
+
+  const res = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(res.text);
+  assert.strictEqual($(`form[action="/admin/projects/${project.id}/sync"]`).length, 1);
+  assert.strictEqual($(`[data-repo-status="${repo.id}"] .status-badge`).text().trim(), 'error');
+  assert.match($(`[data-repo-status="${repo.id}"]`).text(), /auth denied/);
+});
+
+test('project edit embeds the status poller only while a sync is unfinished', async () => {
+  const project = seedProject();
+  const repo = repos.create({ project_id: project.id, git_url: 'https://github.com/acme/payment.git',
+    auth_type: 'none', branch: 'main' }); // sync_status defaults to 'pending'
+
+  let res = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  assert.match(res.text, /sync-status/);
+
+  repos.setSyncStatus(repo.id, { status: 'success' });
+  res = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  assert.ok(!/setInterval/.test(res.text));
+});
