@@ -1,6 +1,6 @@
-// Chuẩn hoá output của OpenCode thành Adaptive Card cho MS Teams.
-// Spec: docs/send_msg_webhook.md (§5 long output, §6 redaction, layout §3).
-// Pure functions — không gọi network.
+// Normalize OpenCode output into Adaptive Cards for Microsoft Teams.
+// Spec: docs/send_msg_webhook.md.
+// Pure functions; no network calls.
 
 const REDACTIONS = [
   [/(authorization:\s*bearer\s+)\S+/gi, '$1[REDACTED]'],
@@ -18,7 +18,7 @@ function redact(text) {
   return out;
 }
 
-// Tách markdown thành block: text paragraph hoặc fenced code (giữ language).
+// Split markdown into text and fenced-code blocks while preserving the language.
 function tokenize(md) {
   const blocks = [];
   const lines = String(md || '').split('\n');
@@ -43,9 +43,9 @@ function tokenize(md) {
   return blocks;
 }
 
-const CUT_MARK = '\n[code tiếp ở phần sau]';
+const CUT_MARK = '\n[code continues in the next part]';
 
-// Cắt 1 block thành các mảnh <= maxLen, không phá fence.
+// Split one block into pieces <= maxLen without breaking fences.
 function splitBlock(block, maxLen) {
   const wrapLen = block.type === 'code' ? ('```'.length * 2 + block.lang.length + 2 + CUT_MARK.length) : 0;
   const budget = Math.max(maxLen - wrapLen, 20);
@@ -69,8 +69,8 @@ function splitBlock(block, maxLen) {
   });
 }
 
-// Chia markdown thành nhiều message <= maxLen ký tự, ưu tiên ranh giới block;
-// code block bị cắt sẽ đóng fence + marker, mở lại ```lang ở message sau.
+// Split markdown into messages <= maxLen, preferring block boundaries.
+// Split code blocks are closed with a marker and reopened in the next message.
 function splitMarkdown(md, maxLen) {
   const blocks = tokenize(md);
   const rendered = [];
@@ -93,10 +93,10 @@ function splitMarkdown(md, maxLen) {
 
 const STATUS_MARK = { success: '✅', warning: '⚠️', error: '❌', info: 'ℹ️', debug: '🔎' };
 
-// Build 1 Adaptive Card message từ 1 chunk markdown (layout theo spec §3).
+// Build one Adaptive Card message from one markdown chunk.
 function buildCard({ status, title, markdown, metadata, partInfo }) {
   const mark = STATUS_MARK[status] || '';
-  const partSuffix = partInfo && partInfo.total > 1 ? ` (phần ${partInfo.index}/${partInfo.total})` : '';
+  const partSuffix = partInfo && partInfo.total > 1 ? ` (part ${partInfo.index}/${partInfo.total})` : '';
   const body = [{
     type: 'TextBlock',
     text: `${mark} ${title}${partSuffix}`.trim(),

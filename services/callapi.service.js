@@ -3,19 +3,19 @@ const apicalls = require('../models/apicall.model');
 
 async function executeApiCall({ project, groupName, method, path: apiPath, params }) {
   const group = apis.findByProjectAndName(project.id, groupName);
-  if (!group) throw new Error(`API group "${groupName}" không tồn tại trong project ${project.slug}`);
+  if (!group) throw new Error(`API group "${groupName}" does not exist in project ${project.slug}`);
 
   const m = String(method || 'GET').toUpperCase();
   const allowed = group.allowed_methods.split(',').map((s) => s.trim().toUpperCase());
-  if (!allowed.includes(m)) throw new Error(`Method ${m} không được phép (allowed: ${group.allowed_methods})`);
+  if (!allowed.includes(m)) throw new Error(`Method ${m} is not allowed (allowed: ${group.allowed_methods})`);
 
   const base = group.base_url.replace(/\/$/, '');
   const rawPath = String(apiPath || '');
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(rawPath)) {
-    throw new Error(`Path phải tương đối, không được là URL tuyệt đối — vượt ra ngoài base URL đã khai báo`);
+    throw new Error(`Path must be relative, not an absolute URL outside the configured base URL`);
   }
   const url = new URL(base + '/' + rawPath.replace(/^\//, ''));
-  if (!url.href.startsWith(base)) throw new Error(`Path vượt ra ngoài base URL đã khai báo`);
+  if (!url.href.startsWith(base)) throw new Error(`Path escapes the configured base URL`);
   if (params && typeof params === 'object') {
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
   }

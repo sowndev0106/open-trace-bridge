@@ -12,7 +12,7 @@
     <td>
       <a href="/admin/projects/<%= p.id %>/edit">edit</a>
       <form class="inline-form" method="post" action="/admin/projects/<%= p.id %>/delete"
-            onsubmit="return confirm('Xoá project <%= p.slug %>?')">
+            onsubmit="return confirm('Delete project <%= p.slug %>?')">
         <button>delete</button>
       </form>
     </td>

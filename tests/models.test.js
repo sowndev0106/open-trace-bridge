@@ -14,7 +14,7 @@ beforeEach(() => { resetDbForTest(); });
 test('project CRUD + findBySlug', () => {
   const p = projects.create({
     slug: 'payment', name: 'Payment', keyword: 'payment-bot',
-    system_prompt: 'Bạn là investigator', teams_webhook_url: 'https://hook.example/x',
+    system_prompt: 'You are an investigator', teams_webhook_url: 'https://hook.example/x',
   });
   assert.ok(p.id);
   assert.strictEqual(projects.findBySlug('payment').name, 'Payment');

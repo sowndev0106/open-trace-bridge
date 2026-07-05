@@ -7,9 +7,9 @@ test('stripHtml removes tags', () => {
 });
 
 test('extractPrompt strips keyword prefix case-insensitively', () => {
-  const r = extractPrompt('<p>Payment-Bot hi tìm hiểu lỗi txn_123</p>', 'payment-bot');
+  const r = extractPrompt('<p>Payment-Bot investigate failure txn_123</p>', 'payment-bot');
   assert.strictEqual(r.isNew, false);
-  assert.strictEqual(r.prompt, 'hi tìm hiểu lỗi txn_123');
+  assert.strictEqual(r.prompt, 'investigate failure txn_123');
 });
 
 test('extractPrompt keeps text when keyword absent or mid-sentence', () => {

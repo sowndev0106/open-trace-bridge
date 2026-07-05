@@ -1,29 +1,29 @@
-# OpenTraceBridge — Flow Diagrams
+# OpenTraceBridge Flow Diagrams
 
-## 1. Kiến trúc tổng thể
+## Overall Architecture
 
 ```mermaid
 flowchart TB
     subgraph TEAMS["Microsoft Teams"]
-        GC["Group chat<br/>(user gõ: payment-bot ...)"]
+        GC["Group chat<br/>(user types: payment-bot ...)"]
     end
 
-    subgraph PA["Power Automate (không cần Premium)"]
-        TR["Trigger: When keywords<br/>are mentioned"]
-        GR["Send a Microsoft Graph<br/>HTTP request<br/>(lấy nội dung message)"]
+    subgraph PA["Power Automate"]
+        TR["Trigger: keywords mentioned"]
+        GR["Get message details"]
         PJ["Parse JSON"]
-        UP["OneDrive: Upload file from URL<br/>(workaround gọi GET ra ngoài)"]
+        UP["OneDrive: Upload file from URL<br/>(GET workaround)"]
         TR --> GR --> PJ --> UP
     end
 
-    subgraph SRV["OpenTraceBridge Server (Express MVC, port 6666)"]
-        EV["GET /api/events/:slug"]
+    subgraph SRV["OpenTraceBridge"]
+        EV["GET/POST /api/events/:slug"]
         GW["eventGateway<br/>strip HTML + keyword, detect /new"]
         DB[("SQLite<br/>projects / repos / api_groups<br/>conversations / messages / api_calls")]
-        ADM["Admin UI (EJS)<br/>/admin/projects"]
-        WS["workspace.service<br/>git clone/pull + AGENTS.md<br/>+ opencode.json"]
+        ADM["Admin UI<br/>/admin/projects"]
+        WS["workspace.service<br/>clone/pull + AGENTS.md + opencode.json"]
         OC["opencode.service<br/>opencode run -s session"]
-        IN["/internal/call-api<br/>(enforce base URL, method,<br/>gắn API key, audit)"]
+        IN["/internal/call-api<br/>enforce base URL, method, API key, audit"]
         WH["webhook.service<br/>Adaptive Card"]
         EV --> GW --> DB
         GW --> WS --> OC
@@ -31,13 +31,13 @@ flowchart TB
         ADM --> DB
     end
 
-    subgraph AGENT["OpenCode Agent (per workspace)"]
-        AG["Đọc source code<br/>+ AGENTS.md"]
+    subgraph AGENT["OpenCode Agent"]
+        AG["Read source code<br/>and AGENTS.md"]
         MCP["MCP tool: call_api"]
         AG --> MCP
     end
 
-    EXT["API nội bộ<br/>(transaction / logs / trace...)"]
+    EXT["Internal APIs"]
 
     GC --> TR
     UP -- "GET ?text=&conversationId=..." --> EV
@@ -46,98 +46,72 @@ flowchart TB
     WH -- "POST Adaptive Card" --> GC
 ```
 
-## 2. Sequence: một câu hỏi điều tra từ Teams
+## Investigation Sequence
 
 ```mermaid
 sequenceDiagram
-    actor U as User (Teams)
+    actor U as User
     participant PA as Power Automate
-    participant S as Server :6666
+    participant S as Server
     participant DB as SQLite
     participant W as Workspace
-    participant O as opencode CLI
-    participant A as API nội bộ
-    participant T as Teams (webhook)
+    participant O as OpenCode
+    participant A as Internal API
+    participant T as Teams Webhook
 
-    U->>PA: "payment-bot phân tích lỗi txn_123"
-    PA->>PA: Graph API lấy message + Parse JSON
+    U->>PA: payment-bot investigate txn_123
+    PA->>PA: Get message details and parse JSON
     PA->>S: GET /api/events/payment?text=...&conversationId=...
-    S->>DB: lưu message (in), tìm conversation active
-    alt chưa có conversation
-        S->>DB: tạo conversation mới (session = NULL)
+    S->>DB: Store inbound message and find active conversation
+    alt no active conversation
+        S->>DB: Create conversation with session = NULL
     end
-    S-->>PA: 200 {action: investigating} (ack ngay)
+    S-->>PA: 200 {action: investigating}
 
-    Note over S,O: chạy nền (async)
-    S->>W: git clone/pull repos, ghi AGENTS.md + opencode.json
+    Note over S,O: Async background work
+    S->>W: Clone/pull repos and write AGENTS.md + opencode.json
     S->>O: opencode run --format json [-s session] "prompt"
-    O->>O: đọc source code trong workspace
+    O->>O: Read workspace source code
     O->>S: MCP call_api(group, GET, /path)
-    S->>S: enforce base URL + method, gắn API key
+    S->>S: Enforce base URL, method, and key attachment
     S->>A: GET https://api.internal/...
     A-->>S: JSON data
-    S-->>O: kết quả (đã audit vào api_calls)
-    O-->>S: answer + sessionID
-    S->>DB: lưu sessionID (lần đầu) + message (out)
-    S->>T: POST webhook (Adaptive Card)
-    T-->>U: Bot trả kết quả vào group chat
+    S-->>O: Audited API result
+    O-->>S: Answer + sessionID
+    S->>DB: Store sessionID and outbound message
+    S->>T: POST Adaptive Card
+    T-->>U: Result in group chat
 ```
 
-## 3. Vòng đời conversation & session (lệnh /new)
+## Conversation State
 
 ```mermaid
 stateDiagram-v2
-    [*] --> KhongCo: chưa từng chat
-    KhongCo --> Active_NoSession: message đầu tiên<br/>(tạo conversation, session=NULL)
-    Active_NoSession --> Active_CoSession: opencode run xong<br/>lưu sessionID vào DB
-    Active_CoSession --> Active_CoSession: message tiếp theo<br/>opencode run -s SESSION<br/>(nhớ ngữ cảnh cũ)
-    Active_CoSession --> Closed: "payment-bot /new"
-    Active_NoSession --> Closed: "payment-bot /new"
-    Closed --> Active_NoSession: message sau đó<br/>(conversation MỚI, session MỚI)
-    note right of Active_CoSession
-        (project, teams_conversation_id)
-        → opencode_session_id
-        Map lưu trong bảng conversations
-    end note
+    [*] --> None: no previous chat
+    None --> ActiveNoSession: first message creates conversation
+    ActiveNoSession --> ActiveWithSession: first OpenCode run stores sessionID
+    ActiveWithSession --> ActiveWithSession: follow-up uses same session
+    ActiveWithSession --> Closed: "<keyword> /new"
+    ActiveNoSession --> Closed: "<keyword> /new"
+    Closed --> ActiveNoSession: next message creates a new conversation
 ```
 
-## 4. Enforcement khi agent gọi API (call_api)
+## API Enforcement
 
 ```mermaid
 flowchart TD
-    A["Agent gọi call_api(group, method, path, params)"] --> B["MCP stdio script<br/>(có OTB_INTERNAL_TOKEN trong env)"]
+    A["Agent calls call_api(group, method, path, params)"] --> B["MCP stdio script with OTB_INTERNAL_TOKEN"]
     B --> C["POST /internal/call-api"]
-    C --> D{"Token đúng?"}
-    D -- sai --> X1["403 forbidden"]
-    D -- đúng --> E{"Group tồn tại<br/>trong project?"}
-    E -- không --> X2["Lỗi: group không tồn tại"]
-    E -- có --> F{"Method nằm trong<br/>allowed_methods?"}
-    F -- không --> X3["Lỗi: method không được phép"]
-    F -- có --> G{"Path tương đối +<br/>URL cuối nằm dưới base_url?"}
-    G -- không --> X4["Lỗi: vượt ra ngoài base URL"]
-    G -- có --> H["Gắn header API key<br/>(agent KHÔNG BAO GIỜ thấy key)"]
-    H --> I["fetch (timeout 30s)"]
-    I --> J["Ghi audit vào api_calls<br/>(kể cả khi lỗi)"]
-    J --> K["Trả JSON về agent"]
-```
-
-## 5. Luồng xử lý request trong server (điểm rẽ nhánh)
-
-```mermaid
-flowchart TD
-    A["GET/POST /api/events/:slug"] --> B{"Project slug<br/>tồn tại?"}
-    B -- không --> E404["404"]
-    B -- có --> C{"Có text +<br/>conversationId?"}
-    C -- không --> E400["400"]
-    C -- có --> D["extractPrompt:<br/>strip HTML + keyword"]
-    D --> E{"Bắt đầu bằng /new?"}
-    E -- có --> F["Đóng conversation active<br/>Tạo conversation mới<br/>Webhook: 'Đã tạo hội thoại mới'"]
-    E -- không --> G{"Có conversation<br/>active?"}
-    G -- không --> H["Tạo conversation mới"]
-    G -- có --> I["Dùng conversation cũ<br/>(tiếp nối session)"]
-    H --> J["ACK 200 ngay lập tức"]
-    I --> J
-    J --> K["Nền: workspace → opencode → webhook"]
-    K -- lỗi git/timeout/crash --> L["Webhook báo lỗi thân thiện<br/>+ lưu [error] vào messages"]
-    K -- thành công --> M["Webhook gửi answer<br/>+ lưu messages (out)"]
+    C --> D{"Valid token?"}
+    D -- "no" --> X1["403 forbidden"]
+    D -- "yes" --> E{"Group exists in project?"}
+    E -- "no" --> X2["Error: group does not exist"]
+    E -- "yes" --> F{"Method allowed?"}
+    F -- "no" --> X3["Error: method is not allowed"]
+    F -- "yes" --> G{"Relative path stays under base_url?"}
+    G -- "no" --> X4["Error: path escapes base URL"]
+    G -- "yes" --> H["Attach API key header"]
+    H --> I["fetch with timeout"]
+    I --> J["Write api_calls audit row"]
+    J --> K["Return JSON to agent"]
 ```

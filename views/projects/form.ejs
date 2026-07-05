@@ -3,18 +3,18 @@
 <% if (error) { %><p class="error"><%= error %></p><% } %>
 <form method="post" action="<%= project && project.id ? '/admin/projects/' + project.id : '/admin/projects' %>">
   <div class="row">
-    <div><label>Slug (dùng trong URL event)</label>
+    <div><label>Slug (used in the event URL)</label>
       <input type="text" name="slug" value="<%= project ? project.slug : '' %>" required></div>
     <div><label>Name</label>
       <input type="text" name="name" value="<%= project ? project.name : '' %>" required></div>
-    <div><label>Keyword (prefix trong Teams, vd payment-bot)</label>
+    <div><label>Keyword (Teams prefix, for example payment-bot)</label>
       <input type="text" name="keyword" value="<%= project ? (project.keyword || '') : '' %>"></div>
   </div>
   <label>System prompt (markdown)</label>
   <textarea name="system_prompt"><%= project ? (project.system_prompt || '') : '' %></textarea>
-  <label>Teams webhook URL (nhận kết quả)</label>
+  <label>Teams webhook URL (receives results)</label>
   <input type="url" name="teams_webhook_url" value="<%= project ? (project.teams_webhook_url || '') : '' %>">
-  <label>Max message length (bắt buộc — vượt quá sẽ tự chia nhiều message, code block được đóng/mở fence chuẩn)</label>
+  <label>Max message length (required; longer results are split while preserving code fences)</label>
   <input type="number" name="max_msg_length" min="500" required
          value="<%= project && project.max_msg_length ? project.max_msg_length : 20000 %>">
   <button>Save</button>
@@ -22,7 +22,7 @@
 
 <% if (project && project.id) { %>
   <p><a href="/admin/projects/<%= project.id %>/conversations">Conversations & audit →</a></p>
-  <p>Event URL cho Power Automate:
+  <p>Event URL for Power Automate:
     <code>https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&conversationId=...&userId=...&userName=...</code>
   </p>
   <fieldset>
@@ -40,7 +40,7 @@
     <form method="post" action="/admin/projects/<%= project.id %>/repos">
       <div class="row">
         <div><label>Git URL</label><input type="text" name="git_url" required
-          placeholder="https://github.com/org/repo.git hoặc git@github.com:org/repo.git"></div>
+          placeholder="https://github.com/org/repo.git or git@github.com:org/repo.git"></div>
         <div><label>Auth</label>
           <select name="auth_type">
             <option value="none">none</option>
@@ -49,14 +49,14 @@
           </select></div>
         <div><label>Branch</label><input type="text" name="branch" value="main"></div>
       </div>
-      <label>Token (nếu https-token)</label><input type="text" name="token">
-      <label>SSH private key (nếu ssh)</label><textarea name="ssh_key"></textarea>
+      <label>Token (for https-token)</label><input type="text" name="token">
+      <label>SSH private key (for ssh)</label><textarea name="ssh_key"></textarea>
       <button>Add repo</button>
     </form>
   </fieldset>
 
   <fieldset>
-    <legend>API groups (<%= apis.length %>) — mỗi group 1 API key</legend>
+    <legend>API groups (<%= apis.length %>) - one API key per group</legend>
     <table>
       <tr><th>Name</th><th>Base URL</th><th>Methods</th><th></th></tr>
       <% for (const a of apis) { %>
@@ -76,9 +76,9 @@
       <div class="row">
         <div><label>API key</label><input type="text" name="api_key"></div>
         <div><label>Auth header</label><input type="text" name="auth_header" value="Authorization"></div>
-        <div><label>Allowed methods (phẩy)</label><input type="text" name="allowed_methods" value="GET"></div>
+        <div><label>Allowed methods (comma-separated)</label><input type="text" name="allowed_methods" value="GET"></div>
       </div>
-      <label>Description (markdown — mô tả kỹ endpoints, params, filters cho agent đọc)</label>
+      <label>Description (markdown: document endpoints, params, and filters for the agent)</label>
       <textarea name="description_md"></textarea>
       <button>Add API group</button>
     </form>

@@ -9,7 +9,7 @@ router.post('/call-api', async (req, res) => {
   }
   const { slug, group, method, path, params } = req.body || {};
   const project = projects.findBySlug(slug);
-  if (!project) return res.status(404).json({ error: `project "${slug}" không tồn tại` });
+  if (!project) return res.status(404).json({ error: `project "${slug}" does not exist` });
   try {
     const result = await executeApiCall({ project, groupName: group, method, path, params });
     res.json(result);

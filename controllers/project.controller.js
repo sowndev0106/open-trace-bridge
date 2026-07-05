@@ -12,17 +12,17 @@ function createProject(req, res) {
   const { slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length } = req.body;
   if (!slug || !name) {
     return res.status(400).render('projects/form', {
-      project: req.body, repos: [], apis: [], error: 'slug và name là bắt buộc',
+      project: req.body, repos: [], apis: [], error: 'slug and name are required',
     });
   }
   if (!(Number(max_msg_length) > 0)) {
     return res.status(400).render('projects/form', {
-      project: req.body, repos: [], apis: [], error: 'max_msg_length là bắt buộc và phải là số dương',
+      project: req.body, repos: [], apis: [], error: 'max_msg_length is required and must be a positive number',
     });
   }
   if (projects.findBySlug(slug)) {
     return res.status(400).render('projects/form', {
-      project: req.body, repos: [], apis: [], error: `slug "${slug}" đã tồn tại`,
+      project: req.body, repos: [], apis: [], error: `slug "${slug}" already exists`,
     });
   }
   const p = projects.create({ slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length });

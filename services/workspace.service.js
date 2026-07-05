@@ -27,7 +27,7 @@ function buildAgentsMd(project, apiGroups) {
 
 - Base URL: \`${g.base_url}\`
 - Allowed methods: ${g.allowed_methods}
-- Gọi qua MCP tool \`call_api\` với \`group: "${g.name}"\`. KHÔNG cần API key — server tự gắn.
+- Call through MCP tool \`call_api\` with \`group: "${g.name}"\`. Do not provide an API key; the server attaches it.
 
 ${g.description_md}
 `).join('\n');
@@ -36,18 +36,18 @@ ${g.description_md}
 
 ${project.system_prompt}
 
-# Quy tắc
+# Rules
 
-- Bạn CHỈ được đọc source code trong workspace này và gọi các API qua MCP tool \`call_api\`.
-- Không sửa code, không chạy lệnh shell, không truy cập URL ngoài danh sách API bên dưới.
-- Khi phân tích xong, trả lời NGẮN GỌN bằng markdown theo cấu trúc heading:
-  **Tóm tắt** (1-3 dòng), **Kết luận**, **Evidence** (bullet list), **Bước tiếp theo** (bullet list).
-- Code snippet: LUÔN ghi file path trước block, chỉ trích đoạn quan trọng (< 80 dòng), dùng fenced code block \`\`\`<language>.
-- Data/log/JSON: hiển thị key fields quan trọng trước, raw excerpt sau, truncate nếu dài.
-- TUYỆT ĐỐI không đưa secret, token, API key, private key, password vào câu trả lời.
+- You may ONLY read source code in this workspace and call APIs through the MCP tool \`call_api\`.
+- Do not edit code, run shell commands, or access URLs outside the API list below.
+- When the investigation is complete, answer CONCISELY in markdown with these headings:
+  **Summary** (1-3 lines), **Conclusion**, **Evidence** (bullet list), **Next steps** (bullet list).
+- Code snippets: always include the file path before the block, quote only the important excerpt (< 80 lines), and use a fenced code block \`\`\`<language>.
+- Data/log/JSON: show important key fields first, then a raw excerpt, and truncate long output.
+- Never include secrets, tokens, API keys, private keys, or passwords in the answer.
 
-# Các API có thể gọi (qua tool call_api(group, method, path, params))
-${apiSections || '\n(Chưa khai báo API nào)'}
+# Callable APIs (through call_api(group, method, path, params))
+${apiSections || '\n(No APIs have been configured)'}
 `;
 }
 
@@ -62,8 +62,8 @@ function buildOpencodeConfig(project) {
         enabled: true,
         environment: {
           OTB_PROJECT_SLUG: project.slug,
-          // /internal/call-api nằm trên admin app (port private, không tunnel)
-          OTB_BASE: `http://127.0.0.1:${process.env.ADMIN_PORT || 6667}`,
+          // /internal/call-api is served by the private admin app, not the public tunnel.
+          OTB_BASE: `http://127.0.0.1:${process.env.ADMIN_PORT || 8667}`,
           OTB_INTERNAL_TOKEN: getInternalToken(),
         },
       },
@@ -104,7 +104,7 @@ async function ensureWorkspace(project, repoRows, apiGroups) {
           cloneUrlFor(repo), dir], { env, timeout: 300000 });
       }
     } catch (err) {
-      throw new Error(`Git fail cho repo ${repo.git_url}: ${err.stderr || err.message}`);
+      throw new Error(`Git failed for repo ${repo.git_url}: ${err.stderr || err.message}`);
     }
   }
 

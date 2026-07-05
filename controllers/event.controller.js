@@ -28,16 +28,16 @@ async function investigate(project, conv, prompt) {
   const ws = await ensureWorkspace(project, repos.listByProject(project.id), apis.listByProject(project.id));
   const result = await runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt });
   if (!conv.opencode_session_id) convs.setSession(conv.id, result.sessionId);
-  return result.text || '(agent không trả text)';
+  return result.text || '(agent returned no text)';
 }
 
 function handleEvent(req, res) {
   const project = projects.findBySlug(req.params.slug);
-  if (!project) return res.status(404).json({ error: `Không có project slug "${req.params.slug}"` });
+  if (!project) return res.status(404).json({ error: `No project found for slug "${req.params.slug}"` });
 
   const ev = eventFromRequest(req);
   if (!ev.text || !ev.conversationId) {
-    return res.status(400).json({ error: 'Thiếu text hoặc conversationId' });
+    return res.status(400).json({ error: 'Missing text or conversationId' });
   }
 
   const { isNew, prompt } = extractPrompt(ev.text, project.keyword);
@@ -51,12 +51,12 @@ function handleEvent(req, res) {
     // §4.5 new_session
     sendTeamsMessage(project.teams_webhook_url, {
       status: 'info',
-      title: 'Đã tạo hội thoại mới',
-      markdown: `Project: ${project.name}\n\nCác câu hỏi tiếp theo trong group chat này sẽ dùng OpenCode session mới.`,
+      title: 'New conversation created',
+      markdown: `Project: ${project.name}\n\nThe next questions in this group chat will use a new OpenCode session.`,
       metadata: { project: project.slug },
       maxLength: project.max_msg_length,
     })
-      .then(() => messages.add({ conversation_id: conv.id, direction: 'out', content: 'Đã tạo cuộc hội thoại mới' }))
+      .then(() => messages.add({ conversation_id: conv.id, direction: 'out', content: 'New conversation created' }))
       .catch((err) => console.error('Webhook fail:', err.message));
     return;
   }
@@ -64,7 +64,7 @@ function handleEvent(req, res) {
   if (!conv) conv = convs.create(project.id, ev.conversationId);
   messages.add({ conversation_id: conv.id, direction: 'in', user_id: ev.userId, user_name: ev.userName, content: ev.text });
 
-  // Ack chỉ qua HTTP response — KHÔNG gửi ack vào group chat (tránh spam, theo spec)
+  // Acknowledge only through the HTTP response. Do not send chat acknowledgements.
   res.json({ handled: true, action: 'investigating', conversationId: conv.id });
 
   investigate(project, conv, prompt)
@@ -72,7 +72,7 @@ function handleEvent(req, res) {
       messages.add({ conversation_id: conv.id, direction: 'out', content: answer });
       return sendTeamsMessage(project.teams_webhook_url, {
         status: 'success',
-        title: `${project.name} — Kết quả`,
+        title: `${project.name} - Result`,
         markdown: answer,
         metadata: { project: project.slug, sessionId: convs.findActive(project.id, ev.conversationId)?.opencode_session_id },
         maxLength: project.max_msg_length,
@@ -85,14 +85,14 @@ function handleEvent(req, res) {
       // §4.6 partial_or_timeout / §4.7 error
       const msg = isTimeout ? {
         status: 'warning',
-        title: 'Phân tích chưa hoàn tất',
-        markdown: `OpenCode chạy quá lâu nên server đã dừng job.\n\n**Gợi ý tiếp theo**\nHỏi lại với phạm vi hẹp hơn, vd: "${project.keyword} tiếp tục kiểm tra <phần cụ thể>".`,
+        title: 'Investigation did not finish',
+        markdown: `OpenCode ran too long, so the server stopped the job.\n\n**Next suggestion**\nAsk again with a narrower scope, for example: "${project.keyword} continue checking <specific area>".`,
         metadata: { project: project.slug },
         maxLength: project.max_msg_length,
       } : {
         status: 'error',
-        title: 'Không hoàn tất được phân tích',
-        markdown: `**Lý do**\n${err.message}\n\n**Gợi ý**\nKiểm tra cấu hình repo/API trong Admin UI rồi thử lại.`,
+        title: 'Investigation failed',
+        markdown: `**Reason**\n${err.message}\n\n**Suggestion**\nCheck the repository/API configuration in the Admin UI, then try again.`,
         metadata: { project: project.slug },
         maxLength: project.max_msg_length,
       };

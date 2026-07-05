@@ -19,7 +19,7 @@ test('rejects unknown group', async () => {
   const p = setup();
   await assert.rejects(
     executeApiCall({ project: p, groupName: 'nope', method: 'GET', path: '/x', params: {} }),
-    /không tồn tại/i);
+    /does not exist/i);
 });
 
 test('rejects method not allowed', async () => {

@@ -3,9 +3,9 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "6666:6666"                 # Public event API — tunnel trỏ vào đây
-      - "127.0.0.1:6667:6667"       # Admin UI + /internal — CHỈ localhost host, KHÔNG tunnel
-      - "127.0.0.1:4096:4096"       # OpenCode serve — CHỈ localhost host
+      - "6666:6666"                 # Public event API. Point the tunnel here.
+      - "127.0.0.1:8667:8667"       # Admin UI + /internal. Host localhost only; do not tunnel.
+      - "127.0.0.1:4096:4096"       # OpenCode serve. Host localhost only.
     volumes:
       - ./data:/app/data
       - ./workspaces:/app/workspaces
@@ -13,7 +13,7 @@ services:
       - opencode-config:/root/.config/opencode
     environment:
       - PORT=6666
-      - ADMIN_PORT=6667
+      - ADMIN_PORT=8667
       - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD:-}
 
 volumes:

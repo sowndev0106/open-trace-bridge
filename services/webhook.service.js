@@ -1,7 +1,7 @@
-// Gửi message về Teams qua webhook của project (Power Automate "When a Teams webhook
-// request is received"). Format theo docs/send_msg_webhook.md:
-// redact secrets (§6) → split theo max_msg_length (§5, code fence được đóng/mở chuẩn)
-// → build Adaptive Card (§3) → POST tuần tự từng phần.
+// Send messages to Teams through the project webhook (Power Automate "When a Teams webhook
+// request is received"). Format follows docs/send_msg_webhook.md:
+// redact secrets, split by max_msg_length while preserving code fences,
+// build Adaptive Cards, then POST each part sequentially.
 const { redact, splitMarkdown, buildCard } = require('./teamsFormat');
 
 async function postCard(webhookUrl, card) {
@@ -11,14 +11,14 @@ async function postCard(webhookUrl, card) {
     body: JSON.stringify(card),
     signal: AbortSignal.timeout(30000),
   });
-  if (!resp.ok) throw new Error(`Webhook trả ${resp.status}: ${(await resp.text()).slice(0, 300)}`);
+  if (!resp.ok) throw new Error(`Webhook returned ${resp.status}: ${(await resp.text()).slice(0, 300)}`);
 }
 
-// message: { status, title, markdown, metadata } — xem docs/send_msg_webhook.md §2/§4
+// message: { status, title, markdown, metadata }. See docs/send_msg_webhook.md.
 async function sendTeamsMessage(webhookUrl, message) {
-  if (!webhookUrl) throw new Error('Project chưa cấu hình teams_webhook_url');
+  if (!webhookUrl) throw new Error('Project has not configured teams_webhook_url');
   const m = typeof message === 'string'
-    ? { status: 'success', title: 'Kết quả', markdown: message, metadata: {} }
+    ? { status: 'success', title: 'Result', markdown: message, metadata: {} }
     : message;
 
   const clean = redact(m.markdown || '');

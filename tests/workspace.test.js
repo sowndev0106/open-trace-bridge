@@ -4,7 +4,7 @@ process.env.OTB_DB_PATH = ':memory:';
 const { buildAgentsMd, buildOpencodeConfig, repoDirName } = require('../services/workspace.service');
 
 const project = { id: 1, slug: 'payment', name: 'Payment', keyword: 'payment-bot',
-  system_prompt: 'Bạn là incident investigator.', teams_webhook_url: '' };
+  system_prompt: 'You are an incident investigator.', teams_webhook_url: '' };
 const groups = [{
   name: 'txn-api', base_url: 'https://api.internal', api_key: 'SECRET-KEY',
   auth_header: 'Authorization', allowed_methods: 'GET', description_md: '## GET /transactions/{id}',
@@ -12,7 +12,7 @@ const groups = [{
 
 test('buildAgentsMd contains prompt + api docs but NEVER the key', () => {
   const md = buildAgentsMd(project, groups);
-  assert.ok(md.includes('Bạn là incident investigator.'));
+  assert.ok(md.includes('You are an incident investigator.'));
   assert.ok(md.includes('txn-api'));
   assert.ok(md.includes('GET /transactions/{id}'));
   assert.ok(md.includes('call_api'));

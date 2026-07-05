@@ -39,33 +39,33 @@ test('splitMarkdown splits at paragraph boundaries', () => {
 
 test('splitMarkdown never breaks a code fence: closes and reopens with language', () => {
   const codeLines = Array.from({ length: 30 }, (_, i) => `const line${i} = ${i};`).join('\n');
-  const md = 'Mở đầu\n\n```js\n' + codeLines + '\n```\n\nKết thúc';
+  const md = 'Intro\n\n```js\n' + codeLines + '\n```\n\nOutro';
   const chunks = splitMarkdown(md, 300);
   assert.ok(chunks.length >= 2);
   for (const c of chunks) {
     const fences = (c.match(/```/g) || []).length;
     assert.strictEqual(fences % 2, 0, `unbalanced fence in chunk: ${c}`);
   }
-  const middle = chunks.filter((c) => c.includes('[code tiếp'));
-  assert.ok(middle.length >= 1, 'phải có marker cắt code');
+  const middle = chunks.filter((c) => c.includes('[code continues'));
+  assert.ok(middle.length >= 1, 'must include a code split marker');
   const reopened = chunks.filter((c, i) => i > 0 && c.startsWith('```js'));
-  assert.ok(reopened.length >= 1, 'chunk sau phải mở lại fence với đúng language');
+  assert.ok(reopened.length >= 1, 'the next chunk must reopen the fence with the same language');
 });
 
 test('buildCard produces adaptive card with title, monospace code, metadata', () => {
   const card = buildCard({
     status: 'success',
     title: 'Payment investigation',
-    markdown: 'Tóm tắt ở đây\n\n```js\nconst x = 1;\n```',
+    markdown: 'Summary goes here\n\n```js\nconst x = 1;\n```',
     metadata: { project: 'payment', sessionId: 'ses_x' },
     partInfo: { index: 1, total: 2 },
   });
   assert.strictEqual(card.type, 'message');
   const body = card.attachments[0].content.body;
   assert.ok(body[0].text.includes('Payment investigation'));
-  assert.ok(body[0].text.includes('(phần 1/2)'));
+  assert.ok(body[0].text.includes('(part 1/2)'));
   const codeBlock = body.find((b) => b.fontType === 'Monospace');
-  assert.ok(codeBlock, 'phải có TextBlock Monospace cho code');
+  assert.ok(codeBlock, 'must include a monospace TextBlock for code');
   assert.ok(codeBlock.text.includes('const x = 1;'));
   const meta = body[body.length - 1];
   assert.ok(meta.isSubtle);
@@ -75,6 +75,6 @@ test('buildCard produces adaptive card with title, monospace code, metadata', ()
 test('buildCard status tones', () => {
   for (const [status, mark] of [['success', '✅'], ['warning', '⚠️'], ['error', '❌'], ['info', 'ℹ️']]) {
     const card = buildCard({ status, title: 'T', markdown: 'x', metadata: {} });
-    assert.ok(card.attachments[0].content.body[0].text.includes(mark), `${status} cần ${mark}`);
+    assert.ok(card.attachments[0].content.body[0].text.includes(mark), `${status} needs ${mark}`);
   }
 });
