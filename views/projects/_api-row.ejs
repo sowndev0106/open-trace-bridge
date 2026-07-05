@@ -1,0 +1,35 @@
+<fieldset class="mb-4 rounded-lg border border-line p-4" data-row>
+  <input type="hidden" name="apis[<%= i %>][id]" value="<%= a.id || '' %>">
+  <div class="form-grid-two">
+    <div>
+      <label>Name</label>
+      <input type="text" name="apis[<%= i %>][name]" value="<%= a.name || '' %>" placeholder="transaction-api">
+    </div>
+    <div>
+      <label>Base URL</label>
+      <input type="text" name="apis[<%= i %>][base_url]" value="<%= a.base_url || '' %>" placeholder="https://api.internal.example">
+    </div>
+  </div>
+  <div class="form-grid mt-3">
+    <div>
+      <label>API key</label>
+      <input type="password" name="apis[<%= i %>][api_key]" value="" autocomplete="new-password"
+             placeholder="<%= a.id ? 'Leave blank to keep the current key' : '' %>">
+    </div>
+    <div>
+      <label>Auth header</label>
+      <input type="text" name="apis[<%= i %>][auth_header]" value="<%= a.auth_header || 'Authorization' %>">
+    </div>
+    <div>
+      <label>Allowed methods</label>
+      <input type="text" name="apis[<%= i %>][allowed_methods]" value="<%= a.allowed_methods || 'GET' %>">
+    </div>
+  </div>
+  <div class="mt-3">
+    <label>Description</label>
+    <textarea name="apis[<%= i %>][description_md]" placeholder="Document endpoints, params, and filters for the agent"><%= a.description_md || '' %></textarea>
+  </div>
+  <div class="mt-3 flex justify-end">
+    <button type="button" class="btn btn-danger" data-remove>Remove</button>
+  </div>
+</fieldset>

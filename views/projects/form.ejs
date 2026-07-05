@@ -4,219 +4,147 @@
   const isEditing = project && project.id;
   const formAction = isEditing ? '/admin/projects/' + project.id : '/admin/projects';
   const errorList = Array.isArray(errors) ? errors : (error ? [error] : []);
-  const repoValues = repoDraft || {};
-  const apiValues = apiDraft || {};
   const syncBadgeClass = { success: 'status-active', error: 'status-error', syncing: 'status-syncing', pending: 'status-muted' };
 %>
 
-<section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-  <div>
-    <p class="page-kicker"><%= isEditing ? 'Project settings' : 'Project setup' %></p>
-    <h1 class="page-title"><%= isEditing ? project.name : 'New project' %></h1>
-    <p class="page-subtitle">Configure how Teams events become investigation sessions and which systems the agent can inspect.</p>
-  </div>
-  <a href="/admin/projects" class="btn btn-secondary">Back to projects</a>
-</section>
-
-<% if (errorList.length) { %>
-  <section class="error mb-5" role="alert">
-    <p class="font-semibold">Please fix these fields:</p>
-    <ul class="error-list">
-      <% for (const item of errorList) { %>
-        <li><%= item %></li>
-      <% } %>
-    </ul>
-  </section>
+<% if (isEditing) { %>
+  <form id="sync-form" method="post" action="/admin/projects/<%= project.id %>/sync"></form>
 <% } %>
 
-<form class="panel mb-6" method="post" action="<%= formAction %>">
-  <div class="panel-body space-y-5">
-    <div class="form-grid">
-      <div>
-        <label for="slug">Slug</label>
-        <input id="slug" type="text" name="slug" value="<%= project ? project.slug : '' %>" required pattern="[a-z0-9-]+">
-        <p class="field-help">Lowercase letters, numbers, and hyphens. Used in the event URL.</p>
-      </div>
-      <div>
-        <label for="name">Name</label>
-        <input id="name" type="text" name="name" value="<%= project ? project.name : '' %>" required>
-      </div>
-      <div>
-        <label for="keyword">Teams keyword</label>
-        <input id="keyword" type="text" name="keyword" value="<%= project ? (project.keyword || '') : '' %>" placeholder="payment-bot" pattern="[A-Za-z0-9_-]+">
-        <p class="field-help">Optional prefix users type before prompts.</p>
-      </div>
-    </div>
-
+<form method="post" action="<%= formAction %>">
+  <section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
     <div>
-      <label for="system_prompt">System prompt</label>
-      <textarea id="system_prompt" name="system_prompt"><%= project ? (project.system_prompt || '') : '' %></textarea>
+      <p class="page-kicker"><%= isEditing ? 'Project settings' : 'Project setup' %></p>
+      <h1 class="page-title"><%= isEditing ? project.name : 'New project' %></h1>
+      <p class="page-subtitle">Configure how Teams events become investigation sessions and which systems the agent can inspect. One Save writes everything on this page.</p>
     </div>
-
-    <div class="form-grid-two">
-      <div>
-        <label for="teams_webhook_url">Teams webhook URL</label>
-        <input id="teams_webhook_url" type="url" name="teams_webhook_url" value="<%= project ? (project.teams_webhook_url || '') : '' %>" placeholder="https://outlook.office.com/webhook/...">
-      </div>
-      <div>
-        <label for="max_msg_length">Max message length</label>
-        <input id="max_msg_length" type="number" name="max_msg_length" min="500" required
-               value="<%= project && project.max_msg_length ? project.max_msg_length : 20000 %>">
-        <p class="field-help">Longer results are split while preserving code fences.</p>
-      </div>
-    </div>
-
-    <div class="flex justify-end">
-      <button class="btn btn-primary" type="submit">Save project</button>
-    </div>
-  </div>
-</form>
-
-<% if (isEditing) { %>
-  <section class="panel mb-6">
-    <div class="panel-body">
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 class="section-heading">Power Automate endpoint</h2>
-          <p class="mt-2 text-sm text-ink-500">Use this URL shape when sending Teams events into OpenTraceBridge.</p>
-        </div>
-        <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations">Open audit trail</a>
-      </div>
-      <div class="mt-4 overflow-x-auto rounded-lg border border-line bg-slate-50 p-4">
-        <code>https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&amp;conversationId=...&amp;userId=...&amp;userName=...</code>
-      </div>
-    </div>
-  </section>
-
-  <section class="panel mb-6">
-    <div class="panel-body">
-      <div class="mb-4 flex items-center justify-between gap-4">
-        <div>
-          <h2 class="section-heading">Repos</h2>
-          <p class="mt-1 text-sm text-ink-500"><%= repos.length %> connected repositories.</p>
-        </div>
-        <form class="inline-form" method="post" action="/admin/projects/<%= project.id %>/sync">
-          <button class="btn btn-secondary" type="submit">Sync now</button>
-        </form>
-      </div>
-
-      <% if (repos.length) { %>
-        <div class="table-shell mb-5 shadow-none">
-          <div class="table-scroll">
-            <table class="data-table">
-              <thead><tr><th>Git URL</th><th>Auth</th><th>Branch</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
-              <tbody>
-                <% for (const r of repos) { %>
-                <tr>
-                  <td><%= r.git_url %></td>
-                  <td><span class="status-badge status-muted"><%= r.auth_type %></span></td>
-                  <td><%= r.branch %></td>
-                  <td data-repo-status="<%= r.id %>">
-                    <span class="status-badge <%= syncBadgeClass[r.sync_status] || 'status-muted' %>"><%= r.sync_status %></span>
-                    <% if (r.synced_at) { %><div class="mt-1 text-xs text-ink-500"><%= r.synced_at %></div><% } %>
-                    <% if (r.sync_status === 'error' && r.sync_error) { %>
-                      <div class="mt-1 max-w-xs truncate text-xs text-rose-700" title="<%= r.sync_error %>"><%= r.sync_error %></div>
-                    <% } %>
-                  </td>
-                  <td>
-                    <div class="flex justify-end">
-                      <form class="inline-form" method="post" action="/admin/projects/<%= project.id %>/repos/<%= r.id %>/delete">
-                        <button class="btn btn-danger" type="submit">Remove</button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      <% } else { %>
-        <div class="mb-5 rounded-lg border border-dashed border-line bg-slate-50 px-4 py-5 text-sm text-ink-500">No repositories connected yet.</div>
+    <div class="flex items-center gap-2">
+      <a href="/admin/projects" class="btn btn-secondary">Back to projects</a>
+      <% if (isEditing) { %>
+        <button class="btn btn-secondary" type="submit" form="sync-form">Sync now</button>
       <% } %>
-
-      <form method="post" action="/admin/projects/<%= project.id %>/repos" class="space-y-4">
-        <div class="form-grid">
-          <div>
-            <label for="git_url">Git URL</label>
-            <input id="git_url" type="text" name="git_url" required value="<%= repoValues.git_url || '' %>" placeholder="https://github.com/org/repo.git or git@github.com:org/repo.git">
-          </div>
-          <div>
-            <label for="auth_type">Auth</label>
-            <select id="auth_type" name="auth_type">
-              <option value="none" <%= repoValues.auth_type === 'none' ? 'selected' : '' %>>none</option>
-              <option value="https-token" <%= repoValues.auth_type === 'https-token' ? 'selected' : '' %>>https-token</option>
-              <option value="ssh" <%= repoValues.auth_type === 'ssh' ? 'selected' : '' %>>ssh</option>
-            </select>
-          </div>
-          <div>
-            <label for="branch">Branch</label>
-            <input id="branch" type="text" name="branch" value="<%= repoValues.branch || 'main' %>" required>
-          </div>
-        </div>
-        <div class="form-grid-two">
-          <div><label for="token">Token</label><input id="token" type="text" name="token" value="<%= repoValues.token || '' %>"></div>
-          <div><label for="ssh_key">SSH private key</label><textarea id="ssh_key" name="ssh_key"><%= repoValues.ssh_key || '' %></textarea></div>
-        </div>
-        <button class="btn btn-secondary" type="submit">Add repo</button>
-      </form>
+      <button class="btn btn-primary" type="submit">Save</button>
     </div>
   </section>
 
-  <section class="panel">
+  <% if (errorList.length) { %>
+    <section class="error mb-5" role="alert">
+      <p class="font-semibold">Please fix these fields:</p>
+      <ul class="error-list">
+        <% for (const item of errorList) { %>
+          <li><%= item %></li>
+        <% } %>
+      </ul>
+    </section>
+  <% } %>
+
+  <section class="panel mb-6">
+    <div class="panel-body space-y-5">
+      <div class="form-grid">
+        <div>
+          <label for="slug">Slug</label>
+          <input id="slug" type="text" name="slug" value="<%= project ? project.slug : '' %>" required pattern="[a-z0-9-]+">
+          <p class="field-help">Lowercase letters, numbers, and hyphens. Used in the event URL.</p>
+        </div>
+        <div>
+          <label for="name">Name</label>
+          <input id="name" type="text" name="name" value="<%= project ? project.name : '' %>" required>
+        </div>
+        <div>
+          <label for="keyword">Teams keyword</label>
+          <input id="keyword" type="text" name="keyword" value="<%= project ? (project.keyword || '') : '' %>" placeholder="payment-bot" pattern="[A-Za-z0-9_-]+">
+          <p class="field-help">Optional prefix users type before prompts.</p>
+        </div>
+      </div>
+
+      <div>
+        <label for="system_prompt">System prompt</label>
+        <textarea id="system_prompt" name="system_prompt"><%= project ? (project.system_prompt || '') : '' %></textarea>
+      </div>
+
+      <div class="form-grid-two">
+        <div>
+          <label for="teams_webhook_url">Teams webhook URL</label>
+          <input id="teams_webhook_url" type="url" name="teams_webhook_url" value="<%= project ? (project.teams_webhook_url || '') : '' %>" placeholder="https://outlook.office.com/webhook/...">
+        </div>
+        <div>
+          <label for="max_msg_length">Max message length</label>
+          <input id="max_msg_length" type="number" name="max_msg_length" min="500" required
+                 value="<%= project && project.max_msg_length ? project.max_msg_length : 20000 %>">
+          <p class="field-help">Longer results are split while preserving code fences.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <% if (isEditing) { %>
+    <section class="panel mb-6">
+      <div class="panel-body">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="section-heading">Power Automate endpoint</h2>
+            <p class="mt-2 text-sm text-ink-500">Use this URL shape when sending Teams events into OpenTraceBridge.</p>
+          </div>
+          <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations">Open audit trail</a>
+        </div>
+        <div class="mt-4 overflow-x-auto rounded-lg border border-line bg-slate-50 p-4">
+          <code>https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&amp;conversationId=...&amp;userId=...&amp;userName=...</code>
+        </div>
+      </div>
+    </section>
+  <% } %>
+
+  <section class="panel mb-6">
+    <div class="panel-body">
+      <div class="mb-4">
+        <h2 class="section-heading">Repos</h2>
+        <p class="mt-1 text-sm text-ink-500">Rows are saved together with the project when you press Save.</p>
+      </div>
+      <div data-rows="repos">
+        <% repos.forEach((r, i) => { %>
+          <%- include('_repo-row', { r, i, syncBadgeClass }) %>
+        <% }) %>
+      </div>
+      <button type="button" class="btn btn-secondary" data-add="repos">Add repo</button>
+      <template data-template="repos"><%- include('_repo-row', { r: {}, i: '__I__', syncBadgeClass }) %></template>
+    </div>
+  </section>
+
+  <section class="panel mb-6">
     <div class="panel-body">
       <div class="mb-4">
         <h2 class="section-heading">API groups</h2>
-        <p class="mt-1 text-sm text-ink-500"><%= apis.length %> groups available to the agent.</p>
+        <p class="mt-1 text-sm text-ink-500">Available to the agent through the call_api MCP tool.</p>
       </div>
-
-      <% if (apis.length) { %>
-        <div class="table-shell mb-5 shadow-none">
-          <div class="table-scroll">
-            <table class="data-table">
-              <thead><tr><th>Name</th><th>Base URL</th><th>Methods</th><th class="text-right">Actions</th></tr></thead>
-              <tbody>
-                <% for (const a of apis) { %>
-                <tr>
-                  <td><%= a.name %></td>
-                  <td><%= a.base_url %></td>
-                  <td><span class="status-badge status-muted"><%= a.allowed_methods %></span></td>
-                  <td>
-                    <div class="flex justify-end">
-                      <form class="inline-form" method="post" action="/admin/projects/<%= project.id %>/apis/<%= a.id %>/delete">
-                        <button class="btn btn-danger" type="submit">Remove</button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      <% } else { %>
-        <div class="mb-5 rounded-lg border border-dashed border-line bg-slate-50 px-4 py-5 text-sm text-ink-500">No API groups configured yet.</div>
-      <% } %>
-
-      <form method="post" action="/admin/projects/<%= project.id %>/apis" class="space-y-4">
-        <div class="form-grid-two">
-          <div><label for="api_name">Name</label><input id="api_name" type="text" name="name" required value="<%= apiValues.name || '' %>" placeholder="transaction-api" pattern="[A-Za-z0-9_-]+"></div>
-          <div><label for="base_url">Base URL</label><input id="base_url" type="url" name="base_url" required value="<%= apiValues.base_url || '' %>" placeholder="https://api.internal.example"></div>
-        </div>
-        <div class="form-grid">
-          <div><label for="api_key">API key</label><input id="api_key" type="text" name="api_key" value="<%= apiValues.api_key || '' %>"></div>
-          <div><label for="auth_header">Auth header</label><input id="auth_header" type="text" name="auth_header" value="<%= apiValues.auth_header || 'Authorization' %>" required></div>
-          <div><label for="allowed_methods">Allowed methods</label><input id="allowed_methods" type="text" name="allowed_methods" value="<%= apiValues.allowed_methods || 'GET' %>" required></div>
-        </div>
-        <div>
-          <label for="description_md">Description</label>
-          <textarea id="description_md" name="description_md" placeholder="Document endpoints, params, and filters for the agent"><%= apiValues.description_md || '' %></textarea>
-        </div>
-        <button class="btn btn-secondary" type="submit">Add API group</button>
-      </form>
+      <div data-rows="apis">
+        <% apis.forEach((a, i) => { %>
+          <%- include('_api-row', { a, i }) %>
+        <% }) %>
+      </div>
+      <button type="button" class="btn btn-secondary" data-add="apis">Add API group</button>
+      <template data-template="apis"><%- include('_api-row', { a: {}, i: '__I__' }) %></template>
     </div>
   </section>
-<% } %>
+</form>
+
+<script>
+  (function () {
+    var counters = { repos: <%= repos.length %>, apis: <%= apis.length %> };
+    document.querySelectorAll('[data-add]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var kind = btn.getAttribute('data-add');
+        var tpl = document.querySelector('template[data-template="' + kind + '"]');
+        var holder = document.createElement('div');
+        holder.innerHTML = tpl.innerHTML.replace(/__I__/g, counters[kind]++);
+        document.querySelector('[data-rows="' + kind + '"]').appendChild(holder.firstElementChild);
+      });
+    });
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-remove]');
+      if (btn) btn.closest('[data-row]').remove();
+    });
+  })();
+</script>
 
 <% if (project && project.id && repos.some((r) => r.sync_status === 'pending' || r.sync_status === 'syncing')) { %>
 <script>

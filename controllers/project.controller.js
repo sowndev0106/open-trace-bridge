@@ -1,22 +1,17 @@
+const { getDb } = require('../lib/db');
 const projects = require('../models/project.model');
 const repos = require('../models/repo.model');
 const apis = require('../models/api.model');
-const {
-  validateProjectInput,
-  validateRepoInput,
-  validateApiGroupInput,
-} = require('../services/adminValidation');
+const { validateProjectBundle } = require('../services/adminValidation');
 const sync = require('../services/sync.service');
 
-function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [], repoDraft = null, apiDraft = null }) {
+function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [] }) {
   return res.status(status).render('projects/form', {
     project,
     repos: repoRows || [],
     apis: apiRows || [],
     errors,
     error: errors[0] || null,
-    repoDraft,
-    apiDraft,
   });
 }
 
@@ -35,18 +30,41 @@ function listProjects(req, res) {
 function newProjectForm(req, res) {
   renderProjectForm(res, 200, { project: null, repoRows: [], apiRows: [] });
 }
+
+// Insert/update submitted rows, delete rows the submission no longer contains.
+function reconcileRows(model, projectId, submitted) {
+  const submittedIds = new Set(submitted.filter((r) => r.id).map((r) => r.id));
+  for (const existing of model.listByProject(projectId)) {
+    if (!submittedIds.has(existing.id)) model.remove(existing.id);
+  }
+  for (const row of submitted) {
+    const { id, ...values } = row;
+    if (id) model.update(id, values);
+    else model.create({ project_id: projectId, ...values });
+  }
+}
+
 function createProject(req, res) {
-  const { values, errors } = validateProjectInput(req.body);
-  if (values.slug && projects.findBySlug(values.slug)) {
-    errors.push(`Slug "${values.slug}" already exists.`);
+  const { values, errors } = validateProjectBundle(req.body);
+  if (values.project.slug && projects.findBySlug(values.project.slug)) {
+    errors.push(`Slug "${values.project.slug}" already exists.`);
   }
   if (errors.length) {
-    return renderProjectForm(res, 400, { project: { ...req.body, ...values }, repoRows: [], apiRows: [], errors });
+    return renderProjectForm(res, 400, {
+      project: { ...req.body, ...values.project },
+      repoRows: values.repos, apiRows: values.apis, errors,
+    });
   }
-  const p = projects.create(values);
+  const p = getDb().transaction(() => {
+    const created = projects.create(values.project);
+    reconcileRows(repos, created.id, values.repos);
+    reconcileRows(apis, created.id, values.apis);
+    return created;
+  })();
   sync.triggerSync(p.id, { reason: 'create' });
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
+
 function editProjectForm(req, res) {
   const p = projects.findById(req.params.id);
   if (!p) return res.status(404).send('Project not found');
@@ -56,53 +74,37 @@ function editProjectForm(req, res) {
     apiRows: apis.listByProject(p.id),
   });
 }
+
 function updateProject(req, res) {
   const p = projects.findById(req.params.id);
   if (!p) return res.status(404).send('Project not found');
-  const { values, errors } = validateProjectInput(req.body);
-  const existing = values.slug ? projects.findBySlug(values.slug) : null;
+  const existingRepos = repos.listByProject(p.id);
+  const existingApis = apis.listByProject(p.id);
+  const { values, errors } = validateProjectBundle(req.body, { existingRepos, existingApis });
+  const existing = values.project.slug ? projects.findBySlug(values.project.slug) : null;
   if (existing && Number(existing.id) !== Number(p.id)) {
-    errors.push(`Slug "${values.slug}" already exists.`);
+    errors.push(`Slug "${values.project.slug}" already exists.`);
   }
   if (errors.length) {
     return renderProjectForm(res, 400, {
-      project: { ...p, ...req.body, ...values, id: p.id },
-      repoRows: repos.listByProject(p.id),
-      apiRows: apis.listByProject(p.id),
-      errors,
+      project: { ...p, ...req.body, ...values.project, id: p.id },
+      repoRows: values.repos, apiRows: values.apis, errors,
     });
   }
-  projects.update(p.id, values);
+  getDb().transaction(() => {
+    projects.update(p.id, values.project);
+    reconcileRows(repos, p.id, values.repos);
+    reconcileRows(apis, p.id, values.apis);
+  })();
   sync.triggerSync(p.id, { reason: 'update' });
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
+
 function deleteProject(req, res) {
   projects.remove(req.params.id);
   res.redirect('/admin/projects');
 }
 
-function addRepo(req, res) {
-  const p = projects.findById(req.params.id);
-  if (!p) return res.status(404).send('Project not found');
-  const { values, errors } = validateRepoInput(req.body);
-  if (errors.length) {
-    return renderProjectForm(res, 400, {
-      project: p,
-      repoRows: repos.listByProject(p.id),
-      apiRows: apis.listByProject(p.id),
-      errors,
-      repoDraft: values,
-    });
-  }
-  repos.create({ project_id: p.id, ...values });
-  sync.triggerSync(p.id, { reason: 'repo-add' });
-  res.redirect(`/admin/projects/${p.id}/edit`);
-}
-function deleteRepo(req, res) {
-  repos.remove(req.params.repoId);
-  sync.triggerSync(req.params.id, { reason: 'repo-delete' });
-  res.redirect(`/admin/projects/${req.params.id}/edit`);
-}
 function syncNow(req, res) {
   const p = projects.findById(req.params.id);
   if (!p) return res.status(404).send('Project not found');
@@ -121,28 +123,8 @@ function syncStatus(req, res) {
     })),
   });
 }
-function addApiGroup(req, res) {
-  const p = projects.findById(req.params.id);
-  if (!p) return res.status(404).send('Project not found');
-  const { values, errors } = validateApiGroupInput(req.body);
-  if (errors.length) {
-    return renderProjectForm(res, 400, {
-      project: p,
-      repoRows: repos.listByProject(p.id),
-      apiRows: apis.listByProject(p.id),
-      errors,
-      apiDraft: values,
-    });
-  }
-  apis.create({ project_id: p.id, ...values });
-  res.redirect(`/admin/projects/${p.id}/edit`);
-}
-function deleteApiGroup(req, res) {
-  apis.remove(req.params.apiId);
-  res.redirect(`/admin/projects/${req.params.id}/edit`);
-}
 
 module.exports = {
   listProjects, newProjectForm, createProject, editProjectForm, updateProject, deleteProject,
-  addRepo, deleteRepo, addApiGroup, deleteApiGroup, syncNow, syncStatus,
+  syncNow, syncStatus,
 };

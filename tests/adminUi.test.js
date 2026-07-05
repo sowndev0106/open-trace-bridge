@@ -86,8 +86,10 @@ test('project edit form preserves workflows inside redesigned panels', async () 
   assert.strictEqual($('input[name="teams_webhook_url"]').val(), 'https://hook.example/payment');
   assert.strictEqual($('input[name="max_msg_length"]').val(), '20000');
   assert.strictEqual($(`a[href="/admin/projects/${project.id}/conversations"]`).text().trim(), 'Open audit trail');
-  assert.strictEqual($(`form[action="/admin/projects/${project.id}/repos"][method="post"]`).length, 1);
-  assert.strictEqual($(`form[action="/admin/projects/${project.id}/apis"][method="post"]`).length, 1);
+  assert.strictEqual($('input[name="repos[0][git_url]"]').val(), 'https://github.com/acme/payment.git');
+  assert.strictEqual($('input[name="apis[0][name]"]').val(), 'transaction-api');
+  assert.strictEqual($('template[data-template="repos"]').length, 1);
+  assert.strictEqual($('template[data-template="apis"]').length, 1);
   assert.match(response.text, /https:\/\/6666\.sowndev\.com\/api\/events\/payment/);
   assert.match(response.text, /panel-body/);
 });
@@ -118,53 +120,46 @@ test('project create validation shows all field errors and preserves input', asy
   assert.strictEqual($('textarea[name="system_prompt"]').text(), 'Keep this prompt');
 });
 
-test('repo validation rejects invalid auth and missing credentials without creating a repo', async () => {
+test('bundle validation rejects a bad repo row with prefixed errors and creates nothing', async () => {
   const project = seedProject();
-
   const response = await request(adminApp)
-    .post(`/admin/projects/${project.id}/repos`)
+    .post(`/admin/projects/${project.id}`)
     .type('form')
     .send({
-      git_url: 'ftp://example.com/repo.git',
-      auth_type: 'https-token',
-      token: '',
-      ssh_key: '',
-      branch: '',
+      slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
+      teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+      'repos[0][git_url]': 'ftp://example.com/repo.git',
+      'repos[0][auth_type]': 'https-token',
+      'repos[0][token]': '', 'repos[0][ssh_key]': '', 'repos[0][branch]': '',
     })
     .expect(400);
-
   const $ = cheerio.load(response.text);
   const errors = $('.error-list li').map((_, el) => $(el).text()).get();
-
-  assert.ok(errors.includes('Git URL must be an HTTPS URL or an SSH Git URL.'));
-  assert.ok(errors.includes('Token is required for https-token repositories.'));
-  assert.ok(errors.includes('Branch is required.'));
+  assert.ok(errors.includes('Repo #1: Git URL must be an HTTPS URL or an SSH Git URL.'));
+  assert.ok(errors.includes('Repo #1: Token is required for https-token repositories.'));
+  assert.ok(errors.includes('Repo #1: Branch is required.'));
   assert.strictEqual(repos.listByProject(project.id).length, 0);
 });
 
-test('api group validation rejects invalid URL and methods without creating a group', async () => {
+test('bundle validation rejects a bad API row with prefixed errors and creates nothing', async () => {
   const project = seedProject();
-
   const response = await request(adminApp)
-    .post(`/admin/projects/${project.id}/apis`)
+    .post(`/admin/projects/${project.id}`)
     .type('form')
     .send({
-      name: 'bad name',
-      base_url: 'not-a-url',
-      api_key: '',
-      auth_header: '',
-      allowed_methods: 'GET,TRACE',
-      description_md: 'Keep this description',
+      slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
+      teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+      'apis[0][name]': 'bad name', 'apis[0][base_url]': 'not-a-url',
+      'apis[0][auth_header]': '', 'apis[0][allowed_methods]': 'GET,TRACE',
+      'apis[0][description_md]': 'Keep this description',
     })
     .expect(400);
-
   const $ = cheerio.load(response.text);
   const errors = $('.error-list li').map((_, el) => $(el).text()).get();
-
-  assert.ok(errors.includes('API group name must use letters, numbers, underscores, and hyphens only.'));
-  assert.ok(errors.includes('Base URL must be a valid http or https URL.'));
-  assert.ok(errors.includes('Auth header is required.'));
-  assert.ok(errors.includes('Allowed methods can only include GET, POST, PUT, PATCH, and DELETE.'));
+  assert.ok(errors.includes('API group #1: API group name must use letters, numbers, underscores, and hyphens only.'));
+  assert.ok(errors.includes('API group #1: Base URL must be a valid http or https URL.'));
+  assert.ok(errors.includes('API group #1: Auth header is required.'));
+  assert.ok(errors.includes('API group #1: Allowed methods can only include GET, POST, PUT, PATCH, and DELETE.'));
   assert.strictEqual(apis.listByProject(project.id).length, 0);
   assert.match(response.text, /Keep this description/);
 });
@@ -224,7 +219,7 @@ test('conversation detail renders message timeline', async () => {
   assert.match(response.text, /message-timeline/);
 });
 
-test('project save, repo add/delete, and Sync now all trigger a background sync', async () => {
+test('create, update, and Sync now each trigger exactly one background sync', async () => {
   const triggered = [];
   const origTrigger = sync.triggerSync;
   sync.triggerSync = (id, opts = {}) => { triggered.push({ id: Number(id), reason: opts.reason }); return Promise.resolve(); };
@@ -232,20 +227,19 @@ test('project save, repo add/delete, and Sync now all trigger a background sync'
     await request(adminApp).post('/admin/projects').type('form').send({
       slug: 'billing', name: 'Billing', keyword: 'billing-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000',
+      'repos[0][git_url]': 'https://github.com/acme/billing.git',
+      'repos[0][auth_type]': 'none', 'repos[0][branch]': 'main',
+      'repos[0][token]': '', 'repos[0][ssh_key]': '',
     }).expect(302);
     const project = projects.findBySlug('billing');
+    assert.strictEqual(repos.listByProject(project.id).length, 1);
     await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
       slug: 'billing', name: 'Billing 2', keyword: 'billing-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000',
     }).expect(302);
-    await request(adminApp).post(`/admin/projects/${project.id}/repos`).type('form').send({
-      git_url: 'https://github.com/acme/billing.git', auth_type: 'none', branch: 'main',
-    }).expect(302);
-    const repo = repos.listByProject(project.id)[0];
-    await request(adminApp).post(`/admin/projects/${project.id}/repos/${repo.id}/delete`).expect(302);
     await request(adminApp).post(`/admin/projects/${project.id}/sync`).expect(302);
-    assert.deepStrictEqual(triggered.map((t) => t.id), Array(5).fill(project.id));
-    assert.strictEqual(triggered[4].reason, 'manual');
+    assert.deepStrictEqual(triggered.map((t) => t.reason), ['create', 'update', 'manual']);
+    assert.deepStrictEqual(triggered.map((t) => t.id), Array(3).fill(project.id));
   } finally {
     sync.triggerSync = origTrigger;
   }
@@ -303,4 +297,75 @@ test('project edit embeds the status poller only while a sync is unfinished', as
   repos.setSyncStatus(repo.id, { status: 'success' });
   res = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
   assert.ok(!/setInterval/.test(res.text));
+});
+
+test('save-all reconciles rows: edit one, add one, omit one (deleted)', async () => {
+  const project = seedProject();
+  const keep = repos.create({ project_id: project.id, git_url: 'https://github.com/acme/keep.git', auth_type: 'none', branch: 'main' });
+  const drop = repos.create({ project_id: project.id, git_url: 'https://github.com/acme/drop.git', auth_type: 'none', branch: 'main' });
+  const origTrigger = sync.triggerSync;
+  sync.triggerSync = () => Promise.resolve();
+  try {
+    await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+      slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
+      teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+      'repos[0][id]': String(keep.id),
+      'repos[0][git_url]': 'https://github.com/acme/keep.git',
+      'repos[0][auth_type]': 'none', 'repos[0][branch]': 'release',
+      'repos[0][token]': '', 'repos[0][ssh_key]': '',
+      'repos[1][git_url]': 'https://github.com/acme/new.git',
+      'repos[1][auth_type]': 'none', 'repos[1][branch]': 'main',
+      'repos[1][token]': '', 'repos[1][ssh_key]': '',
+    }).expect(302);
+  } finally {
+    sync.triggerSync = origTrigger;
+  }
+  const rows = repos.listByProject(project.id);
+  assert.strictEqual(rows.length, 2);
+  const kept = rows.find((r) => r.id === keep.id);
+  assert.strictEqual(kept.branch, 'release');
+  assert.strictEqual(kept.sync_status, 'pending'); // branch changed -> resync
+  assert.ok(rows.some((r) => r.git_url === 'https://github.com/acme/new.git'));
+  assert.ok(!rows.some((r) => r.id === drop.id));
+});
+
+test('blank token on save keeps the stored secret; secrets are never echoed', async () => {
+  const project = seedProject();
+  const repo = repos.create({ project_id: project.id, git_url: 'https://github.com/acme/sec.git',
+    auth_type: 'https-token', token: 'ghp_supersecrettoken', branch: 'main' });
+  const origTrigger = sync.triggerSync;
+  sync.triggerSync = () => Promise.resolve();
+  try {
+    await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+      slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
+      teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+      'repos[0][id]': String(repo.id),
+      'repos[0][git_url]': 'https://github.com/acme/sec.git',
+      'repos[0][auth_type]': 'https-token', 'repos[0][branch]': 'main',
+      'repos[0][token]': '', 'repos[0][ssh_key]': '',
+    }).expect(302);
+  } finally {
+    sync.triggerSync = origTrigger;
+  }
+  assert.strictEqual(repos.listByProject(project.id)[0].token, 'ghp_supersecrettoken');
+
+  const page = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  assert.ok(!page.text.includes('ghp_supersecrettoken'));
+  const $ = cheerio.load(page.text);
+  assert.strictEqual($('input[name="repos[0][token]"]').attr('type'), 'password');
+  assert.strictEqual($('input[name="repos[0][token]"]').val() || '', '');
+  assert.strictEqual($('input[name="apis[0][api_key]"]').length, 0); // no api rows seeded
+});
+
+test('Save button is at the top inside the single unified form', async () => {
+  const project = seedProject();
+  const res = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(res.text);
+  const mainForm = $(`form[action="/admin/projects/${project.id}"]`);
+  assert.strictEqual(mainForm.length, 1);
+  // Save button lives in the header section (first section inside the form).
+  assert.strictEqual(mainForm.find('section').first().find('button.btn-primary[type="submit"]').text().trim(), 'Save');
+  // Sync now posts through the external sync form.
+  assert.strictEqual($(`form#sync-form[action="/admin/projects/${project.id}/sync"]`).length, 1);
+  assert.strictEqual($('button[form="sync-form"]').length, 1);
 });
