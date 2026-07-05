@@ -15,6 +15,7 @@ app.use((req, res, next) => {
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/admin', require('./routes/admin.routes'));
 app.use('/api', require('./routes/events.routes'));
+app.use('/internal', require('./routes/internal.routes'));
 
 app.use((req, res) => {
   console.log('Unhandled route:', req.method, req.originalUrl);
