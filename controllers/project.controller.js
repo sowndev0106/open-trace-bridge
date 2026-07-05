@@ -42,4 +42,32 @@ function deleteProject(req, res) {
   res.redirect('/admin/projects');
 }
 
-module.exports = { listProjects, newProjectForm, createProject, editProjectForm, updateProject, deleteProject };
+function addRepo(req, res) {
+  const p = projects.findById(req.params.id);
+  if (!p) return res.status(404).send('Project not found');
+  const { git_url, auth_type, token, ssh_key, branch } = req.body;
+  if (git_url) repos.create({ project_id: p.id, git_url, auth_type, token, ssh_key, branch });
+  res.redirect(`/admin/projects/${p.id}/edit`);
+}
+function deleteRepo(req, res) {
+  repos.remove(req.params.repoId);
+  res.redirect(`/admin/projects/${req.params.id}/edit`);
+}
+function addApiGroup(req, res) {
+  const p = projects.findById(req.params.id);
+  if (!p) return res.status(404).send('Project not found');
+  const { name, base_url, api_key, auth_header, allowed_methods, description_md } = req.body;
+  if (name && base_url) {
+    apis.create({ project_id: p.id, name, base_url, api_key, auth_header, allowed_methods, description_md });
+  }
+  res.redirect(`/admin/projects/${p.id}/edit`);
+}
+function deleteApiGroup(req, res) {
+  apis.remove(req.params.apiId);
+  res.redirect(`/admin/projects/${req.params.id}/edit`);
+}
+
+module.exports = {
+  listProjects, newProjectForm, createProject, editProjectForm, updateProject, deleteProject,
+  addRepo, deleteRepo, addApiGroup, deleteApiGroup,
+};

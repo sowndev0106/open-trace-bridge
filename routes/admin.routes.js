@@ -8,5 +8,9 @@ router.post('/projects', pc.createProject);
 router.get('/projects/:id/edit', pc.editProjectForm);
 router.post('/projects/:id', pc.updateProject);
 router.post('/projects/:id/delete', pc.deleteProject);
+router.post('/projects/:id/repos', pc.addRepo);
+router.post('/projects/:id/repos/:repoId/delete', pc.deleteRepo);
+router.post('/projects/:id/apis', pc.addApiGroup);
+router.post('/projects/:id/apis/:apiId/delete', pc.deleteApiGroup);
 
 module.exports = router;

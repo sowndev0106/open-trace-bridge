@@ -21,6 +21,63 @@
   <p>Event URL cho Power Automate:
     <code>https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&conversationId=...&userId=...&userName=...</code>
   </p>
-  <!-- Task 4 sẽ thêm section Repos + API groups tại đây -->
+  <fieldset>
+    <legend>Repos (<%= repos.length %>)</legend>
+    <table>
+      <tr><th>Git URL</th><th>Auth</th><th>Branch</th><th></th></tr>
+      <% for (const r of repos) { %>
+      <tr>
+        <td><%= r.git_url %></td><td><%= r.auth_type %></td><td><%= r.branch %></td>
+        <td><form class="inline-form" method="post"
+              action="/admin/projects/<%= project.id %>/repos/<%= r.id %>/delete"><button>x</button></form></td>
+      </tr>
+      <% } %>
+    </table>
+    <form method="post" action="/admin/projects/<%= project.id %>/repos">
+      <div class="row">
+        <div><label>Git URL</label><input type="text" name="git_url" required
+          placeholder="https://github.com/org/repo.git hoặc git@github.com:org/repo.git"></div>
+        <div><label>Auth</label>
+          <select name="auth_type">
+            <option value="none">none</option>
+            <option value="https-token">https-token</option>
+            <option value="ssh">ssh</option>
+          </select></div>
+        <div><label>Branch</label><input type="text" name="branch" value="main"></div>
+      </div>
+      <label>Token (nếu https-token)</label><input type="text" name="token">
+      <label>SSH private key (nếu ssh)</label><textarea name="ssh_key"></textarea>
+      <button>Add repo</button>
+    </form>
+  </fieldset>
+
+  <fieldset>
+    <legend>API groups (<%= apis.length %>) — mỗi group 1 API key</legend>
+    <table>
+      <tr><th>Name</th><th>Base URL</th><th>Methods</th><th></th></tr>
+      <% for (const a of apis) { %>
+      <tr>
+        <td><%= a.name %></td><td><%= a.base_url %></td><td><%= a.allowed_methods %></td>
+        <td><form class="inline-form" method="post"
+              action="/admin/projects/<%= project.id %>/apis/<%= a.id %>/delete"><button>x</button></form></td>
+      </tr>
+      <% } %>
+    </table>
+    <form method="post" action="/admin/projects/<%= project.id %>/apis">
+      <div class="row">
+        <div><label>Name</label><input type="text" name="name" required placeholder="transaction-api"></div>
+        <div><label>Base URL</label><input type="url" name="base_url" required
+          placeholder="https://api.internal.example"></div>
+      </div>
+      <div class="row">
+        <div><label>API key</label><input type="text" name="api_key"></div>
+        <div><label>Auth header</label><input type="text" name="auth_header" value="Authorization"></div>
+        <div><label>Allowed methods (phẩy)</label><input type="text" name="allowed_methods" value="GET"></div>
+      </div>
+      <label>Description (markdown — mô tả kỹ endpoints, params, filters cho agent đọc)</label>
+      <textarea name="description_md"></textarea>
+      <button>Add API group</button>
+    </form>
+  </fieldset>
 <% } %>
 <%- include('../layout-foot') %>
