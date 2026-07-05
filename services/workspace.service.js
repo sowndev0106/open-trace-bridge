@@ -62,7 +62,8 @@ function buildOpencodeConfig(project) {
         enabled: true,
         environment: {
           OTB_PROJECT_SLUG: project.slug,
-          OTB_BASE: `http://127.0.0.1:${process.env.PORT || 6666}`,
+          // /internal/call-api nằm trên admin app (port private, không tunnel)
+          OTB_BASE: `http://127.0.0.1:${process.env.ADMIN_PORT || 6667}`,
           OTB_INTERNAL_TOKEN: getInternalToken(),
         },
       },

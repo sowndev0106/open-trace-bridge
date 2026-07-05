@@ -12,8 +12,8 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 COPY . .
 
-ENV PORT=6666
-EXPOSE 6666 4096
+ENV PORT=6666 ADMIN_PORT=6667
+EXPOSE 6666 6667 4096
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
