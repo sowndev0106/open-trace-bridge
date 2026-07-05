@@ -13,6 +13,7 @@ const apis = require('../models/api.model');
 const convs = require('../models/conversation.model');
 const messages = require('../models/message.model');
 const apicalls = require('../models/apicall.model');
+const sync = require('../services/sync.service');
 
 beforeEach(() => {
   resetDbForTest();
@@ -221,4 +222,47 @@ test('conversation detail renders message timeline', async () => {
   assert.match(response.text, /investigate txn_123/);
   assert.match(response.text, /I found the failing API call/);
   assert.match(response.text, /message-timeline/);
+});
+
+test('project save, repo add/delete, and Sync now all trigger a background sync', async () => {
+  const triggered = [];
+  const origTrigger = sync.triggerSync;
+  sync.triggerSync = (id, opts = {}) => { triggered.push({ id: Number(id), reason: opts.reason }); return Promise.resolve(); };
+  try {
+    await request(adminApp).post('/admin/projects').type('form').send({
+      slug: 'billing', name: 'Billing', keyword: 'billing-bot', system_prompt: 'x',
+      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000',
+    }).expect(302);
+    const project = projects.findBySlug('billing');
+    await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+      slug: 'billing', name: 'Billing 2', keyword: 'billing-bot', system_prompt: 'x',
+      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000',
+    }).expect(302);
+    await request(adminApp).post(`/admin/projects/${project.id}/repos`).type('form').send({
+      git_url: 'https://github.com/acme/billing.git', auth_type: 'none', branch: 'main',
+    }).expect(302);
+    const repo = repos.listByProject(project.id)[0];
+    await request(adminApp).post(`/admin/projects/${project.id}/repos/${repo.id}/delete`).expect(302);
+    await request(adminApp).post(`/admin/projects/${project.id}/sync`).expect(302);
+    assert.deepStrictEqual(triggered.map((t) => t.id), Array(5).fill(project.id));
+    assert.strictEqual(triggered[4].reason, 'manual');
+  } finally {
+    sync.triggerSync = origTrigger;
+  }
+});
+
+test('sync-status endpoint returns derived project status and per-repo rows', async () => {
+  const project = seedProject();
+  const repo = repos.create({ project_id: project.id, git_url: 'https://github.com/acme/payment.git',
+    auth_type: 'none', branch: 'main' });
+  repos.setSyncStatus(repo.id, { status: 'error', error: 'auth denied' });
+
+  const res = await request(adminApp).get(`/admin/projects/${project.id}/sync-status`).expect(200);
+  assert.strictEqual(res.body.project, 'error');
+  assert.strictEqual(res.body.repos.length, 1);
+  assert.strictEqual(res.body.repos[0].sync_status, 'error');
+  assert.strictEqual(res.body.repos[0].sync_error, 'auth denied');
+  assert.ok(res.body.repos[0].synced_at);
+
+  await request(adminApp).get('/admin/projects/999/sync-status').expect(404);
 });

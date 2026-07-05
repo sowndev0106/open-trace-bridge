@@ -6,6 +6,7 @@ const {
   validateRepoInput,
   validateApiGroupInput,
 } = require('../services/adminValidation');
+const sync = require('../services/sync.service');
 
 function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [], repoDraft = null, apiDraft = null }) {
   return res.status(status).render('projects/form', {
@@ -20,7 +21,16 @@ function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [
 }
 
 function listProjects(req, res) {
-  res.render('projects/list', { projects: projects.list() });
+  const rows = projects.list().map((p) => {
+    const repoRows = repos.listByProject(p.id);
+    return {
+      ...p,
+      repo_count: repoRows.length,
+      sync_status: sync.deriveProjectStatus(repoRows),
+      synced_at: repoRows.map((r) => r.synced_at).filter(Boolean).sort().pop() || null,
+    };
+  });
+  res.render('projects/list', { projects: rows });
 }
 function newProjectForm(req, res) {
   renderProjectForm(res, 200, { project: null, repoRows: [], apiRows: [] });
@@ -34,6 +44,7 @@ function createProject(req, res) {
     return renderProjectForm(res, 400, { project: { ...req.body, ...values }, repoRows: [], apiRows: [], errors });
   }
   const p = projects.create(values);
+  sync.triggerSync(p.id, { reason: 'create' });
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
 function editProjectForm(req, res) {
@@ -62,6 +73,7 @@ function updateProject(req, res) {
     });
   }
   projects.update(p.id, values);
+  sync.triggerSync(p.id, { reason: 'update' });
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
 function deleteProject(req, res) {
@@ -83,11 +95,31 @@ function addRepo(req, res) {
     });
   }
   repos.create({ project_id: p.id, ...values });
+  sync.triggerSync(p.id, { reason: 'repo-add' });
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
 function deleteRepo(req, res) {
   repos.remove(req.params.repoId);
+  sync.triggerSync(req.params.id, { reason: 'repo-delete' });
   res.redirect(`/admin/projects/${req.params.id}/edit`);
+}
+function syncNow(req, res) {
+  const p = projects.findById(req.params.id);
+  if (!p) return res.status(404).send('Project not found');
+  sync.triggerSync(p.id, { reason: 'manual' });
+  res.redirect(`/admin/projects/${p.id}/edit`);
+}
+function syncStatus(req, res) {
+  const p = projects.findById(req.params.id);
+  if (!p) return res.status(404).json({ error: 'Project not found' });
+  const repoRows = repos.listByProject(p.id);
+  res.json({
+    project: sync.deriveProjectStatus(repoRows),
+    repos: repoRows.map((r) => ({
+      id: r.id, git_url: r.git_url, sync_status: r.sync_status,
+      sync_error: r.sync_error, synced_at: r.synced_at,
+    })),
+  });
 }
 function addApiGroup(req, res) {
   const p = projects.findById(req.params.id);
@@ -112,5 +144,5 @@ function deleteApiGroup(req, res) {
 
 module.exports = {
   listProjects, newProjectForm, createProject, editProjectForm, updateProject, deleteProject,
-  addRepo, deleteRepo, addApiGroup, deleteApiGroup,
+  addRepo, deleteRepo, addApiGroup, deleteApiGroup, syncNow, syncStatus,
 };
