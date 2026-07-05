@@ -138,7 +138,11 @@ https://6666.sowndev.com/api/events?text=<url-encode raw text>&userId=<...>&user
 
 ## Step 2 — Investigation động (multi-project, SQLite, OpenCode session)
 
-> Trạng thái: **design đã chốt, xem chi tiết `REQUIREMENT.md` §3–§10**
+> Trạng thái: **ĐÃ IMPLEMENT + smoke test pass (2026-07-05)** — design: `REQUIREMENT.md` §3–§10, plan: `superpowers/plans/2026-07-05-step2-dynamic-investigation.md`, diagram: `DIAGRAMS.md`
+>
+> Smoke test đã verify: agent trả lời thật từ repo clone; session continuity (hỏi tiếp nhớ ngữ cảnh cùng session); `payment-bot /new` đóng conversation cũ, tạo mới; 17 unit test pass. Bug tìm được khi smoke: spawn opencode với stdin pipe mở làm treo tới timeout 5 phút — fix bằng `stdio: ['ignore',...]`. pm2 đã restart chạy code mới trên port 6666.
+>
+> Việc còn lại: (1) cập nhật URL Power Automate sang `/api/events/<slug>`; (2) tạo webhook nhận kết quả trong Teams (flow "When a Teams webhook request is received" → Post card in chat) rồi dán URL vào project; (3) Task 11 Docker — file đã viết sẵn, chưa build/test.
 
 Các quyết định chính (bàn ngày 2026-07-05):
 
