@@ -52,6 +52,7 @@ test('projects index renders modern project table actions and endpoint copy', as
   assert.strictEqual($('h1').text().trim(), 'Projects');
   assert.strictEqual($('a[href="/admin/projects/new"]').first().text().trim(), 'New project');
   assert.strictEqual($(`a[href="/admin/projects/${project.id}/edit"]`).length, 1);
+  assert.strictEqual($(`a[href="/admin/projects/${project.id}/conversations"]`).filter((_, el) => $(el).text().trim() === 'View logs').length, 1);
   assert.strictEqual($(`form[action="/admin/projects/${project.id}/delete"][method="post"]`).length, 1);
   assert.match(response.text, /\/api\/events\/payment/);
   assert.match(response.text, /payment-bot/);
