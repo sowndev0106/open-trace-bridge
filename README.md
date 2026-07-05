@@ -60,7 +60,7 @@ OpenCode remote control is published on `http://localhost:4096` for local setup 
 
 1. Create a project with a unique slug, name, keyword, system prompt, Teams webhook URL, and max message length.
 2. Add one or more repositories. HTTPS token, SSH key, and unauthenticated clone modes are supported.
-3. Add API groups with a base URL, allowed methods, auth header, API key, and markdown description for the agent.
+3. Add API groups by pasting a working `curl` command plus a markdown description for the agent. OpenTraceBridge extracts the base URL, method, auth header, and API key from the curl command, stores the secret server-side, and redacts it from generated workspace instructions.
 4. Point Power Automate at:
 
 ```text
@@ -74,6 +74,15 @@ project workspace in the background; the admin UI shows per-repo sync status
 and offers a **Sync now** button. Use `<keyword> /pull-source` in Teams to
 re-pull the sources to the latest remote state on demand — the result is posted
 back through the project webhook.
+
+The project edit page shows the latest API calls made through the OpenCode
+`call_api` tool. The full audit page remains available from **Open full audit**
+and includes conversation sessions plus recent internal API calls.
+
+OpenTraceBridge saves Teams chat history for each project, including
+investigation prompts, `/new`, `/pull-source`, agent answers, and error
+messages. Configure **Chat retention days** on the project form to control
+automatic cleanup; `0` keeps history indefinitely.
 
 ## Development
 
