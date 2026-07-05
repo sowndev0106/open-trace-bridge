@@ -1,0 +1,23 @@
+<%- include('../layout-head') %>
+<h1>Conversations — <%= project.name %></h1>
+<table>
+  <tr><th>ID</th><th>Teams conversation</th><th>OpenCode session</th><th>Status</th><th>Updated</th></tr>
+  <% for (const c of conversations) { %>
+  <tr>
+    <td><a href="/admin/conversations/<%= c.id %>"><%= c.id %></a></td>
+    <td><%= c.teams_conversation_id %></td>
+    <td><code><%= c.opencode_session_id || '-' %></code></td>
+    <td><%= c.status %></td>
+    <td><%= c.updated_at %></td>
+  </tr>
+  <% } %>
+</table>
+<h2>API calls (50 gần nhất)</h2>
+<table>
+  <tr><th>Time</th><th>Group</th><th>Method</th><th>URL</th><th>Status</th></tr>
+  <% for (const a of apiCalls) { %>
+  <tr><td><%= a.created_at %></td><td><%= a.group_name %></td><td><%= a.method %></td>
+      <td><%= a.url %></td><td><%= a.status %></td></tr>
+  <% } %>
+</table>
+<%- include('../layout-foot') %>

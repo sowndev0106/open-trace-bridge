@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const pc = require('../controllers/project.controller');
+const cc = require('../controllers/conversation.controller');
 
 router.get('/', (req, res) => res.redirect('/admin/projects'));
 router.get('/projects', pc.listProjects);
@@ -12,5 +13,7 @@ router.post('/projects/:id/repos', pc.addRepo);
 router.post('/projects/:id/repos/:repoId/delete', pc.deleteRepo);
 router.post('/projects/:id/apis', pc.addApiGroup);
 router.post('/projects/:id/apis/:apiId/delete', pc.deleteApiGroup);
+router.get('/projects/:id/conversations', cc.listForProject);
+router.get('/conversations/:id', cc.detail);
 
 module.exports = router;

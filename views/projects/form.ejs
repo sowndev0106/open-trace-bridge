@@ -18,6 +18,7 @@
 </form>
 
 <% if (project && project.id) { %>
+  <p><a href="/admin/projects/<%= project.id %>/conversations">Conversations & audit →</a></p>
   <p>Event URL cho Power Automate:
     <code>https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&conversationId=...&userId=...&userName=...</code>
   </p>

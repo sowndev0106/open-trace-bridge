@@ -1,0 +1,10 @@
+<%- include('../layout-head') %>
+<h1>Conversation #<%= conv.id %> — <%= project.name %></h1>
+<p>Session: <code><%= conv.opencode_session_id || '-' %></code> | Status: <%= conv.status %></p>
+<% for (const m of messages) { %>
+  <p><strong><%= m.direction === 'in' ? (m.user_name || 'user') : 'bot' %></strong>
+     <small>(<%= m.created_at %>)</small><br>
+     <span style="white-space: pre-wrap"><%= m.content %></span></p>
+  <hr>
+<% } %>
+<%- include('../layout-foot') %>
