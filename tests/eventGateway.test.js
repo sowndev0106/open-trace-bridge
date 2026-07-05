@@ -29,3 +29,15 @@ test('validateEvent still works', () => {
   assert.strictEqual(validateEvent({ raw: { text: 'x' }, user: {}, channel: {} }), null);
   assert.ok(validateEvent({}));
 });
+
+test('extractPrompt detects /pull-source after keyword', () => {
+  const r = extractPrompt('payment-bot /pull-source', 'payment-bot');
+  assert.strictEqual(r.isPullSource, true);
+  assert.strictEqual(r.isNew, false);
+});
+
+test('extractPrompt does not flag /pull-source mid-sentence or as prefix of another word', () => {
+  assert.strictEqual(extractPrompt('please run /pull-source', '').isPullSource, false);
+  assert.strictEqual(extractPrompt('/pull-sourcex', '').isPullSource, false);
+  assert.strictEqual(extractPrompt('/pull-source now', '').isPullSource, true);
+});
