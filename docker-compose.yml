@@ -12,6 +12,7 @@ services:
       - opencode-config:/root/.config/opencode
     environment:
       - PORT=6666
+      - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD:-}
 
 volumes:
   opencode-state:
