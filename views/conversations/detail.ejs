@@ -1,10 +1,31 @@
 <%- include('../layout-head') %>
-<h1>Conversation #<%= conv.id %> — <%= project.name %></h1>
-<p>Session: <code><%= conv.opencode_session_id || '-' %></code> | Status: <%= conv.status %></p>
-<% for (const m of messages) { %>
-  <p><strong><%= m.direction === 'in' ? (m.user_name || 'user') : 'bot' %></strong>
-     <small>(<%= m.created_at %>)</small><br>
-     <span style="white-space: pre-wrap"><%= m.content %></span></p>
-  <hr>
-<% } %>
+
+<section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <p class="page-kicker"><%= project.name %></p>
+    <h1 class="page-title">Conversation #<%= conv.id %></h1>
+    <p class="page-subtitle">Session <code><%= conv.opencode_session_id || '-' %></code> with status <span class="status-badge <%= conv.status === 'active' ? 'status-active' : 'status-muted' %>"><%= conv.status %></span></p>
+  </div>
+  <a href="/admin/projects/<%= project.id %>/conversations" class="btn btn-secondary">Back to audit</a>
+</section>
+
+<section class="panel">
+  <div class="panel-body">
+    <div class="message-timeline space-y-5">
+      <% for (const m of messages) { %>
+        <% const isInbound = m.direction === 'in'; %>
+        <article class="flex <%= isInbound ? 'justify-start' : 'justify-end' %>">
+          <div class="max-w-3xl rounded-lg border <%= isInbound ? 'border-line bg-white' : 'border-blue-100 bg-blue-50' %> p-4">
+            <div class="mb-2 flex flex-wrap items-center gap-2">
+              <strong class="text-sm text-ink-950"><%= isInbound ? (m.user_name || 'user') : 'bot' %></strong>
+              <small class="text-xs text-ink-500"><%= m.created_at %></small>
+            </div>
+            <div class="whitespace-pre-wrap text-sm leading-6 text-ink-700"><%= m.content %></div>
+          </div>
+        </article>
+      <% } %>
+    </div>
+  </div>
+</section>
+
 <%- include('../layout-foot') %>

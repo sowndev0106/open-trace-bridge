@@ -77,6 +77,22 @@ Run the test suite with:
 npm test
 ```
 
+## Admin UI Styling
+
+The private admin UI uses Tailwind CSS compiled into `public/styles/admin.css`.
+
+Build the stylesheet after changing EJS classes or `assets/styles/admin.css`:
+
+```bash
+npm run build:css
+```
+
+During UI work, run the watcher in a second terminal:
+
+```bash
+npm run dev:css
+```
+
 Generated runtime data lives in `data/` and `workspaces/`. Do not commit `.env`, database files, cloned repositories, API keys, tokens, or OpenCode auth data.
 
 ## Documentation

@@ -4,22 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>OpenTraceBridge Admin</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 900px; padding: 0 1rem; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; }
-    label { display: block; margin-top: .8rem; font-weight: 600; }
-    input[type=text], input[type=url], textarea, select { width: 100%; padding: .4rem; box-sizing: border-box; }
-    textarea { min-height: 6rem; font-family: monospace; }
-    .error { color: #b00; }
-    .row { display: flex; gap: 1rem; }
-    .row > * { flex: 1; }
-    fieldset { margin-top: 1.5rem; }
-    .inline-form { display: inline; }
-    button { margin-top: .8rem; padding: .4rem 1rem; cursor: pointer; }
-    code { background: #f4f4f4; padding: .1rem .3rem; }
-  </style>
+  <link rel="stylesheet" href="/assets/styles/admin.css">
 </head>
 <body>
-<nav><a href="/admin/projects">Projects</a></nav>
-<hr>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/admin/projects" class="flex items-center gap-3">
+        <span class="brand-mark">OT</span>
+        <span>
+          <span class="block text-sm font-semibold text-ink-950">OpenTraceBridge</span>
+          <span class="block text-xs text-ink-500">Admin console</span>
+        </span>
+      </a>
+      <nav class="flex items-center gap-1" aria-label="Primary navigation">
+        <a class="nav-link" href="/admin/projects">Projects</a>
+      </nav>
+    </div>
+  </header>
+  <main class="app-container">

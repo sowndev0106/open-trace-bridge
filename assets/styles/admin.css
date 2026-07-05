@@ -1,0 +1,185 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@source "../../views/**/*.ejs";
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-ink-950: #111827;
+  --color-ink-700: #374151;
+  --color-ink-500: #6b7280;
+  --color-panel: #ffffff;
+  --color-canvas: #f6f7fb;
+  --color-line: #d9dee8;
+  --color-brand: #2563eb;
+  --color-brand-dark: #1d4ed8;
+  --color-success: #047857;
+  --color-danger: #b91c1c;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+
+  body {
+    @apply min-h-screen bg-canvas text-ink-950 antialiased;
+  }
+
+  code {
+    @apply rounded-md border border-line bg-slate-50 px-2 py-1 font-mono text-[0.8125rem] text-ink-700;
+  }
+
+  label {
+    @apply block text-sm font-medium text-ink-700;
+  }
+
+  input[type="text"],
+  input[type="url"],
+  input[type="number"],
+  textarea,
+  select {
+    @apply mt-2 w-full rounded-lg border-line bg-white text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand;
+  }
+
+  textarea {
+    @apply min-h-32 font-mono leading-6;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen bg-canvas;
+  }
+
+  .app-container {
+    @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8;
+  }
+
+  .topbar {
+    @apply border-b border-line bg-white/95 backdrop-blur;
+  }
+
+  .topbar-inner {
+    @apply mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8;
+  }
+
+  .brand-mark {
+    @apply flex h-9 w-9 items-center justify-center rounded-lg bg-ink-950 text-sm font-bold text-white;
+  }
+
+  .nav-link {
+    @apply rounded-lg px-3 py-2 text-sm font-medium text-ink-700 hover:bg-slate-100 hover:text-ink-950;
+  }
+
+  .page-kicker {
+    @apply text-sm font-medium text-brand;
+  }
+
+  .page-title {
+    @apply mt-2 text-3xl font-semibold tracking-normal text-ink-950;
+  }
+
+  .page-subtitle {
+    @apply mt-2 max-w-3xl text-sm leading-6 text-ink-500;
+  }
+
+  .section-heading {
+    @apply text-base font-semibold text-ink-950;
+  }
+
+  .panel {
+    @apply rounded-lg border border-line bg-panel shadow-sm;
+  }
+
+  .panel-body {
+    @apply p-5 sm:p-6;
+  }
+
+  .table-shell {
+    @apply overflow-hidden rounded-lg border border-line bg-white shadow-sm;
+  }
+
+  .table-scroll {
+    @apply overflow-x-auto;
+  }
+
+  .data-table {
+    @apply min-w-full divide-y divide-line text-left text-sm;
+  }
+
+  .data-table thead {
+    @apply bg-slate-50 text-xs uppercase tracking-normal text-ink-500;
+  }
+
+  .data-table th {
+    @apply px-4 py-3 font-semibold;
+  }
+
+  .data-table td {
+    @apply px-4 py-4 align-top text-ink-700;
+  }
+
+  .data-table tbody {
+    @apply divide-y divide-line bg-white;
+  }
+
+  .btn {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold shadow-sm transition;
+  }
+
+  .btn-primary {
+    @apply border-brand bg-brand text-white hover:bg-brand-dark;
+  }
+
+  .btn-secondary {
+    @apply border-line bg-white text-ink-700 hover:bg-slate-50 hover:text-ink-950;
+  }
+
+  .btn-danger {
+    @apply border-red-200 bg-red-50 text-danger hover:bg-red-100;
+  }
+
+  .inline-form {
+    @apply inline-flex;
+  }
+
+  .form-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .form-grid-two {
+    @apply grid gap-4 md:grid-cols-2;
+  }
+
+  .field-help {
+    @apply mt-1 text-xs leading-5 text-ink-500;
+  }
+
+  .error {
+    @apply rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger;
+  }
+
+  .error-list {
+    @apply mt-2 list-disc space-y-1 pl-5;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold;
+  }
+
+  .status-active {
+    @apply border-emerald-200 bg-emerald-50 text-success;
+  }
+
+  .status-muted {
+    @apply border-slate-200 bg-slate-100 text-ink-500;
+  }
+
+  .empty-state {
+    @apply rounded-lg border border-dashed border-line bg-white px-6 py-10 text-center;
+  }
+
+  .message-timeline {
+    @apply relative;
+  }
+}

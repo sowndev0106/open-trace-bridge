@@ -25,6 +25,7 @@ adminApp.use(express.json({ limit: '1mb' }));
 adminApp.use(express.urlencoded({ extended: true }));
 adminApp.set('view engine', 'ejs');
 adminApp.set('views', path.join(__dirname, 'views'));
+adminApp.use('/assets', express.static(path.join(__dirname, 'public')));
 adminApp.use(logger);
 adminApp.get('/health', (req, res) => res.json({ status: 'ok', scope: 'admin' }));
 adminApp.get('/', (req, res) => res.redirect('/admin/projects'));

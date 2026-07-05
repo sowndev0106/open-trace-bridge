@@ -1,48 +1,67 @@
 const projects = require('../models/project.model');
 const repos = require('../models/repo.model');
 const apis = require('../models/api.model');
+const {
+  validateProjectInput,
+  validateRepoInput,
+  validateApiGroupInput,
+} = require('../services/adminValidation');
+
+function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [], repoDraft = null, apiDraft = null }) {
+  return res.status(status).render('projects/form', {
+    project,
+    repos: repoRows || [],
+    apis: apiRows || [],
+    errors,
+    error: errors[0] || null,
+    repoDraft,
+    apiDraft,
+  });
+}
 
 function listProjects(req, res) {
   res.render('projects/list', { projects: projects.list() });
 }
 function newProjectForm(req, res) {
-  res.render('projects/form', { project: null, repos: [], apis: [], error: null });
+  renderProjectForm(res, 200, { project: null, repoRows: [], apiRows: [] });
 }
 function createProject(req, res) {
-  const { slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length } = req.body;
-  if (!slug || !name) {
-    return res.status(400).render('projects/form', {
-      project: req.body, repos: [], apis: [], error: 'slug and name are required',
-    });
+  const { values, errors } = validateProjectInput(req.body);
+  if (values.slug && projects.findBySlug(values.slug)) {
+    errors.push(`Slug "${values.slug}" already exists.`);
   }
-  if (!(Number(max_msg_length) > 0)) {
-    return res.status(400).render('projects/form', {
-      project: req.body, repos: [], apis: [], error: 'max_msg_length is required and must be a positive number',
-    });
+  if (errors.length) {
+    return renderProjectForm(res, 400, { project: { ...req.body, ...values }, repoRows: [], apiRows: [], errors });
   }
-  if (projects.findBySlug(slug)) {
-    return res.status(400).render('projects/form', {
-      project: req.body, repos: [], apis: [], error: `slug "${slug}" already exists`,
-    });
-  }
-  const p = projects.create({ slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length });
+  const p = projects.create(values);
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
 function editProjectForm(req, res) {
   const p = projects.findById(req.params.id);
   if (!p) return res.status(404).send('Project not found');
-  res.render('projects/form', {
-    project: p, repos: repos.listByProject(p.id), apis: apis.listByProject(p.id), error: null,
+  return renderProjectForm(res, 200, {
+    project: p,
+    repoRows: repos.listByProject(p.id),
+    apiRows: apis.listByProject(p.id),
   });
 }
 function updateProject(req, res) {
   const p = projects.findById(req.params.id);
   if (!p) return res.status(404).send('Project not found');
-  const { slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length } = req.body;
-  projects.update(p.id, {
-    slug, name, keyword, system_prompt, teams_webhook_url,
-    max_msg_length: Number(max_msg_length) > 0 ? Number(max_msg_length) : p.max_msg_length,
-  });
+  const { values, errors } = validateProjectInput(req.body);
+  const existing = values.slug ? projects.findBySlug(values.slug) : null;
+  if (existing && Number(existing.id) !== Number(p.id)) {
+    errors.push(`Slug "${values.slug}" already exists.`);
+  }
+  if (errors.length) {
+    return renderProjectForm(res, 400, {
+      project: { ...p, ...req.body, ...values, id: p.id },
+      repoRows: repos.listByProject(p.id),
+      apiRows: apis.listByProject(p.id),
+      errors,
+    });
+  }
+  projects.update(p.id, values);
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
 function deleteProject(req, res) {
@@ -53,8 +72,17 @@ function deleteProject(req, res) {
 function addRepo(req, res) {
   const p = projects.findById(req.params.id);
   if (!p) return res.status(404).send('Project not found');
-  const { git_url, auth_type, token, ssh_key, branch } = req.body;
-  if (git_url) repos.create({ project_id: p.id, git_url, auth_type, token, ssh_key, branch });
+  const { values, errors } = validateRepoInput(req.body);
+  if (errors.length) {
+    return renderProjectForm(res, 400, {
+      project: p,
+      repoRows: repos.listByProject(p.id),
+      apiRows: apis.listByProject(p.id),
+      errors,
+      repoDraft: values,
+    });
+  }
+  repos.create({ project_id: p.id, ...values });
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
 function deleteRepo(req, res) {
@@ -64,10 +92,17 @@ function deleteRepo(req, res) {
 function addApiGroup(req, res) {
   const p = projects.findById(req.params.id);
   if (!p) return res.status(404).send('Project not found');
-  const { name, base_url, api_key, auth_header, allowed_methods, description_md } = req.body;
-  if (name && base_url) {
-    apis.create({ project_id: p.id, name, base_url, api_key, auth_header, allowed_methods, description_md });
+  const { values, errors } = validateApiGroupInput(req.body);
+  if (errors.length) {
+    return renderProjectForm(res, 400, {
+      project: p,
+      repoRows: repos.listByProject(p.id),
+      apiRows: apis.listByProject(p.id),
+      errors,
+      apiDraft: values,
+    });
   }
+  apis.create({ project_id: p.id, ...values });
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
 function deleteApiGroup(req, res) {

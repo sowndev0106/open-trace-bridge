@@ -1,22 +1,77 @@
 <%- include('../layout-head') %>
-<h1>Projects</h1>
-<p><a href="/admin/projects/new">+ New project</a></p>
-<table>
-  <tr><th>Slug</th><th>Name</th><th>Keyword</th><th>Event URL</th><th></th></tr>
-  <% for (const p of projects) { %>
-  <tr>
-    <td><%= p.slug %></td>
-    <td><%= p.name %></td>
-    <td><%= p.keyword %></td>
-    <td><code>/api/events/<%= p.slug %></code></td>
-    <td>
-      <a href="/admin/projects/<%= p.id %>/edit">edit</a>
-      <form class="inline-form" method="post" action="/admin/projects/<%= p.id %>/delete"
-            onsubmit="return confirm('Delete project <%= p.slug %>?')">
-        <button>delete</button>
-      </form>
-    </td>
-  </tr>
-  <% } %>
-</table>
+
+<section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <p class="page-kicker">Project registry</p>
+    <h1 class="page-title">Projects</h1>
+    <p class="page-subtitle">Manage event endpoints, Teams keywords, connected repositories, and internal API groups for each investigation workspace.</p>
+  </div>
+  <a href="/admin/projects/new" class="btn btn-primary">New project</a>
+</section>
+
+<section class="mb-6 grid gap-4 sm:grid-cols-3">
+  <div class="panel panel-body">
+    <p class="text-sm font-medium text-ink-500">Total projects</p>
+    <p class="mt-2 text-2xl font-semibold text-ink-950"><%= projects.length %></p>
+  </div>
+  <div class="panel panel-body">
+    <p class="text-sm font-medium text-ink-500">Event base</p>
+    <p class="mt-2 truncate font-mono text-sm text-ink-950">/api/events/:slug</p>
+  </div>
+  <div class="panel panel-body">
+    <p class="text-sm font-medium text-ink-500">Admin scope</p>
+    <p class="mt-2 text-sm font-semibold text-ink-950">Private console</p>
+  </div>
+</section>
+
+<% if (!projects.length) { %>
+  <section class="empty-state">
+    <h2 class="text-lg font-semibold text-ink-950">No projects yet</h2>
+    <p class="mt-2 text-sm text-ink-500">Create the first project to receive Teams events and route investigations.</p>
+    <a href="/admin/projects/new" class="btn btn-primary mt-5">New project</a>
+  </section>
+<% } else { %>
+  <section class="table-shell">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Keyword</th>
+            <th>Event URL</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (const p of projects) { %>
+          <tr>
+            <td>
+              <div class="font-semibold text-ink-950"><%= p.name %></div>
+              <div class="mt-1 text-xs text-ink-500"><%= p.slug %></div>
+            </td>
+            <td>
+              <% if (p.keyword) { %>
+                <span class="status-badge status-muted"><%= p.keyword %></span>
+              <% } else { %>
+                <span class="text-sm text-ink-500">No keyword</span>
+              <% } %>
+            </td>
+            <td><code>/api/events/<%= p.slug %></code></td>
+            <td>
+              <div class="flex justify-end gap-2">
+                <a class="btn btn-secondary" href="/admin/projects/<%= p.id %>/edit">Edit</a>
+                <form class="inline-form" method="post" action="/admin/projects/<%= p.id %>/delete"
+                      onsubmit="return confirm('Delete project <%= p.slug %>?')">
+                  <button class="btn btn-danger" type="submit">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% } %>
+
 <%- include('../layout-foot') %>

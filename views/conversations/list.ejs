@@ -1,23 +1,60 @@
 <%- include('../layout-head') %>
-<h1>Conversations — <%= project.name %></h1>
-<table>
-  <tr><th>ID</th><th>Teams conversation</th><th>OpenCode session</th><th>Status</th><th>Updated</th></tr>
-  <% for (const c of conversations) { %>
-  <tr>
-    <td><a href="/admin/conversations/<%= c.id %>"><%= c.id %></a></td>
-    <td><%= c.teams_conversation_id %></td>
-    <td><code><%= c.opencode_session_id || '-' %></code></td>
-    <td><%= c.status %></td>
-    <td><%= c.updated_at %></td>
-  </tr>
-  <% } %>
-</table>
-<h2>API calls (latest 50)</h2>
-<table>
-  <tr><th>Time</th><th>Group</th><th>Method</th><th>URL</th><th>Status</th></tr>
-  <% for (const a of apiCalls) { %>
-  <tr><td><%= a.created_at %></td><td><%= a.group_name %></td><td><%= a.method %></td>
-      <td><%= a.url %></td><td><%= a.status %></td></tr>
-  <% } %>
-</table>
+
+<section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <p class="page-kicker"><%= project.name %></p>
+    <h1 class="page-title">Conversations</h1>
+    <p class="page-subtitle">Review Teams conversation sessions and the latest internal API calls made during investigations.</p>
+  </div>
+  <a href="/admin/projects/<%= project.id %>/edit" class="btn btn-secondary">Back to project</a>
+</section>
+
+<section class="mb-6 table-shell">
+  <div class="border-b border-line px-5 py-4">
+    <h2 class="section-heading">Conversation sessions</h2>
+  </div>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr><th>ID</th><th>Teams conversation</th><th>OpenCode session</th><th>Status</th><th>Updated</th></tr>
+      </thead>
+      <tbody>
+        <% for (const c of conversations) { %>
+        <tr>
+          <td><a class="font-semibold text-brand hover:text-brand-dark" href="/admin/conversations/<%= c.id %>">#<%= c.id %></a></td>
+          <td><%= c.teams_conversation_id %></td>
+          <td><code><%= c.opencode_session_id || '-' %></code></td>
+          <td><span class="status-badge <%= c.status === 'active' ? 'status-active' : 'status-muted' %>"><%= c.status %></span></td>
+          <td><%= c.updated_at %></td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="table-shell">
+  <div class="border-b border-line px-5 py-4">
+    <h2 class="section-heading">Latest API calls</h2>
+  </div>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr><th>Time</th><th>Group</th><th>Method</th><th>URL</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <% for (const a of apiCalls) { %>
+        <tr>
+          <td><%= a.created_at %></td>
+          <td><%= a.group_name %></td>
+          <td><span class="status-badge status-muted"><%= a.method %></span></td>
+          <td class="max-w-xl truncate"><%= a.url %></td>
+          <td><%= a.status || '-' %></td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <%- include('../layout-foot') %>
