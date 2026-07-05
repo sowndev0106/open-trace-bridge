@@ -199,18 +199,19 @@
       <% } %>
 
       <form method="post" action="/admin/projects/<%= project.id %>/apis" class="space-y-4">
-        <div class="form-grid-two">
-          <div><label for="api_name">Name</label><input id="api_name" type="text" name="name" required value="<%= apiValues.name || '' %>" placeholder="transaction-api" pattern="[A-Za-z0-9_-]+"></div>
-          <div><label for="base_url">Base URL</label><input id="base_url" type="url" name="base_url" required value="<%= apiValues.base_url || '' %>" placeholder="https://api.internal.example"></div>
-        </div>
-        <div class="form-grid">
-          <div><label for="api_key">API key</label><input id="api_key" type="text" name="api_key" value="<%= apiValues.api_key || '' %>"></div>
-          <div><label for="auth_header">Auth header</label><input id="auth_header" type="text" name="auth_header" value="<%= apiValues.auth_header || 'Authorization' %>" required></div>
-          <div><label for="allowed_methods">Allowed methods</label><input id="allowed_methods" type="text" name="allowed_methods" value="<%= apiValues.allowed_methods || 'GET' %>" required></div>
+        <div>
+          <label for="api_name">Name</label>
+          <input id="api_name" type="text" name="name" value="<%= apiValues.name || '' %>" placeholder="transaction-api" pattern="[A-Za-z0-9_-]+">
+          <p class="field-help">Optional. If left blank, OpenTraceBridge derives a name from the curl URL host.</p>
         </div>
         <div>
-          <label for="description_md">Description</label>
-          <textarea id="description_md" name="description_md" placeholder="Document endpoints, params, and filters for the agent"><%= apiValues.description_md || '' %></textarea>
+          <label for="curl_command">Curl command</label>
+          <textarea id="curl_command" name="curl_command" placeholder='curl -H "Authorization: Bearer sk_live_xxx" "https://api.internal.example/v1/transactions/txn_123"'><%= apiValues.curl_command || '' %></textarea>
+          <p class="field-help">Paste a working curl command. The server stores the auth header value and only exposes the markdown description to the agent.</p>
+        </div>
+        <div>
+          <label for="description_md">Markdown description</label>
+          <textarea id="description_md" name="description_md" placeholder="Document endpoints, params, filters, and response fields for the agent."><%= apiValues.description_md || '' %></textarea>
         </div>
         <button class="btn btn-secondary" type="submit">Add API group</button>
       </form>

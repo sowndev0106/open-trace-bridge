@@ -169,6 +169,29 @@ test('api group validation rejects invalid URL and methods without creating a gr
   assert.match(response.text, /Keep this description/);
 });
 
+test('api group can be created from pasted curl and markdown description', async () => {
+  const project = seedProject();
+
+  await request(adminApp)
+    .post(`/admin/projects/${project.id}/apis`)
+    .type('form')
+    .send({
+      name: 'transaction-api',
+      curl_command: `curl -X POST -H "Authorization: Bearer sk_live_123" "https://api.internal.example/v1/transactions/search?limit=10"`,
+      description_md: 'Search transactions by reference id.',
+    })
+    .expect(302);
+
+  const rows = apis.listByProject(project.id);
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].name, 'transaction-api');
+  assert.strictEqual(rows[0].base_url, 'https://api.internal.example/v1');
+  assert.strictEqual(rows[0].api_key, 'Bearer sk_live_123');
+  assert.strictEqual(rows[0].auth_header, 'Authorization');
+  assert.strictEqual(rows[0].allowed_methods, 'POST');
+  assert.strictEqual(rows[0].description_md, 'Search transactions by reference id.');
+});
+
 test('conversation audit list renders redesigned tables', async () => {
   const project = seedProject();
   const conversation = convs.create(project.id, 'teams-conv-1');

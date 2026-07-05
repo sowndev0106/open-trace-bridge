@@ -2,6 +2,7 @@ const PROJECT_SLUG_RE = /^[a-z0-9-]+$/;
 const TOKEN_RE = /^[A-Za-z0-9_-]+$/;
 const AUTH_TYPES = new Set(['none', 'https-token', 'ssh']);
 const ALLOWED_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+const { parseCurlApiGroupInput } = require('./curlApiGroup.service');
 
 function clean(value) {
   return String(value ?? '').trim();
@@ -105,6 +106,35 @@ function validateRepoInput(input) {
 }
 
 function validateApiGroupInput(input) {
+  const errors = [];
+
+  if (clean(input.curl_command)) {
+    try {
+      const parsed = parseCurlApiGroupInput(input);
+      const methods = normalizeMethods(parsed.allowed_methods || 'GET');
+      if (!methods.length || methods.some((method) => !ALLOWED_METHODS.has(method))) {
+        errors.push('Allowed methods can only include GET, POST, PUT, PATCH, and DELETE.');
+      }
+      return {
+        values: { ...parsed, allowed_methods: methods.join(',') },
+        errors,
+      };
+    } catch (err) {
+      return {
+        values: {
+          name: clean(input.name),
+          base_url: '',
+          api_key: '',
+          auth_header: 'Authorization',
+          allowed_methods: 'GET',
+          description_md: String(input.description_md ?? ''),
+          curl_command: String(input.curl_command ?? ''),
+        },
+        errors: [err.message],
+      };
+    }
+  }
+
   const methods = normalizeMethods(input.allowed_methods || 'GET');
   const values = {
     name: clean(input.name),
@@ -114,7 +144,6 @@ function validateApiGroupInput(input) {
     allowed_methods: methods.join(','),
     description_md: String(input.description_md ?? ''),
   };
-  const errors = [];
 
   if (!values.name) {
     errors.push('API group name is required.');
