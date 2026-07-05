@@ -85,7 +85,7 @@ test('project edit form preserves workflows inside redesigned panels', async () 
   assert.strictEqual($('textarea[name="system_prompt"]').text(), 'Investigate payment incidents.');
   assert.strictEqual($('input[name="teams_webhook_url"]').val(), 'https://hook.example/payment');
   assert.strictEqual($('input[name="max_msg_length"]').val(), '20000');
-  assert.strictEqual($(`a[href="/admin/projects/${project.id}/conversations"]`).text().trim(), 'Open audit trail');
+  assert.ok($(`a[href="/admin/projects/${project.id}/conversations"]`).filter((_, el) => $(el).text().trim() === 'Open audit trail').length >= 1);
   assert.strictEqual($(`form[action="/admin/projects/${project.id}/repos"][method="post"]`).length, 1);
   assert.strictEqual($(`form[action="/admin/projects/${project.id}/apis"][method="post"]`).length, 1);
   assert.match(response.text, /https:\/\/6666\.sowndev\.com\/api\/events\/payment/);
@@ -214,6 +214,25 @@ test('conversation audit list renders redesigned tables', async () => {
   assert.match(response.text, /transaction-api/);
   assert.match(response.text, /Latest API calls/);
   assert.match(response.text, /table-shell/);
+});
+
+test('project edit page shows latest API calls', async () => {
+  const project = seedProject();
+  apicalls.add({
+    project_id: project.id,
+    group_name: 'transaction-api',
+    method: 'GET',
+    url: 'https://api.internal/transactions/txn_123',
+    status: 200,
+  });
+
+  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.match(response.text, /Latest API calls/);
+  assert.match(response.text, /transaction-api/);
+  assert.match(response.text, /https:\/\/api\.internal\/transactions\/txn_123/);
+  assert.strictEqual($('[data-api-call-row]').length, 1);
 });
 
 test('conversation detail renders message timeline', async () => {

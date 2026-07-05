@@ -1,6 +1,7 @@
 const projects = require('../models/project.model');
 const repos = require('../models/repo.model');
 const apis = require('../models/api.model');
+const apicalls = require('../models/apicall.model');
 const {
   validateProjectInput,
   validateRepoInput,
@@ -8,11 +9,12 @@ const {
 } = require('../services/adminValidation');
 const sync = require('../services/sync.service');
 
-function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [], repoDraft = null, apiDraft = null }) {
+function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [], repoDraft = null, apiDraft = null, apiCalls = [] }) {
   return res.status(status).render('projects/form', {
     project,
     repos: repoRows || [],
     apis: apiRows || [],
+    apiCalls,
     errors,
     error: errors[0] || null,
     repoDraft,
@@ -54,6 +56,7 @@ function editProjectForm(req, res) {
     project: p,
     repoRows: repos.listByProject(p.id),
     apiRows: apis.listByProject(p.id),
+    apiCalls: apicalls.listByProject(p.id).slice(0, 25),
   });
 }
 function updateProject(req, res) {
@@ -69,6 +72,7 @@ function updateProject(req, res) {
       project: { ...p, ...req.body, ...values, id: p.id },
       repoRows: repos.listByProject(p.id),
       apiRows: apis.listByProject(p.id),
+      apiCalls: apicalls.listByProject(p.id).slice(0, 25),
       errors,
     });
   }
@@ -90,6 +94,7 @@ function addRepo(req, res) {
       project: p,
       repoRows: repos.listByProject(p.id),
       apiRows: apis.listByProject(p.id),
+      apiCalls: apicalls.listByProject(p.id).slice(0, 25),
       errors,
       repoDraft: values,
     });
@@ -130,6 +135,7 @@ function addApiGroup(req, res) {
       project: p,
       repoRows: repos.listByProject(p.id),
       apiRows: apis.listByProject(p.id),
+      apiCalls: apicalls.listByProject(p.id).slice(0, 25),
       errors,
       apiDraft: values,
     });
