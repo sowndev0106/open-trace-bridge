@@ -7,11 +7,11 @@ router.post('/call-api', async (req, res) => {
   if (req.get('x-otb-internal-token') !== getInternalToken()) {
     return res.status(403).json({ error: 'forbidden' });
   }
-  const { slug, group, method, path, params } = req.body || {};
+  const { slug, group, method, path, params, conversation_id } = req.body || {};
   const project = projects.findBySlug(slug);
   if (!project) return res.status(404).json({ error: `project "${slug}" does not exist` });
   try {
-    const result = await executeApiCall({ project, groupName: group, method, path, params });
+    const result = await executeApiCall({ project, groupName: group, method, path, params, conversationId: conversation_id });
     res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });

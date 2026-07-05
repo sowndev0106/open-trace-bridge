@@ -18,6 +18,23 @@ function fakeChild(stdoutLine) {
   return child;
 }
 
+test('runPrompt exposes the conversation id to the MCP chain via env', async () => {
+  const calls = [];
+  const orig = opencode.proc.spawn;
+  opencode.proc.spawn = (cmd, args, opts) => {
+    calls.push({ opts });
+    return fakeChild('{"type":"text","sessionID":"ses_x","part":{"type":"text","text":"ok"}}\n');
+  };
+  try {
+    await opencode.runPrompt({ dir: '/tmp/ws/payment', text: 'hi', conversationId: 7 });
+    assert.strictEqual(calls[0].opts.env.OTB_CONVERSATION_ID, '7');
+    await opencode.runPrompt({ dir: '/tmp/ws/payment', text: 'hi' });
+    assert.strictEqual(calls[1].opts.env.OTB_CONVERSATION_ID, undefined);
+  } finally {
+    opencode.proc.spawn = orig;
+  }
+});
+
 test('runPrompt spawns opencode with cwd and PWD both set to the workspace dir', async () => {
   const calls = [];
   const orig = opencode.proc.spawn;

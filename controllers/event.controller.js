@@ -24,7 +24,7 @@ function eventFromRequest(req) {
 
 async function investigate(project, conv, prompt) {
   const ws = await sync.ensureReady(project);
-  const result = await opencode.runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt });
+  const result = await opencode.runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt, conversationId: conv.id });
   if (!conv.opencode_session_id) convs.setSession(conv.id, result.sessionId);
   return result.text || '(agent returned no text)';
 }

@@ -43,6 +43,86 @@ test('rejects path escaping base url', async () => {
     /base URL/i);
 });
 
+test('audit row stores full request params and response body', async () => {
+  const p = setup();
+  const apicalls = require('../models/apicall.model');
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response('{"total":2,"items":["a","b"]}', {
+    status: 200, headers: { 'content-type': 'application/json' },
+  });
+  try {
+    const r = await executeApiCall({
+      project: p, groupName: 'txn', method: 'GET', path: '/transactions',
+      params: { limit: 10, ref: 'txn_123' },
+    });
+    assert.strictEqual(r.status, 200);
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+
+  const rows = apicalls.listByProject(p.id);
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].status, 200);
+  assert.deepStrictEqual(JSON.parse(rows[0].request_params), { limit: 10, ref: 'txn_123' });
+  assert.strictEqual(rows[0].response_body, '{"total":2,"items":["a","b"]}');
+  assert.ok(Number.isInteger(rows[0].duration_ms) && rows[0].duration_ms >= 0);
+  assert.strictEqual(rows[0].error, null);
+});
+
+test('audit row records the conversation that made the call', async () => {
+  const p = setup();
+  const apicalls = require('../models/apicall.model');
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response('{}', { status: 200 });
+  try {
+    await executeApiCall({
+      project: p, groupName: 'txn', method: 'GET', path: '/x', params: {}, conversationId: 7,
+    });
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+  const rows = apicalls.listByProject(p.id);
+  assert.strictEqual(rows[0].conversation_id, 7);
+  assert.strictEqual(apicalls.listByConversation(7).length, 1);
+  assert.strictEqual(apicalls.listByConversation(999).length, 0);
+});
+
+test('audit row stores the error when the upstream call fails', async () => {
+  const p = setup();
+  const apicalls = require('../models/apicall.model');
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = async () => { throw new Error('fetch failed: connect ECONNREFUSED'); };
+  try {
+    await assert.rejects(
+      executeApiCall({ project: p, groupName: 'txn', method: 'GET', path: '/x', params: {} }),
+      /ECONNREFUSED/);
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+
+  const rows = apicalls.listByProject(p.id);
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].status, null);
+  assert.match(rows[0].error, /ECONNREFUSED/);
+  assert.strictEqual(rows[0].response_body, null);
+});
+
+test('audit row truncates an oversized response body', async () => {
+  const p = setup();
+  const apicalls = require('../models/apicall.model');
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response('x'.repeat(150000), { status: 200 });
+  try {
+    await executeApiCall({ project: p, groupName: 'txn', method: 'GET', path: '/big', params: {} });
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+
+  const rows = apicalls.listByProject(p.id);
+  assert.ok(rows[0].response_body.length <= 100000 + 30);
+  assert.match(rows[0].response_body, /\[truncated\]$/);
+});
+
 test('parses pasted curl into an API group using bearer auth', () => {
   const parsed = parseCurlApiGroupInput({
     name: 'transaction-api',

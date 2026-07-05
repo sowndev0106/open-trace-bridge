@@ -37,23 +37,8 @@
   <div class="border-b border-line px-5 py-4">
     <h2 class="section-heading">Latest API calls</h2>
   </div>
-  <div class="table-scroll">
-    <table class="data-table">
-      <thead>
-        <tr><th>Time</th><th>Group</th><th>Method</th><th>URL</th><th>Status</th></tr>
-      </thead>
-      <tbody>
-        <% for (const a of apiCalls) { %>
-        <tr>
-          <td><%= a.created_at %></td>
-          <td><%= a.group_name %></td>
-          <td><span class="status-badge status-muted"><%= a.method %></span></td>
-          <td class="max-w-xl truncate"><%= a.url %></td>
-          <td><%= a.status || '-' %></td>
-        </tr>
-        <% } %>
-      </tbody>
-    </table>
+  <div class="p-4">
+    <%- include('_api-calls-table', { apiCalls, showConversation: true }) %>
   </div>
 </section>
 

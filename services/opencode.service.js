@@ -18,7 +18,7 @@ function parseRunOutput(stdout) {
   return { sessionId, text: chunks.join('') };
 }
 
-function runPrompt({ dir, sessionId, text }) {
+function runPrompt({ dir, sessionId, text, conversationId }) {
   return new Promise((resolve, reject) => {
     const args = ['run', '--format', 'json'];
     if (sessionId) args.push('-s', sessionId);
@@ -26,7 +26,12 @@ function runPrompt({ dir, sessionId, text }) {
     // stdin must be ignored; an open pipe makes opencode wait for EOF until timeout.
     // PWD must match cwd: opencode prefers $PWD over process.cwd() when binding
     // the session directory, and spawn() does not update PWD to follow cwd.
-    const child = proc.spawn('opencode', args, { cwd: dir, env: { ...process.env, PWD: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
+    // OTB_CONVERSATION_ID reaches the MCP server through opencode's inherited
+    // env so api_calls audit rows can be tied back to the conversation.
+    const env = { ...process.env, PWD: dir };
+    if (conversationId != null) env.OTB_CONVERSATION_ID = String(conversationId);
+    else delete env.OTB_CONVERSATION_ID;
+    const child = proc.spawn('opencode', args, { cwd: dir, env, stdio: ['ignore', 'pipe', 'pipe'] });
 
     let stdout = '', stderr = '';
     const timer = setTimeout(() => {

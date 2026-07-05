@@ -20,6 +20,7 @@ function detail(req, res) {
     conv,
     project: projects.findById(conv.project_id),
     messages: messages.listByConversation(conv.id),
+    apiCalls: apicalls.listByConversation(conv.id),
   });
 }
 

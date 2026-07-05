@@ -7,6 +7,8 @@ const { z } = require('zod');
 const SLUG = process.env.OTB_PROJECT_SLUG;
 const BASE = process.env.OTB_BASE || 'http://127.0.0.1:6666';
 const TOKEN = process.env.OTB_INTERNAL_TOKEN;
+// Set per opencode run by the bridge so audit rows link back to the conversation.
+const CONVERSATION_ID = process.env.OTB_CONVERSATION_ID || null;
 
 const server = new McpServer({ name: 'otb', version: '1.0.0' });
 
@@ -23,7 +25,7 @@ server.tool(
     const resp = await fetch(`${BASE}/internal/call-api`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-otb-internal-token': TOKEN },
-      body: JSON.stringify({ slug: SLUG, group, method, path, params: params || {} }),
+      body: JSON.stringify({ slug: SLUG, group, method, path, params: params || {}, conversation_id: CONVERSATION_ID }),
       signal: AbortSignal.timeout(35000),
     });
     const data = await resp.json();

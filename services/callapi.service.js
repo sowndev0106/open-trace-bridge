@@ -1,7 +1,9 @@
 const apis = require('../models/api.model');
 const apicalls = require('../models/apicall.model');
 
-async function executeApiCall({ project, groupName, method, path: apiPath, params }) {
+const RESPONSE_BODY_LIMIT = 100000;
+
+async function executeApiCall({ project, groupName, method, path: apiPath, params, conversationId }) {
   const group = apis.findByProjectAndName(project.id, groupName);
   if (!group) throw new Error(`API group "${groupName}" does not exist in project ${project.slug}`);
 
@@ -23,16 +25,30 @@ async function executeApiCall({ project, groupName, method, path: apiPath, param
   const headers = { accept: 'application/json' };
   if (group.api_key) headers[group.auth_header.toLowerCase()] = group.api_key;
 
-  let status = null;
+  // Full request/response audit. Auth headers are never stored.
+  const audit = {
+    project_id: project.id, conversation_id: Number(conversationId) || null,
+    group_name: groupName, method: m, url: url.href,
+    status: null, response_body: null, error: null,
+    request_params: params && typeof params === 'object' && Object.keys(params).length
+      ? JSON.stringify(params) : null,
+  };
+  const started = Date.now();
   try {
     const resp = await fetch(url.href, { method: m, headers, signal: AbortSignal.timeout(30000) });
-    status = resp.status;
+    audit.status = resp.status;
     const text = await resp.text();
+    audit.response_body = text.length > RESPONSE_BODY_LIMIT
+      ? `${text.slice(0, RESPONSE_BODY_LIMIT)}\n[truncated]` : text;
     let body;
     try { body = JSON.parse(text); } catch { body = text; }
-    return { status, body };
+    return { status: audit.status, body };
+  } catch (err) {
+    audit.error = String(err && err.message || err);
+    throw err;
   } finally {
-    apicalls.add({ project_id: project.id, group_name: groupName, method: m, url: url.href, status });
+    audit.duration_ms = Date.now() - started;
+    apicalls.add(audit);
   }
 }
 

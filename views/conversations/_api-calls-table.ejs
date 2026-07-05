@@ -1,0 +1,61 @@
+<div class="table-shell shadow-none">
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <% if (showConversation) { %><th>Conversation</th><% } %>
+          <th>Group</th><th>Method</th><th>URL</th><th>Status</th><th>Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (const a of apiCalls) { %>
+        <tr data-api-call-row>
+          <td><%= a.created_at %></td>
+          <% if (showConversation) { %>
+          <td>
+            <% if (a.conversation_id) { %>
+              <a class="font-semibold text-brand hover:text-brand-dark" href="/admin/conversations/<%= a.conversation_id %>">#<%= a.conversation_id %></a>
+            <% } else { %>-<% } %>
+          </td>
+          <% } %>
+          <td><%= a.group_name %></td>
+          <td><span class="status-badge status-muted"><%= a.method %></span></td>
+          <td class="max-w-xl truncate"><%= a.url %></td>
+          <td><%= a.status || (a.error ? 'error' : '-') %></td>
+          <td>
+            <% if (a.request_params || a.response_body || a.error) { %>
+            <details>
+              <summary class="cursor-pointer text-sm font-medium text-brand">View</summary>
+              <div class="mt-2 space-y-2 text-xs">
+                <% if (a.duration_ms != null) { %>
+                <div><span class="font-semibold">Duration:</span> <%= a.duration_ms %> ms</div>
+                <% } %>
+                <% if (a.request_params) { %>
+                <div>
+                  <div class="font-semibold">Request params</div>
+                  <pre class="mt-1 max-h-48 max-w-xl overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2"><%= a.request_params %></pre>
+                </div>
+                <% } %>
+                <% if (a.response_body) { %>
+                <div>
+                  <div class="font-semibold">Response</div>
+                  <pre class="mt-1 max-h-64 max-w-xl overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2"><%= a.response_body %></pre>
+                </div>
+                <% } %>
+                <% if (a.error) { %>
+                <div>
+                  <div class="font-semibold text-red-600">Error</div>
+                  <pre class="mt-1 max-w-xl overflow-auto whitespace-pre-wrap rounded bg-red-50 p-2 text-red-700"><%= a.error %></pre>
+                </div>
+                <% } %>
+              </div>
+            </details>
+            <% } else { %>-<% } %>
+          </td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

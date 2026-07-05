@@ -319,6 +319,33 @@ test('conversation audit list renders redesigned tables', async () => {
   assert.match(response.text, /table-shell/);
 });
 
+test('conversation detail shows the API calls made by that conversation with full detail', async () => {
+  const project = seedProject();
+  const conversation = convs.create(project.id, 'teams-conv-1');
+  const other = convs.create(project.id, 'teams-conv-2');
+  apicalls.add({
+    project_id: project.id, conversation_id: conversation.id,
+    group_name: 'transaction-api', method: 'GET',
+    url: 'https://api.internal/transactions/txn_123', status: 200,
+    request_params: '{"limit":"10"}', response_body: '{"total":2}', duration_ms: 123,
+  });
+  apicalls.add({
+    project_id: project.id, conversation_id: other.id,
+    group_name: 'transaction-api', method: 'GET',
+    url: 'https://api.internal/transactions/txn_OTHER', status: 200,
+  });
+
+  const response = await request(adminApp).get(`/admin/conversations/${conversation.id}`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.match(response.text, /API calls/);
+  assert.strictEqual($('[data-api-call-row]').length, 1);
+  assert.match(response.text, /txn_123/);
+  assert.doesNotMatch(response.text, /txn_OTHER/);
+  assert.match(response.text, /(&quot;|&#34;)limit(&quot;|&#34;)|"limit"/);
+  assert.match(response.text, /(&quot;|&#34;)total(&quot;|&#34;)|"total"/);
+});
+
 test('project edit page shows latest API calls', async () => {
   const project = seedProject();
   apicalls.add({

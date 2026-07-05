@@ -110,26 +110,7 @@
         </div>
 
         <% if (apiCalls && apiCalls.length) { %>
-          <div class="table-shell shadow-none">
-            <div class="table-scroll">
-              <table class="data-table">
-                <thead>
-                  <tr><th>Time</th><th>Group</th><th>Method</th><th>URL</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                  <% for (const a of apiCalls) { %>
-                  <tr data-api-call-row>
-                    <td><%= a.created_at %></td>
-                    <td><%= a.group_name %></td>
-                    <td><span class="status-badge status-muted"><%= a.method %></span></td>
-                    <td class="max-w-xl truncate"><%= a.url %></td>
-                    <td><%= a.status || '-' %></td>
-                  </tr>
-                  <% } %>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <%- include('../conversations/_api-calls-table', { apiCalls, showConversation: true }) %>
         <% } else { %>
           <div class="rounded-lg border border-dashed border-line bg-slate-50 px-4 py-5 text-sm text-ink-500">No API calls have been recorded yet.</div>
         <% } %>

@@ -59,9 +59,10 @@ test('/pull-source responds immediately, syncs in background, posts summary', as
 
 test('message path uses ensureReady and replies with the agent answer', async () => {
   sync.ensureReady = async () => '/tmp/ws-payment';
-  opencode.runPrompt = async ({ dir, text }) => {
+  opencode.runPrompt = async ({ dir, text, conversationId }) => {
     assert.strictEqual(dir, '/tmp/ws-payment');
     assert.strictEqual(text, 'why did txn_9 fail?');
+    assert.strictEqual(conversationId, convs.findActive(project.id, 'c1').id);
     return { sessionId: 'ses_1', text: 'because of X' };
   };
   const res = await request(publicApp)
