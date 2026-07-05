@@ -48,7 +48,14 @@ function handleEvent(req, res) {
     conv = convs.create(project.id, ev.conversationId);
     messages.add({ conversation_id: conv.id, direction: 'in', user_id: ev.userId, user_name: ev.userName, content: ev.text });
     res.json({ handled: true, action: 'new-session', conversationId: conv.id });
-    sendTeamsMessage(project.teams_webhook_url, `🆕 Đã tạo cuộc hội thoại mới cho **${project.name}**. Gõ \`${project.keyword}\` kèm câu hỏi để bắt đầu.`)
+    // §4.5 new_session
+    sendTeamsMessage(project.teams_webhook_url, {
+      status: 'info',
+      title: 'Đã tạo hội thoại mới',
+      markdown: `Project: ${project.name}\n\nCác câu hỏi tiếp theo trong group chat này sẽ dùng OpenCode session mới.`,
+      metadata: { project: project.slug },
+      maxLength: project.max_msg_length,
+    })
       .then(() => messages.add({ conversation_id: conv.id, direction: 'out', content: 'Đã tạo cuộc hội thoại mới' }))
       .catch((err) => console.error('Webhook fail:', err.message));
     return;
@@ -57,19 +64,40 @@ function handleEvent(req, res) {
   if (!conv) conv = convs.create(project.id, ev.conversationId);
   messages.add({ conversation_id: conv.id, direction: 'in', user_id: ev.userId, user_name: ev.userName, content: ev.text });
 
-  // Ack ngay — kết quả trả async qua webhook (tránh Power Automate timeout)
+  // Ack chỉ qua HTTP response — KHÔNG gửi ack vào group chat (tránh spam, theo spec)
   res.json({ handled: true, action: 'investigating', conversationId: conv.id });
 
   investigate(project, conv, prompt)
     .then((answer) => {
       messages.add({ conversation_id: conv.id, direction: 'out', content: answer });
-      return sendTeamsMessage(project.teams_webhook_url, answer);
+      return sendTeamsMessage(project.teams_webhook_url, {
+        status: 'success',
+        title: `${project.name} — Kết quả`,
+        markdown: answer,
+        metadata: { project: project.slug, sessionId: convs.findActive(project.id, ev.conversationId)?.opencode_session_id },
+        maxLength: project.max_msg_length,
+      });
     })
     .catch((err) => {
       console.error(`Investigation fail (project=${project.slug}):`, err);
       messages.add({ conversation_id: conv.id, direction: 'out', content: `[error] ${err.message}` });
-      return sendTeamsMessage(project.teams_webhook_url,
-        `⚠️ Không hoàn tất được phân tích: ${err.message}`).catch((e) => console.error('Webhook fail:', e.message));
+      const isTimeout = /timeout/i.test(err.message);
+      // §4.6 partial_or_timeout / §4.7 error
+      const msg = isTimeout ? {
+        status: 'warning',
+        title: 'Phân tích chưa hoàn tất',
+        markdown: `OpenCode chạy quá lâu nên server đã dừng job.\n\n**Gợi ý tiếp theo**\nHỏi lại với phạm vi hẹp hơn, vd: "${project.keyword} tiếp tục kiểm tra <phần cụ thể>".`,
+        metadata: { project: project.slug },
+        maxLength: project.max_msg_length,
+      } : {
+        status: 'error',
+        title: 'Không hoàn tất được phân tích',
+        markdown: `**Lý do**\n${err.message}\n\n**Gợi ý**\nKiểm tra cấu hình repo/API trong Admin UI rồi thử lại.`,
+        metadata: { project: project.slug },
+        maxLength: project.max_msg_length,
+      };
+      return sendTeamsMessage(project.teams_webhook_url, msg)
+        .catch((e) => console.error('Webhook fail:', e.message));
     });
 }
 

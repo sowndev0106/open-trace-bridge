@@ -14,6 +14,9 @@
   <textarea name="system_prompt"><%= project ? (project.system_prompt || '') : '' %></textarea>
   <label>Teams webhook URL (nhận kết quả)</label>
   <input type="url" name="teams_webhook_url" value="<%= project ? (project.teams_webhook_url || '') : '' %>">
+  <label>Max message length (bắt buộc — vượt quá sẽ tự chia nhiều message, code block được đóng/mở fence chuẩn)</label>
+  <input type="number" name="max_msg_length" min="500" required
+         value="<%= project && project.max_msg_length ? project.max_msg_length : 20000 %>">
   <button>Save</button>
 </form>
 

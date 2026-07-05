@@ -3,3 +3,4 @@
 /workspaces
 *.log
 .env
+private.md

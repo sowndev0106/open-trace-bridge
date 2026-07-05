@@ -9,10 +9,15 @@ function newProjectForm(req, res) {
   res.render('projects/form', { project: null, repos: [], apis: [], error: null });
 }
 function createProject(req, res) {
-  const { slug, name, keyword, system_prompt, teams_webhook_url } = req.body;
+  const { slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length } = req.body;
   if (!slug || !name) {
     return res.status(400).render('projects/form', {
       project: req.body, repos: [], apis: [], error: 'slug và name là bắt buộc',
+    });
+  }
+  if (!(Number(max_msg_length) > 0)) {
+    return res.status(400).render('projects/form', {
+      project: req.body, repos: [], apis: [], error: 'max_msg_length là bắt buộc và phải là số dương',
     });
   }
   if (projects.findBySlug(slug)) {
@@ -20,7 +25,7 @@ function createProject(req, res) {
       project: req.body, repos: [], apis: [], error: `slug "${slug}" đã tồn tại`,
     });
   }
-  const p = projects.create({ slug, name, keyword, system_prompt, teams_webhook_url });
+  const p = projects.create({ slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length });
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
 function editProjectForm(req, res) {
@@ -33,8 +38,11 @@ function editProjectForm(req, res) {
 function updateProject(req, res) {
   const p = projects.findById(req.params.id);
   if (!p) return res.status(404).send('Project not found');
-  const { slug, name, keyword, system_prompt, teams_webhook_url } = req.body;
-  projects.update(p.id, { slug, name, keyword, system_prompt, teams_webhook_url });
+  const { slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length } = req.body;
+  projects.update(p.id, {
+    slug, name, keyword, system_prompt, teams_webhook_url,
+    max_msg_length: Number(max_msg_length) > 0 ? Number(max_msg_length) : p.max_msg_length,
+  });
   res.redirect(`/admin/projects/${p.id}/edit`);
 }
 function deleteProject(req, res) {
