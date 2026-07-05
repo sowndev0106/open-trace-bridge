@@ -144,34 +144,7 @@ function writeWorkspaceFiles(project, apiGroups) {
   return ws;
 }
 
-async function ensureWorkspace(project, repoRows, apiGroups) {
-  const ws = path.join(WORKSPACES_DIR, project.slug);
-  const keysDir = path.join(WORKSPACES_DIR, '.keys');
-  fs.mkdirSync(ws, { recursive: true });
-  fs.mkdirSync(keysDir, { recursive: true });
-
-  for (const repo of repoRows) {
-    const dir = path.join(ws, repoDirName(repo.git_url));
-    const keyFile = path.join(keysDir, `repo-${repo.id}`);
-    const env = gitEnvFor(repo, keyFile);
-    try {
-      if (fs.existsSync(path.join(dir, '.git'))) {
-        await execFileP('git', ['-C', dir, 'pull', '--ff-only'], { env, timeout: 120000 });
-      } else {
-        await execFileP('git', ['clone', '--depth', '1', '--branch', repo.branch || 'main',
-          cloneUrlFor(repo), dir], { env, timeout: 300000 });
-      }
-    } catch (err) {
-      throw new Error(`Git failed for repo ${repo.git_url}: ${err.stderr || err.message}`);
-    }
-  }
-
-  fs.writeFileSync(path.join(ws, 'AGENTS.md'), buildAgentsMd(project, apiGroups));
-  fs.writeFileSync(path.join(ws, 'opencode.json'), JSON.stringify(buildOpencodeConfig(project), null, 2));
-  return ws;
-}
-
 module.exports = {
-  buildAgentsMd, buildOpencodeConfig, getInternalToken, ensureWorkspace, repoDirName,
+  buildAgentsMd, buildOpencodeConfig, getInternalToken, repoDirName,
   git, workspacePathFor, redactGitError, syncRepo, pruneRemovedRepos, writeWorkspaceFiles,
 };

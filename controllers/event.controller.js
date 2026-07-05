@@ -1,12 +1,10 @@
 const projects = require('../models/project.model');
-const repos = require('../models/repo.model');
-const apis = require('../models/api.model');
 const convs = require('../models/conversation.model');
 const messages = require('../models/message.model');
 const { extractPrompt } = require('../lib/eventGateway');
-const { ensureWorkspace } = require('../services/workspace.service');
-const { runPrompt } = require('../services/opencode.service');
-const { sendTeamsMessage } = require('../services/webhook.service');
+const sync = require('../services/sync.service');
+const opencode = require('../services/opencode.service');
+const webhook = require('../services/webhook.service');
 
 function eventFromRequest(req) {
   if (req.method === 'GET') {
@@ -25,8 +23,8 @@ function eventFromRequest(req) {
 }
 
 async function investigate(project, conv, prompt) {
-  const ws = await ensureWorkspace(project, repos.listByProject(project.id), apis.listByProject(project.id));
-  const result = await runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt });
+  const ws = await sync.ensureReady(project);
+  const result = await opencode.runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt });
   if (!conv.opencode_session_id) convs.setSession(conv.id, result.sessionId);
   return result.text || '(agent returned no text)';
 }
@@ -40,7 +38,26 @@ function handleEvent(req, res) {
     return res.status(400).json({ error: 'Missing text or conversationId' });
   }
 
-  const { isNew, prompt } = extractPrompt(ev.text, project.keyword);
+  const { isNew, isPullSource, prompt } = extractPrompt(ev.text, project.keyword);
+
+  if (isPullSource) {
+    res.json({ handled: true, action: 'pull-source' });
+    sync.syncProject(project.id)
+      .then(({ ok, results }) => {
+        const lines = results
+          .map((r) => `- ${r.git_url}: ${r.status}${r.error ? ` — ${r.error}` : ''}`)
+          .join('\n');
+        return webhook.sendTeamsMessage(project.teams_webhook_url, {
+          status: ok ? 'success' : 'error',
+          title: ok ? 'Sources updated to latest' : 'Source sync failed',
+          markdown: lines || 'No repositories configured.',
+          metadata: { project: project.slug },
+          maxLength: project.max_msg_length,
+        });
+      })
+      .catch((err) => console.error(`pull-source fail (project=${project.slug}):`, err.message));
+    return;
+  }
 
   let conv = convs.findActive(project.id, ev.conversationId);
   if (isNew) {
@@ -49,7 +66,7 @@ function handleEvent(req, res) {
     messages.add({ conversation_id: conv.id, direction: 'in', user_id: ev.userId, user_name: ev.userName, content: ev.text });
     res.json({ handled: true, action: 'new-session', conversationId: conv.id });
     // §4.5 new_session
-    sendTeamsMessage(project.teams_webhook_url, {
+    webhook.sendTeamsMessage(project.teams_webhook_url, {
       status: 'info',
       title: 'New conversation created',
       markdown: `Project: ${project.name}\n\nThe next questions in this group chat will use a new OpenCode session.`,
@@ -70,7 +87,7 @@ function handleEvent(req, res) {
   investigate(project, conv, prompt)
     .then((answer) => {
       messages.add({ conversation_id: conv.id, direction: 'out', content: answer });
-      return sendTeamsMessage(project.teams_webhook_url, {
+      return webhook.sendTeamsMessage(project.teams_webhook_url, {
         status: 'success',
         title: `${project.name} - Result`,
         markdown: answer,
@@ -96,7 +113,7 @@ function handleEvent(req, res) {
         metadata: { project: project.slug },
         maxLength: project.max_msg_length,
       };
-      return sendTeamsMessage(project.teams_webhook_url, msg)
+      return webhook.sendTeamsMessage(project.teams_webhook_url, msg)
         .catch((e) => console.error('Webhook fail:', e.message));
     });
 }
