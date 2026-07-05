@@ -136,18 +136,21 @@ function validateApiGroupInput(input) {
   return { values, errors };
 }
 
-function rowsFrom(value) {
+// A row is "empty" when all its identity fields are blank. Fields with
+// defaults (auth_type, branch, auth_header, allowed_methods) are ignored so
+// an untouched template row is dropped instead of failing validation.
+function rowsFrom(value, identityFields) {
   if (!value) return [];
   const arr = Array.isArray(value) ? value : Object.values(value);
   return arr.filter((row) => row && typeof row === 'object'
-    && Object.entries(row).some(([key, v]) => key !== 'id' && clean(v)));
+    && identityFields.some((field) => clean(row[field])));
 }
 
 function validateProjectBundle(body, { existingRepos = [], existingApis = [] } = {}) {
   const { values: project, errors } = validateProjectInput(body);
   const allErrors = [...errors];
 
-  const repos = rowsFrom(body.repos).map((row, i) => {
+  const repos = rowsFrom(body.repos, ['git_url', 'token', 'ssh_key']).map((row, i) => {
     const id = Number(row.id) || null;
     const existing = id ? existingRepos.find((r) => Number(r.id) === id) : null;
     const input = { ...row };
@@ -158,7 +161,7 @@ function validateProjectBundle(body, { existingRepos = [], existingApis = [] } =
     return { ...values, id: existing ? id : null };
   });
 
-  const apis = rowsFrom(body.apis).map((row, i) => {
+  const apis = rowsFrom(body.apis, ['name', 'base_url', 'api_key', 'description_md']).map((row, i) => {
     const id = Number(row.id) || null;
     const existing = id ? existingApis.find((a) => Number(a.id) === id) : null;
     const input = { ...row };
