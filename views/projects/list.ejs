@@ -1,0 +1,22 @@
+<%- include('../layout-head') %>
+<h1>Projects</h1>
+<p><a href="/admin/projects/new">+ New project</a></p>
+<table>
+  <tr><th>Slug</th><th>Name</th><th>Keyword</th><th>Event URL</th><th></th></tr>
+  <% for (const p of projects) { %>
+  <tr>
+    <td><%= p.slug %></td>
+    <td><%= p.name %></td>
+    <td><%= p.keyword %></td>
+    <td><code>/api/events/<%= p.slug %></code></td>
+    <td>
+      <a href="/admin/projects/<%= p.id %>/edit">edit</a>
+      <form class="inline-form" method="post" action="/admin/projects/<%= p.id %>/delete"
+            onsubmit="return confirm('Xoá project <%= p.slug %>?')">
+        <button>delete</button>
+      </form>
+    </td>
+  </tr>
+  <% } %>
+</table>
+<%- include('../layout-foot') %>

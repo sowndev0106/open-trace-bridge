@@ -1,0 +1,26 @@
+<%- include('../layout-head') %>
+<h1><%= project && project.id ? 'Edit: ' + project.name : 'New project' %></h1>
+<% if (error) { %><p class="error"><%= error %></p><% } %>
+<form method="post" action="<%= project && project.id ? '/admin/projects/' + project.id : '/admin/projects' %>">
+  <div class="row">
+    <div><label>Slug (dùng trong URL event)</label>
+      <input type="text" name="slug" value="<%= project ? project.slug : '' %>" required></div>
+    <div><label>Name</label>
+      <input type="text" name="name" value="<%= project ? project.name : '' %>" required></div>
+    <div><label>Keyword (prefix trong Teams, vd payment-bot)</label>
+      <input type="text" name="keyword" value="<%= project ? (project.keyword || '') : '' %>"></div>
+  </div>
+  <label>System prompt (markdown)</label>
+  <textarea name="system_prompt"><%= project ? (project.system_prompt || '') : '' %></textarea>
+  <label>Teams webhook URL (nhận kết quả)</label>
+  <input type="url" name="teams_webhook_url" value="<%= project ? (project.teams_webhook_url || '') : '' %>">
+  <button>Save</button>
+</form>
+
+<% if (project && project.id) { %>
+  <p>Event URL cho Power Automate:
+    <code>https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&conversationId=...&userId=...&userName=...</code>
+  </p>
+  <!-- Task 4 sẽ thêm section Repos + API groups tại đây -->
+<% } %>
+<%- include('../layout-foot') %>
