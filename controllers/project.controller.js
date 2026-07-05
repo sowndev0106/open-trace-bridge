@@ -2,6 +2,7 @@ const projects = require('../models/project.model');
 const repos = require('../models/repo.model');
 const apis = require('../models/api.model');
 const apicalls = require('../models/apicall.model');
+const convs = require('../models/conversation.model');
 const {
   validateProjectInput,
   validateRepoInput,
@@ -9,12 +10,13 @@ const {
 } = require('../services/adminValidation');
 const sync = require('../services/sync.service');
 
-function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [], repoDraft = null, apiDraft = null, apiCalls = [] }) {
+function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [], repoDraft = null, apiDraft = null, apiCalls = [], conversationRows = [] }) {
   return res.status(status).render('projects/form', {
     project,
     repos: repoRows || [],
     apis: apiRows || [],
     apiCalls,
+    conversations: conversationRows,
     errors,
     error: errors[0] || null,
     repoDraft,
@@ -57,6 +59,7 @@ function editProjectForm(req, res) {
     repoRows: repos.listByProject(p.id),
     apiRows: apis.listByProject(p.id),
     apiCalls: apicalls.listByProject(p.id).slice(0, 25),
+    conversationRows: convs.listByProject(p.id).slice(0, 10),
   });
 }
 function updateProject(req, res) {
@@ -73,6 +76,7 @@ function updateProject(req, res) {
       repoRows: repos.listByProject(p.id),
       apiRows: apis.listByProject(p.id),
       apiCalls: apicalls.listByProject(p.id).slice(0, 25),
+      conversationRows: convs.listByProject(p.id).slice(0, 10),
       errors,
     });
   }
@@ -95,6 +99,7 @@ function addRepo(req, res) {
       repoRows: repos.listByProject(p.id),
       apiRows: apis.listByProject(p.id),
       apiCalls: apicalls.listByProject(p.id).slice(0, 25),
+      conversationRows: convs.listByProject(p.id).slice(0, 10),
       errors,
       repoDraft: values,
     });
@@ -136,6 +141,7 @@ function addApiGroup(req, res) {
       repoRows: repos.listByProject(p.id),
       apiRows: apis.listByProject(p.id),
       apiCalls: apicalls.listByProject(p.id).slice(0, 25),
+      conversationRows: convs.listByProject(p.id).slice(0, 10),
       errors,
       apiDraft: values,
     });

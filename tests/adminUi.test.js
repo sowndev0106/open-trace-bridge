@@ -266,6 +266,27 @@ test('conversation detail renders message timeline', async () => {
   assert.match(response.text, /message-timeline/);
 });
 
+test('project edit page links recent chat history', async () => {
+  const project = seedProject();
+  const conversation = convs.create(project.id, 'teams-conv-1');
+  convs.setSession(conversation.id, 'ses_abc');
+  messages.add({
+    conversation_id: conversation.id,
+    direction: 'in',
+    user_id: 'u1',
+    user_name: 'Son',
+    content: 'payment-bot investigate txn_123',
+  });
+
+  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.match(response.text, /Chat history/);
+  assert.match(response.text, /teams-conv-1/);
+  assert.strictEqual($(`a[href="/admin/conversations/${conversation.id}"]`).length >= 1, true);
+  assert.strictEqual($('[data-chat-history-row]').length, 1);
+});
+
 test('project save, repo add/delete, and Sync now all trigger a background sync', async () => {
   const triggered = [];
   const origTrigger = sync.triggerSync;
