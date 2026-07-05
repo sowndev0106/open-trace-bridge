@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
+const { redactApiSecrets } = require('./curlApiGroup.service');
 const execFileP = promisify(execFile);
 
 const WORKSPACES_DIR = process.env.OTB_WORKSPACES_DIR || path.join(process.cwd(), 'workspaces');
@@ -29,7 +30,7 @@ function buildAgentsMd(project, apiGroups) {
 - Allowed methods: ${g.allowed_methods}
 - Call through MCP tool \`call_api\` with \`group: "${g.name}"\`. Do not provide an API key; the server attaches it.
 
-${g.description_md}
+${redactApiSecrets(g.description_md, apiGroups)}
 `).join('\n');
 
   return `# ${project.name} — Incident Investigator

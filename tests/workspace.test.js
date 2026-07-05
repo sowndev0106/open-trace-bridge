@@ -19,6 +19,27 @@ test('buildAgentsMd contains prompt + api docs but NEVER the key', () => {
   assert.ok(!md.includes('SECRET-KEY'));
 });
 
+test('buildAgentsMd redacts API keys from API descriptions', () => {
+  const markdown = buildAgentsMd(
+    {
+      name: 'Payment',
+      system_prompt: 'Investigate incidents.',
+    },
+    [
+      {
+        name: 'transaction-api',
+        base_url: 'https://api.internal.example/v1',
+        allowed_methods: 'GET',
+        api_key: 'Bearer sk_live_123',
+        description_md: 'Use Bearer sk_live_123 when trying this locally.',
+      },
+    ]
+  );
+
+  assert.doesNotMatch(markdown, /sk_live_123/);
+  assert.match(markdown, /\[REDACTED_API_KEY\]/);
+});
+
 test('buildOpencodeConfig denies edit/bash/webfetch and wires mcp', () => {
   const cfg = buildOpencodeConfig(project);
   assert.strictEqual(cfg.permission.edit, 'deny');
