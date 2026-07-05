@@ -59,9 +59,8 @@ OpenCode remote control is published on `http://localhost:4096` for local setup 
 ## Admin Setup
 
 1. Create a project with a unique slug, name, keyword, system prompt, Teams webhook URL, and max message length.
-2. Add one or more repositories. HTTPS token, SSH key, and unauthenticated clone modes are supported.
-3. Add API groups with a base URL, allowed methods, auth header, API key, and markdown description for the agent.
-4. Point Power Automate at:
+2. Add repository rows (HTTPS token, SSH key, or unauthenticated) and API group rows on the same page — one **Save** button at the top writes everything at once. Leaving a secret field blank keeps the stored value.
+3. Point Power Automate at:
 
 ```text
 https://<public-host>/api/events/<project-slug>?text=...&conversationId=...&userId=...&userName=...
