@@ -136,4 +136,42 @@ function validateApiGroupInput(input) {
   return { values, errors };
 }
 
-module.exports = { validateProjectInput, validateRepoInput, validateApiGroupInput };
+function rowsFrom(value) {
+  if (!value) return [];
+  const arr = Array.isArray(value) ? value : Object.values(value);
+  return arr.filter((row) => row && typeof row === 'object'
+    && Object.entries(row).some(([key, v]) => key !== 'id' && clean(v)));
+}
+
+function validateProjectBundle(body, { existingRepos = [], existingApis = [] } = {}) {
+  const { values: project, errors } = validateProjectInput(body);
+  const allErrors = [...errors];
+
+  const repos = rowsFrom(body.repos).map((row, i) => {
+    const id = Number(row.id) || null;
+    const existing = id ? existingRepos.find((r) => Number(r.id) === id) : null;
+    const input = { ...row };
+    if (existing && !clean(input.token)) input.token = existing.token || '';
+    if (existing && !clean(input.ssh_key)) input.ssh_key = existing.ssh_key || '';
+    const { values, errors: rowErrors } = validateRepoInput(input);
+    for (const message of rowErrors) allErrors.push(`Repo #${i + 1}: ${message}`);
+    return { ...values, id: existing ? id : null };
+  });
+
+  const apis = rowsFrom(body.apis).map((row, i) => {
+    const id = Number(row.id) || null;
+    const existing = id ? existingApis.find((a) => Number(a.id) === id) : null;
+    const input = { ...row };
+    if (existing && !clean(input.api_key)) input.api_key = existing.api_key || '';
+    const { values, errors: rowErrors } = validateApiGroupInput(input);
+    for (const message of rowErrors) allErrors.push(`API group #${i + 1}: ${message}`);
+    return { ...values, id: existing ? id : null };
+  });
+
+  const names = apis.map((a) => a.name).filter(Boolean);
+  if (new Set(names).size !== names.length) allErrors.push('API group names must be unique.');
+
+  return { values: { project, repos, apis }, errors: allErrors };
+}
+
+module.exports = { validateProjectInput, validateRepoInput, validateApiGroupInput, validateProjectBundle };
