@@ -20,7 +20,8 @@ function runPrompt({ dir, sessionId, text }) {
     const args = ['run', '--format', 'json'];
     if (sessionId) args.push('-s', sessionId);
     args.push(text);
-    const child = spawn('opencode', args, { cwd: dir, env: process.env });
+    // stdin phải 'ignore': nếu để pipe mở, opencode chờ stdin EOF và treo tới timeout
+    const child = spawn('opencode', args, { cwd: dir, env: process.env, stdio: ['ignore', 'pipe', 'pipe'] });
 
     let stdout = '', stderr = '';
     const timer = setTimeout(() => {
