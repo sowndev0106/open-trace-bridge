@@ -163,9 +163,13 @@ function validateApiGroupInput(input) {
     errors.push('API group name must use letters, numbers, underscores, and hyphens only.');
   }
 
+  // The form only collects a curl command; structured fields arrive here for
+  // existing rows (carried over from the stored group) or direct API clients.
   if (!values.base_url) {
-    errors.push('Base URL is required.');
-  } else if (!isHttpUrl(values.base_url)) {
+    errors.push('Curl command is required.');
+    return { values, errors };
+  }
+  if (!isHttpUrl(values.base_url)) {
     errors.push('Base URL must be a valid http or https URL.');
   }
 
@@ -207,6 +211,13 @@ function validateProjectBundle(body, { existingRepos = [], existingApis = [] } =
     const existing = id ? existingApis.find((a) => Number(a.id) === id) : null;
     const input = { ...row };
     if (existing && !clean(input.api_key)) input.api_key = existing.api_key || '';
+    // A saved row with no new curl keeps its stored parsed fields; a fresh
+    // curl replaces all of them through validateApiGroupInput.
+    if (existing && !clean(input.curl_command)) {
+      if (!clean(input.base_url)) input.base_url = existing.base_url || '';
+      if (!clean(input.auth_header)) input.auth_header = existing.auth_header || '';
+      if (!clean(input.allowed_methods)) input.allowed_methods = existing.allowed_methods || '';
+    }
     const { values, errors: rowErrors } = validateApiGroupInput(input);
     for (const message of rowErrors) allErrors.push(`API group #${i + 1}: ${message}`);
     return { ...values, id: existing ? id : null };

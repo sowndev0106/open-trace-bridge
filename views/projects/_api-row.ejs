@@ -3,32 +3,15 @@
   <div class="mb-3">
     <label>Curl command</label>
     <textarea name="apis[<%= i %>][curl_command]" placeholder='curl -H "Authorization: Bearer sk_live_xxx" "https://api.internal.example/v1/transactions/txn_123"'><%= a.curl_command || '' %></textarea>
-    <p class="field-help">For new API rows, paste a working curl command and OpenTraceBridge will extract the base URL, method, auth header, and API key.</p>
+    <p class="field-help">Paste a working curl command. OpenTraceBridge extracts the base URL, method, auth header, and API key. For saved rows, leave blank to keep the current values or paste a new curl to replace them.</p>
+    <% if (a.id && a.base_url) { %>
+    <p class="field-help">Current: <code><%= a.allowed_methods || 'GET' %> <%= a.base_url %></code> &middot; auth header: <code><%= a.auth_header || 'Authorization' %></code></p>
+    <% } %>
   </div>
-  <div class="form-grid-two">
-    <div>
-      <label>Name</label>
-      <input type="text" name="apis[<%= i %>][name]" value="<%= a.name || '' %>" placeholder="transaction-api">
-    </div>
-    <div>
-      <label>Base URL</label>
-      <input type="text" name="apis[<%= i %>][base_url]" value="<%= a.base_url || '' %>" placeholder="https://api.internal.example">
-    </div>
-  </div>
-  <div class="form-grid mt-3">
-    <div>
-      <label>API key</label>
-      <input type="password" name="apis[<%= i %>][api_key]" value="" autocomplete="new-password"
-             placeholder="<%= a.id ? 'Leave blank to keep the current key' : '' %>">
-    </div>
-    <div>
-      <label>Auth header</label>
-      <input type="text" name="apis[<%= i %>][auth_header]" value="<%= a.auth_header || 'Authorization' %>">
-    </div>
-    <div>
-      <label>Allowed methods</label>
-      <input type="text" name="apis[<%= i %>][allowed_methods]" value="<%= a.allowed_methods || 'GET' %>">
-    </div>
+  <div class="mb-3">
+    <label>Name</label>
+    <input type="text" name="apis[<%= i %>][name]" value="<%= a.name || '' %>" placeholder="transaction-api">
+    <p class="field-help">Optional. If left blank, OpenTraceBridge derives a name from the curl URL host.</p>
   </div>
   <div class="mt-3">
     <label>Markdown description</label>

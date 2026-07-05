@@ -220,6 +220,80 @@ test('api group can be created from pasted curl and markdown description', async
   assert.strictEqual(rows[0].description_md, 'Search transactions by reference id.');
 });
 
+test('api row form only offers name, curl, and description inputs plus a parsed summary', async () => {
+  const project = seedProject();
+  apis.create({
+    project_id: project.id,
+    name: 'transaction-api',
+    base_url: 'https://api.internal.example/v1',
+    api_key: 'Bearer sk_live_123',
+    auth_header: 'Authorization',
+    allowed_methods: 'POST',
+    description_md: 'Search transactions.',
+  });
+
+  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.strictEqual($('input[name="apis[0][name]"]').length, 1);
+  assert.strictEqual($('textarea[name="apis[0][curl_command]"]').length, 1);
+  assert.strictEqual($('textarea[name="apis[0][description_md]"]').length, 1);
+  assert.strictEqual($('input[name="apis[0][base_url]"]').length, 0);
+  assert.strictEqual($('input[name="apis[0][auth_header]"]').length, 0);
+  assert.strictEqual($('input[name="apis[0][allowed_methods]"]').length, 0);
+  assert.strictEqual($('input[name="apis[0][api_key]"]').length, 0);
+  assert.match(response.text, /POST https:\/\/api\.internal\.example\/v1/);
+  assert.doesNotMatch(response.text, /sk_live_123/);
+});
+
+test('existing API row keeps parsed fields when saved without a new curl command', async () => {
+  const project = seedProject();
+  const api = apis.create({
+    project_id: project.id,
+    name: 'transaction-api',
+    base_url: 'https://api.internal.example/v1',
+    api_key: 'Bearer sk_live_123',
+    auth_header: 'Authorization',
+    allowed_methods: 'POST',
+    description_md: 'Old description.',
+  });
+
+  await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+    slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
+    teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+    chat_retention_days: '90',
+    'apis[0][id]': String(api.id),
+    'apis[0][name]': 'transaction-api',
+    'apis[0][curl_command]': '',
+    'apis[0][description_md]': 'New description.',
+  }).expect(302);
+
+  const rows = apis.listByProject(project.id);
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].base_url, 'https://api.internal.example/v1');
+  assert.strictEqual(rows[0].api_key, 'Bearer sk_live_123');
+  assert.strictEqual(rows[0].auth_header, 'Authorization');
+  assert.strictEqual(rows[0].allowed_methods, 'POST');
+  assert.strictEqual(rows[0].description_md, 'New description.');
+});
+
+test('new API row without a curl command is rejected', async () => {
+  const project = seedProject();
+  const response = await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+    slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
+    teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+    chat_retention_days: '90',
+    'apis[0][name]': 'transaction-api',
+    'apis[0][curl_command]': '',
+    'apis[0][description_md]': 'No curl provided.',
+  }).expect(400);
+
+  const $ = cheerio.load(response.text);
+  const errors = $('.error-list li').map((_, el) => $(el).text()).get();
+  assert.ok(errors.includes('API group #1: Curl command is required.'));
+  assert.strictEqual(apis.listByProject(project.id).length, 0);
+});
+
 test('conversation audit list renders redesigned tables', async () => {
   const project = seedProject();
   const conversation = convs.create(project.id, 'teams-conv-1');
