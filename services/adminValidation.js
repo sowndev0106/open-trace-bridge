@@ -45,9 +45,11 @@ function validateProjectInput(input) {
     system_prompt: String(input.system_prompt ?? ''),
     teams_webhook_url: clean(input.teams_webhook_url),
     max_msg_length: clean(input.max_msg_length),
+    chat_retention_days: clean(input.chat_retention_days),
   };
   const errors = [];
   const maxLength = Number(values.max_msg_length);
+  const retentionDays = Number(values.chat_retention_days);
 
   if (!values.slug) {
     errors.push('Slug is required.');
@@ -71,8 +73,18 @@ function validateProjectInput(input) {
     errors.push('Max message length must be at least 500.');
   }
 
+  if (!Number.isInteger(retentionDays)) {
+    errors.push('Chat retention days is required and must be a whole number.');
+  } else if (retentionDays < 0) {
+    errors.push('Chat retention days must be 0 or greater.');
+  }
+
   return {
-    values: { ...values, max_msg_length: Number.isInteger(maxLength) ? maxLength : values.max_msg_length },
+    values: {
+      ...values,
+      max_msg_length: Number.isInteger(maxLength) ? maxLength : values.max_msg_length,
+      chat_retention_days: Number.isInteger(retentionDays) ? retentionDays : values.chat_retention_days,
+    },
     errors,
   };
 }

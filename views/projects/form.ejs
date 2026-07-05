@@ -64,6 +64,12 @@
                value="<%= project && project.max_msg_length ? project.max_msg_length : 20000 %>">
         <p class="field-help">Longer results are split while preserving code fences.</p>
       </div>
+      <div>
+        <label for="chat_retention_days">Chat retention days</label>
+        <input id="chat_retention_days" type="number" name="chat_retention_days" min="0" required
+               value="<%= project && project.chat_retention_days !== undefined ? project.chat_retention_days : 90 %>">
+        <p class="field-help">Messages, conversations, and API-call audit rows older than this are deleted. Use 0 to keep history.</p>
+      </div>
     </div>
 
     <div class="flex justify-end">

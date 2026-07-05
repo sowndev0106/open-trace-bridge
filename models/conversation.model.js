@@ -22,5 +22,11 @@ function setSession(id, sessionId) {
 function listByProject(project_id) {
   return getDb().prepare('SELECT * FROM conversations WHERE project_id = ? ORDER BY id DESC').all(project_id);
 }
+function deleteOlderThan(project_id, cutoff) {
+  const info = getDb().prepare(
+    `DELETE FROM conversations WHERE project_id = ? AND updated_at < datetime(?)`
+  ).run(project_id, cutoff);
+  return info.changes;
+}
 
-module.exports = { findActive, create, close, setSession, listByProject };
+module.exports = { findActive, create, close, setSession, listByProject, deleteOlderThan };

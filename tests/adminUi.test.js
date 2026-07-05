@@ -27,6 +27,7 @@ function seedProject(overrides = {}) {
     system_prompt: 'Investigate payment incidents.',
     teams_webhook_url: 'https://hook.example/payment',
     max_msg_length: 20000,
+    chat_retention_days: 90,
     ...overrides,
   });
 }
@@ -85,6 +86,7 @@ test('project edit form preserves workflows inside redesigned panels', async () 
   assert.strictEqual($('textarea[name="system_prompt"]').text(), 'Investigate payment incidents.');
   assert.strictEqual($('input[name="teams_webhook_url"]').val(), 'https://hook.example/payment');
   assert.strictEqual($('input[name="max_msg_length"]').val(), '20000');
+  assert.strictEqual($('input[name="chat_retention_days"]').val(), '90');
   assert.ok($(`a[href="/admin/projects/${project.id}/conversations"]`).filter((_, el) => $(el).text().trim() === 'Open audit trail').length >= 1);
   assert.strictEqual($(`form[action="/admin/projects/${project.id}/repos"][method="post"]`).length, 1);
   assert.strictEqual($(`form[action="/admin/projects/${project.id}/apis"][method="post"]`).length, 1);
@@ -103,6 +105,7 @@ test('project create validation shows all field errors and preserves input', asy
       system_prompt: 'Keep this prompt',
       teams_webhook_url: 'not-a-url',
       max_msg_length: '100',
+      chat_retention_days: '90',
     })
     .expect(400);
 
@@ -116,6 +119,27 @@ test('project create validation shows all field errors and preserves input', asy
   assert.ok(errors.includes('Max message length must be at least 500.'));
   assert.strictEqual($('input[name="slug"]').val(), 'Bad Slug!');
   assert.strictEqual($('textarea[name="system_prompt"]').text(), 'Keep this prompt');
+});
+
+test('project form saves chat retention days', async () => {
+  const project = seedProject();
+
+  await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+    slug: 'payment',
+    name: 'Payment',
+    keyword: 'payment-bot',
+    system_prompt: 'Investigate payment incidents.',
+    teams_webhook_url: 'https://hook.example/payment',
+    max_msg_length: '20000',
+    chat_retention_days: '30',
+  }).expect(302);
+
+  const updated = projects.findById(project.id);
+  assert.strictEqual(updated.chat_retention_days, 30);
+
+  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+  assert.strictEqual($('input[name="chat_retention_days"]').val(), '30');
 });
 
 test('repo validation rejects invalid auth and missing credentials without creating a repo', async () => {
@@ -294,12 +318,12 @@ test('project save, repo add/delete, and Sync now all trigger a background sync'
   try {
     await request(adminApp).post('/admin/projects').type('form').send({
       slug: 'billing', name: 'Billing', keyword: 'billing-bot', system_prompt: 'x',
-      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000',
+      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000', chat_retention_days: '90',
     }).expect(302);
     const project = projects.findBySlug('billing');
     await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
       slug: 'billing', name: 'Billing 2', keyword: 'billing-bot', system_prompt: 'x',
-      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000',
+      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000', chat_retention_days: '90',
     }).expect(302);
     await request(adminApp).post(`/admin/projects/${project.id}/repos`).type('form').send({
       git_url: 'https://github.com/acme/billing.git', auth_type: 'none', branch: 'main',
