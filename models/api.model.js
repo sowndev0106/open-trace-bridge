@@ -16,4 +16,13 @@ function findByProjectAndName(project_id, name) {
 }
 function remove(id) { getDb().prepare('DELETE FROM api_groups WHERE id = ?').run(id); }
 
-module.exports = { create, listByProject, findByProjectAndName, remove };
+function update(id, { name, base_url, api_key, auth_header, allowed_methods, description_md }) {
+  getDb().prepare(
+    `UPDATE api_groups SET name = ?, base_url = ?, api_key = ?, auth_header = ?,
+       allowed_methods = ?, description_md = ? WHERE id = ?`
+  ).run(name, base_url, api_key || '', auth_header || 'Authorization',
+    allowed_methods || 'GET', description_md || '', id);
+  return getDb().prepare('SELECT * FROM api_groups WHERE id = ?').get(id);
+}
+
+module.exports = { create, listByProject, findByProjectAndName, remove, update };

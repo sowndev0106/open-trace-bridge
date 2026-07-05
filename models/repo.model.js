@@ -20,4 +20,17 @@ function setSyncStatus(id, { status, error = null }) {
   ).run(status, error, status, id);
 }
 
-module.exports = { create, listByProject, remove, setSyncStatus };
+function update(id, { git_url, auth_type, token, ssh_key, branch }) {
+  const current = getDb().prepare('SELECT * FROM repos WHERE id = ?').get(id);
+  const contentChanged = current.git_url !== git_url || current.branch !== branch;
+  getDb().prepare(
+    `UPDATE repos SET git_url = ?, auth_type = ?, token = ?, ssh_key = ?, branch = ?,
+       sync_status = CASE WHEN ? THEN 'pending' ELSE sync_status END,
+       sync_error  = CASE WHEN ? THEN NULL ELSE sync_error END
+     WHERE id = ?`
+  ).run(git_url, auth_type || 'none', token || null, ssh_key || null, branch || 'main',
+    contentChanged ? 1 : 0, contentChanged ? 1 : 0, id);
+  return getDb().prepare('SELECT * FROM repos WHERE id = ?').get(id);
+}
+
+module.exports = { create, listByProject, remove, setSyncStatus, update };
