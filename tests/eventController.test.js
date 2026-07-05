@@ -8,6 +8,7 @@ const { publicApp } = require('../server');
 const { resetDbForTest } = require('../lib/db');
 const projects = require('../models/project.model');
 const convs = require('../models/conversation.model');
+const messages = require('../models/message.model');
 const sync = require('../services/sync.service');
 const opencode = require('../services/opencode.service');
 const webhook = require('../services/webhook.service');
@@ -46,8 +47,14 @@ test('/pull-source responds immediately, syncs in background, posts summary', as
   assert.strictEqual(syncedProjectId, project.id);
   assert.strictEqual(sent[0].status, 'success');
   assert.match(sent[0].markdown, /acme\/app\.git/);
-  // No conversation is created or touched by /pull-source.
-  assert.strictEqual(convs.findActive(project.id, 'c1'), undefined);
+  const conv = convs.findActive(project.id, 'c1');
+  assert.ok(conv);
+  await waitFor(() => messages.listByConversation(conv.id).length === 2);
+  const rows = messages.listByConversation(conv.id);
+  assert.strictEqual(rows[0].direction, 'in');
+  assert.strictEqual(rows[0].content, 'payment-bot /pull-source');
+  assert.strictEqual(rows[1].direction, 'out');
+  assert.match(rows[1].content, /Sources updated to latest/);
 });
 
 test('message path uses ensureReady and replies with the agent answer', async () => {

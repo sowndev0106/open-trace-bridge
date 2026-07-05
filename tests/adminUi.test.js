@@ -27,6 +27,7 @@ function seedProject(overrides = {}) {
     system_prompt: 'Investigate payment incidents.',
     teams_webhook_url: 'https://hook.example/payment',
     max_msg_length: 20000,
+    chat_retention_days: 90,
     ...overrides,
   });
 }
@@ -85,7 +86,8 @@ test('project edit form preserves workflows inside redesigned panels', async () 
   assert.strictEqual($('textarea[name="system_prompt"]').text(), 'Investigate payment incidents.');
   assert.strictEqual($('input[name="teams_webhook_url"]').val(), 'https://hook.example/payment');
   assert.strictEqual($('input[name="max_msg_length"]').val(), '20000');
-  assert.strictEqual($(`a[href="/admin/projects/${project.id}/conversations"]`).text().trim(), 'Open audit trail');
+  assert.strictEqual($('input[name="chat_retention_days"]').val(), '90');
+  assert.ok($(`a[href="/admin/projects/${project.id}/conversations"]`).filter((_, el) => $(el).text().trim() === 'Open audit trail').length >= 1);
   assert.strictEqual($('input[name="repos[0][git_url]"]').val(), 'https://github.com/acme/payment.git');
   assert.strictEqual($('input[name="apis[0][name]"]').val(), 'transaction-api');
   assert.strictEqual($('template[data-template="repos"]').length, 1);
@@ -105,6 +107,7 @@ test('project create validation shows all field errors and preserves input', asy
       system_prompt: 'Keep this prompt',
       teams_webhook_url: 'not-a-url',
       max_msg_length: '100',
+      chat_retention_days: '90',
     })
     .expect(400);
 
@@ -120,6 +123,27 @@ test('project create validation shows all field errors and preserves input', asy
   assert.strictEqual($('textarea[name="system_prompt"]').text(), 'Keep this prompt');
 });
 
+test('project form saves chat retention days', async () => {
+  const project = seedProject();
+
+  await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+    slug: 'payment',
+    name: 'Payment',
+    keyword: 'payment-bot',
+    system_prompt: 'Investigate payment incidents.',
+    teams_webhook_url: 'https://hook.example/payment',
+    max_msg_length: '20000',
+    chat_retention_days: '30',
+  }).expect(302);
+
+  const updated = projects.findById(project.id);
+  assert.strictEqual(updated.chat_retention_days, 30);
+
+  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+  assert.strictEqual($('input[name="chat_retention_days"]').val(), '30');
+});
+
 test('bundle validation rejects a bad repo row with prefixed errors and creates nothing', async () => {
   const project = seedProject();
   const response = await request(adminApp)
@@ -128,6 +152,7 @@ test('bundle validation rejects a bad repo row with prefixed errors and creates 
     .send({
       slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+      chat_retention_days: '90',
       'repos[0][git_url]': 'ftp://example.com/repo.git',
       'repos[0][auth_type]': 'https-token',
       'repos[0][token]': '', 'repos[0][ssh_key]': '', 'repos[0][branch]': '',
@@ -149,6 +174,7 @@ test('bundle validation rejects a bad API row with prefixed errors and creates n
     .send({
       slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+      chat_retention_days: '90',
       'apis[0][name]': 'bad name', 'apis[0][base_url]': 'not-a-url',
       'apis[0][auth_header]': '', 'apis[0][allowed_methods]': 'GET,TRACE',
       'apis[0][description_md]': 'Keep this description',
@@ -162,6 +188,36 @@ test('bundle validation rejects a bad API row with prefixed errors and creates n
   assert.ok(errors.includes('API group #1: Allowed methods can only include GET, POST, PUT, PATCH, and DELETE.'));
   assert.strictEqual(apis.listByProject(project.id).length, 0);
   assert.match(response.text, /Keep this description/);
+});
+
+test('api group can be created from pasted curl and markdown description', async () => {
+  const project = seedProject();
+
+  await request(adminApp)
+    .post(`/admin/projects/${project.id}`)
+    .type('form')
+    .send({
+      slug: 'payment',
+      name: 'Payment',
+      keyword: 'payment-bot',
+      system_prompt: 'Investigate payment incidents.',
+      teams_webhook_url: 'https://hook.example/payment',
+      max_msg_length: '20000',
+      chat_retention_days: '90',
+      'apis[0][name]': 'transaction-api',
+      'apis[0][curl_command]': `curl -X POST -H "Authorization: Bearer sk_live_123" "https://api.internal.example/v1/transactions/search?limit=10"`,
+      'apis[0][description_md]': 'Search transactions by reference id.',
+    })
+    .expect(302);
+
+  const rows = apis.listByProject(project.id);
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].name, 'transaction-api');
+  assert.strictEqual(rows[0].base_url, 'https://api.internal.example/v1');
+  assert.strictEqual(rows[0].api_key, 'Bearer sk_live_123');
+  assert.strictEqual(rows[0].auth_header, 'Authorization');
+  assert.strictEqual(rows[0].allowed_methods, 'POST');
+  assert.strictEqual(rows[0].description_md, 'Search transactions by reference id.');
 });
 
 test('conversation audit list renders redesigned tables', async () => {
@@ -186,6 +242,25 @@ test('conversation audit list renders redesigned tables', async () => {
   assert.match(response.text, /transaction-api/);
   assert.match(response.text, /Latest API calls/);
   assert.match(response.text, /table-shell/);
+});
+
+test('project edit page shows latest API calls', async () => {
+  const project = seedProject();
+  apicalls.add({
+    project_id: project.id,
+    group_name: 'transaction-api',
+    method: 'GET',
+    url: 'https://api.internal/transactions/txn_123',
+    status: 200,
+  });
+
+  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.match(response.text, /Latest API calls/);
+  assert.match(response.text, /transaction-api/);
+  assert.match(response.text, /https:\/\/api\.internal\/transactions\/txn_123/);
+  assert.strictEqual($('[data-api-call-row]').length, 1);
 });
 
 test('conversation detail renders message timeline', async () => {
@@ -219,6 +294,27 @@ test('conversation detail renders message timeline', async () => {
   assert.match(response.text, /message-timeline/);
 });
 
+test('project edit page links recent chat history', async () => {
+  const project = seedProject();
+  const conversation = convs.create(project.id, 'teams-conv-1');
+  convs.setSession(conversation.id, 'ses_abc');
+  messages.add({
+    conversation_id: conversation.id,
+    direction: 'in',
+    user_id: 'u1',
+    user_name: 'Son',
+    content: 'payment-bot investigate txn_123',
+  });
+
+  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.match(response.text, /Chat history/);
+  assert.match(response.text, /teams-conv-1/);
+  assert.strictEqual($(`a[href="/admin/conversations/${conversation.id}"]`).length >= 1, true);
+  assert.strictEqual($('[data-chat-history-row]').length, 1);
+});
+
 test('create, update, and Sync now each trigger exactly one background sync', async () => {
   const triggered = [];
   const origTrigger = sync.triggerSync;
@@ -226,7 +322,7 @@ test('create, update, and Sync now each trigger exactly one background sync', as
   try {
     await request(adminApp).post('/admin/projects').type('form').send({
       slug: 'billing', name: 'Billing', keyword: 'billing-bot', system_prompt: 'x',
-      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000',
+      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000', chat_retention_days: '90',
       'repos[0][git_url]': 'https://github.com/acme/billing.git',
       'repos[0][auth_type]': 'none', 'repos[0][branch]': 'main',
       'repos[0][token]': '', 'repos[0][ssh_key]': '',
@@ -235,7 +331,7 @@ test('create, update, and Sync now each trigger exactly one background sync', as
     assert.strictEqual(repos.listByProject(project.id).length, 1);
     await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
       slug: 'billing', name: 'Billing 2', keyword: 'billing-bot', system_prompt: 'x',
-      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000',
+      teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000', chat_retention_days: '90',
     }).expect(302);
     await request(adminApp).post(`/admin/projects/${project.id}/sync`).expect(302);
     assert.deepStrictEqual(triggered.map((t) => t.reason), ['create', 'update', 'manual']);
@@ -309,6 +405,7 @@ test('save-all reconciles rows: edit one, add one, omit one (deleted)', async ()
     await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
       slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+      chat_retention_days: '90',
       'repos[0][id]': String(keep.id),
       'repos[0][git_url]': 'https://github.com/acme/keep.git',
       'repos[0][auth_type]': 'none', 'repos[0][branch]': 'release',
@@ -339,6 +436,7 @@ test('blank token on save keeps the stored secret; secrets are never echoed', as
     await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
       slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+      chat_retention_days: '90',
       'repos[0][id]': String(repo.id),
       'repos[0][git_url]': 'https://github.com/acme/sec.git',
       'repos[0][auth_type]': 'https-token', 'repos[0][branch]': 'main',

@@ -2,6 +2,7 @@ const PROJECT_SLUG_RE = /^[a-z0-9-]+$/;
 const TOKEN_RE = /^[A-Za-z0-9_-]+$/;
 const AUTH_TYPES = new Set(['none', 'https-token', 'ssh']);
 const ALLOWED_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+const { parseCurlApiGroupInput } = require('./curlApiGroup.service');
 
 function clean(value) {
   return String(value ?? '').trim();
@@ -44,9 +45,11 @@ function validateProjectInput(input) {
     system_prompt: String(input.system_prompt ?? ''),
     teams_webhook_url: clean(input.teams_webhook_url),
     max_msg_length: clean(input.max_msg_length),
+    chat_retention_days: clean(input.chat_retention_days),
   };
   const errors = [];
   const maxLength = Number(values.max_msg_length);
+  const retentionDays = Number(values.chat_retention_days);
 
   if (!values.slug) {
     errors.push('Slug is required.');
@@ -70,8 +73,18 @@ function validateProjectInput(input) {
     errors.push('Max message length must be at least 500.');
   }
 
+  if (!Number.isInteger(retentionDays)) {
+    errors.push('Chat retention days is required and must be a whole number.');
+  } else if (retentionDays < 0) {
+    errors.push('Chat retention days must be 0 or greater.');
+  }
+
   return {
-    values: { ...values, max_msg_length: Number.isInteger(maxLength) ? maxLength : values.max_msg_length },
+    values: {
+      ...values,
+      max_msg_length: Number.isInteger(maxLength) ? maxLength : values.max_msg_length,
+      chat_retention_days: Number.isInteger(retentionDays) ? retentionDays : values.chat_retention_days,
+    },
     errors,
   };
 }
@@ -105,6 +118,35 @@ function validateRepoInput(input) {
 }
 
 function validateApiGroupInput(input) {
+  const errors = [];
+
+  if (clean(input.curl_command)) {
+    try {
+      const parsed = parseCurlApiGroupInput(input);
+      const methods = normalizeMethods(parsed.allowed_methods || 'GET');
+      if (!methods.length || methods.some((method) => !ALLOWED_METHODS.has(method))) {
+        errors.push('Allowed methods can only include GET, POST, PUT, PATCH, and DELETE.');
+      }
+      return {
+        values: { ...parsed, allowed_methods: methods.join(',') },
+        errors,
+      };
+    } catch (err) {
+      return {
+        values: {
+          name: clean(input.name),
+          base_url: '',
+          api_key: '',
+          auth_header: 'Authorization',
+          allowed_methods: 'GET',
+          description_md: String(input.description_md ?? ''),
+          curl_command: String(input.curl_command ?? ''),
+        },
+        errors: [err.message],
+      };
+    }
+  }
+
   const methods = normalizeMethods(input.allowed_methods || 'GET');
   const values = {
     name: clean(input.name),
@@ -114,7 +156,6 @@ function validateApiGroupInput(input) {
     allowed_methods: methods.join(','),
     description_md: String(input.description_md ?? ''),
   };
-  const errors = [];
 
   if (!values.name) {
     errors.push('API group name is required.');
@@ -161,7 +202,7 @@ function validateProjectBundle(body, { existingRepos = [], existingApis = [] } =
     return { ...values, id: existing ? id : null };
   });
 
-  const apis = rowsFrom(body.apis, ['name', 'base_url', 'api_key', 'description_md']).map((row, i) => {
+  const apis = rowsFrom(body.apis, ['name', 'base_url', 'api_key', 'description_md', 'curl_command']).map((row, i) => {
     const id = Number(row.id) || null;
     const existing = id ? existingApis.find((a) => Number(a.id) === id) : null;
     const input = { ...row };

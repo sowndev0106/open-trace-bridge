@@ -62,7 +62,7 @@
         <textarea id="system_prompt" name="system_prompt"><%= project ? (project.system_prompt || '') : '' %></textarea>
       </div>
 
-      <div class="form-grid-two">
+      <div class="form-grid">
         <div>
           <label for="teams_webhook_url">Teams webhook URL</label>
           <input id="teams_webhook_url" type="url" name="teams_webhook_url" value="<%= project ? (project.teams_webhook_url || '') : '' %>" placeholder="https://outlook.office.com/webhook/...">
@@ -72,6 +72,12 @@
           <input id="max_msg_length" type="number" name="max_msg_length" min="500" required
                  value="<%= project && project.max_msg_length ? project.max_msg_length : 20000 %>">
           <p class="field-help">Longer results are split while preserving code fences.</p>
+        </div>
+        <div>
+          <label for="chat_retention_days">Chat retention days</label>
+          <input id="chat_retention_days" type="number" name="chat_retention_days" min="0" required
+                 value="<%= project && project.chat_retention_days !== undefined ? project.chat_retention_days : 90 %>">
+          <p class="field-help">Messages, conversations, and API-call audit rows older than this are deleted. Use 0 to keep history.</p>
         </div>
       </div>
     </div>
@@ -90,6 +96,80 @@
         <div class="mt-4 overflow-x-auto rounded-lg border border-line bg-slate-50 p-4">
           <code>https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&amp;conversationId=...&amp;userId=...&amp;userName=...</code>
         </div>
+      </div>
+    </section>
+
+    <section class="panel mb-6">
+      <div class="panel-body">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="section-heading">Latest API calls</h2>
+            <p class="mt-1 text-sm text-ink-500">Recent calls made through the OpenCode <code>call_api</code> tool for this project.</p>
+          </div>
+          <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations">Open full audit</a>
+        </div>
+
+        <% if (apiCalls && apiCalls.length) { %>
+          <div class="table-shell shadow-none">
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Time</th><th>Group</th><th>Method</th><th>URL</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <% for (const a of apiCalls) { %>
+                  <tr data-api-call-row>
+                    <td><%= a.created_at %></td>
+                    <td><%= a.group_name %></td>
+                    <td><span class="status-badge status-muted"><%= a.method %></span></td>
+                    <td class="max-w-xl truncate"><%= a.url %></td>
+                    <td><%= a.status || '-' %></td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="rounded-lg border border-dashed border-line bg-slate-50 px-4 py-5 text-sm text-ink-500">No API calls have been recorded yet.</div>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="panel mb-6">
+      <div class="panel-body">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="section-heading">Chat history</h2>
+            <p class="mt-1 text-sm text-ink-500">Recent Teams conversations saved for this project.</p>
+          </div>
+          <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations">View all chats</a>
+        </div>
+
+        <% if (conversations && conversations.length) { %>
+          <div class="table-shell shadow-none">
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr><th>ID</th><th>Teams conversation</th><th>OpenCode session</th><th>Status</th><th>Updated</th></tr>
+                </thead>
+                <tbody>
+                  <% for (const c of conversations) { %>
+                  <tr data-chat-history-row>
+                    <td><a class="font-semibold text-brand hover:text-brand-dark" href="/admin/conversations/<%= c.id %>">#<%= c.id %></a></td>
+                    <td><%= c.teams_conversation_id %></td>
+                    <td><code><%= c.opencode_session_id || '-' %></code></td>
+                    <td><span class="status-badge <%= c.status === 'active' ? 'status-active' : 'status-muted' %>"><%= c.status %></span></td>
+                    <td><%= c.updated_at %></td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="rounded-lg border border-dashed border-line bg-slate-50 px-4 py-5 text-sm text-ink-500">No chat history has been recorded yet.</div>
+        <% } %>
       </div>
     </section>
   <% } %>
@@ -114,7 +194,7 @@
     <div class="panel-body">
       <div class="mb-4">
         <h2 class="section-heading">API groups</h2>
-        <p class="mt-1 text-sm text-ink-500">Available to the agent through the call_api MCP tool.</p>
+        <p class="mt-1 text-sm text-ink-500">Paste curl commands or edit stored API rows. Rows are saved together with the project when you press Save.</p>
       </div>
       <div data-rows="apis">
         <% apis.forEach((a, i) => { %>

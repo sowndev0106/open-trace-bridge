@@ -41,21 +41,30 @@ function handleEvent(req, res) {
   const { isNew, isPullSource, prompt } = extractPrompt(ev.text, project.keyword);
 
   if (isPullSource) {
+    let conv = convs.findActive(project.id, ev.conversationId);
+    if (!conv) conv = convs.create(project.id, ev.conversationId);
+    messages.add({ conversation_id: conv.id, direction: 'in', user_id: ev.userId, user_name: ev.userName, content: ev.text });
     res.json({ handled: true, action: 'pull-source' });
     sync.syncProject(project.id)
       .then(({ ok, results }) => {
         const lines = results
-          .map((r) => `- ${r.git_url}: ${r.status}${r.error ? ` — ${r.error}` : ''}`)
+          .map((r) => `- ${r.git_url}: ${r.status}${r.error ? ` - ${r.error}` : ''}`)
           .join('\n');
+        const title = ok ? 'Sources updated to latest' : 'Source sync failed';
+        const markdown = lines || 'No repositories configured.';
+        messages.add({ conversation_id: conv.id, direction: 'out', content: `${title}\n\n${markdown}` });
         return webhook.sendTeamsMessage(project.teams_webhook_url, {
           status: ok ? 'success' : 'error',
-          title: ok ? 'Sources updated to latest' : 'Source sync failed',
-          markdown: lines || 'No repositories configured.',
+          title,
+          markdown,
           metadata: { project: project.slug },
           maxLength: project.max_msg_length,
         });
       })
-      .catch((err) => console.error(`pull-source fail (project=${project.slug}):`, err.message));
+      .catch((err) => {
+        messages.add({ conversation_id: conv.id, direction: 'out', content: `[error] ${err.message}` });
+        console.error(`pull-source fail (project=${project.slug}):`, err.message);
+      });
     return;
   }
 

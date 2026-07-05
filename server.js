@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const retention = require('./services/retention.service');
 
 function logger(req, res, next) {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
@@ -38,5 +39,6 @@ const ADMIN_PORT = process.env.ADMIN_PORT || 8667;
 if (require.main === module) {
   publicApp.listen(PORT, () => console.log(`OpenTraceBridge public API listening on port ${PORT}`));
   adminApp.listen(ADMIN_PORT, () => console.log(`OpenTraceBridge admin UI listening on port ${ADMIN_PORT} (private)`));
+  retention.startRetentionJob();
 }
 module.exports = { publicApp, adminApp };

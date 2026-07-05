@@ -1,6 +1,7 @@
 /node_modules
 /data
 /workspaces
+/.worktrees
 *.log
 .env
 private.md

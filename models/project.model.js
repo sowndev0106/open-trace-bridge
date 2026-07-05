@@ -1,18 +1,19 @@
 const { getDb } = require('../lib/db');
 
-function create({ slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length }) {
+function create({ slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length, chat_retention_days }) {
   const info = getDb().prepare(
-    `INSERT INTO projects (slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length)
-     VALUES (?, ?, ?, ?, ?, ?)`
+    `INSERT INTO projects (slug, name, keyword, system_prompt, teams_webhook_url, max_msg_length, chat_retention_days)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
   ).run(slug, name, keyword || '', system_prompt || '', teams_webhook_url || '',
-    Number(max_msg_length) > 0 ? Number(max_msg_length) : 20000);
+    Number(max_msg_length) > 0 ? Number(max_msg_length) : 20000,
+    Number.isInteger(Number(chat_retention_days)) && Number(chat_retention_days) >= 0 ? Number(chat_retention_days) : 90);
   return findById(info.lastInsertRowid);
 }
 function findById(id) { return getDb().prepare('SELECT * FROM projects WHERE id = ?').get(id); }
 function findBySlug(slug) { return getDb().prepare('SELECT * FROM projects WHERE slug = ?').get(slug); }
 function list() { return getDb().prepare('SELECT * FROM projects ORDER BY id').all(); }
 function update(id, fields) {
-  const allowed = ['slug', 'name', 'keyword', 'system_prompt', 'teams_webhook_url', 'max_msg_length'];
+  const allowed = ['slug', 'name', 'keyword', 'system_prompt', 'teams_webhook_url', 'max_msg_length', 'chat_retention_days'];
   const keys = Object.keys(fields).filter((k) => allowed.includes(k));
   if (!keys.length) return findById(id);
   const set = keys.map((k) => `${k} = ?`).join(', ');
