@@ -1,0 +1,13 @@
+{
+  "name": "open-trace-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenTraceBridge quick-win demo server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
