@@ -136,7 +136,7 @@
   <section class="panel mb-6">
     <div class="panel-body">
       <div class="mb-4">
-        <h2 class="section-heading">API groups</h2>
+        <h2 class="section-heading">API Endpoints (Curl)</h2>
         <p class="mt-1 text-sm text-ink-500">Paste curl commands or edit stored API rows. Rows are saved together with the project when you press Save.</p>
       </div>
       <div data-rows="apis">
@@ -144,7 +144,7 @@
           <%- include('_api-row', { a, i }) %>
         <% }) %>
       </div>
-      <button type="button" class="btn btn-secondary" data-add="apis">Add API group</button>
+      <button type="button" class="btn btn-secondary" data-add="apis">Add API endpoint</button>
       <template data-template="apis"><%- include('_api-row', { a: {}, i: '__I__' }) %></template>
     </div>
   </section>
@@ -160,7 +160,7 @@
     if (systemPromptTextarea) {
       var systemPromptEditor = new toastui.Editor({
         el: document.querySelector('#system_prompt_editor'),
-        height: '350px',
+        height: '700px',
         initialEditType: 'markdown',
         previewStyle: 'tab',
         initialValue: systemPromptTextarea.value,
@@ -181,7 +181,7 @@
 
       var editor = new toastui.Editor({
         el: editorEl,
-        height: '250px',
+        height: '500px',
         initialEditType: 'markdown',
         previewStyle: 'tab',
         initialValue: textarea.value,
