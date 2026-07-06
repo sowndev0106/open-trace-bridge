@@ -1,6 +1,7 @@
 const projects = require('../models/project.model');
 const convs = require('../models/conversation.model');
 const messages = require('../models/message.model');
+const runs = require('../models/run.model');
 const { extractPrompt, COMMANDS } = require('../lib/eventGateway');
 const sync = require('../services/sync.service');
 const opencode = require('../services/opencode.service');
@@ -23,10 +24,29 @@ function eventFromRequest(req) {
 }
 
 async function investigate(project, conv, prompt) {
-  const ws = await sync.ensureReady(project);
-  const result = await opencode.runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt, conversationId: conv.id });
-  if (!conv.opencode_session_id) convs.setSession(conv.id, result.sessionId);
-  return result.text || '(agent returned no text)';
+  const startedAt = Date.now();
+  try {
+    const ws = await sync.ensureReady(project);
+    const result = await opencode.runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt, conversationId: conv.id });
+    if (!conv.opencode_session_id) convs.setSession(conv.id, result.sessionId);
+    const usage = result.usage || {};
+    runs.add({
+      project_id: project.id, conversation_id: conv.id, status: 'success',
+      duration_ms: Date.now() - startedAt,
+      tokens_input: usage.tokensInput ?? null, tokens_output: usage.tokensOutput ?? null,
+      tokens_reasoning: usage.tokensReasoning ?? null, cost_usd: usage.costUsd ?? null,
+    });
+    return result.text || '(agent returned no text)';
+  } catch (err) {
+    const isTimeout = /timeout|timed out/i.test(err.message);
+    runs.add({
+      project_id: project.id, conversation_id: conv.id,
+      status: isTimeout ? 'timeout' : 'error',
+      duration_ms: Date.now() - startedAt,
+      error: err.message.slice(0, 1000),
+    });
+    throw err;
+  }
 }
 
 function guideMarkdown(project) {
@@ -159,7 +179,7 @@ function handleEvent(req, res) {
     .catch((err) => {
       console.error(`Investigation fail (project=${project.slug}):`, err);
       messages.add({ conversation_id: conv.id, direction: 'out', content: `[error] ${err.message}` });
-      const isTimeout = /timeout/i.test(err.message);
+      const isTimeout = /timeout|timed out/i.test(err.message);
       // §4.6 partial_or_timeout / §4.7 error
       const msg = isTimeout ? {
         status: 'warning',

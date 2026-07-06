@@ -9,6 +9,7 @@ const { resetDbForTest } = require('../lib/db');
 const projects = require('../models/project.model');
 const convs = require('../models/conversation.model');
 const messages = require('../models/message.model');
+const runs = require('../models/run.model');
 const sync = require('../services/sync.service');
 const opencode = require('../services/opencode.service');
 const webhook = require('../services/webhook.service');
@@ -120,4 +121,54 @@ test('unknown slash command sends a hint card and never calls the agent', async 
   await waitFor(() => sent.length === 1);
   assert.match(sent[0].markdown, /\/guide/);
   assert.strictEqual(called, false);
+});
+
+test('a successful investigation records a runs row with duration and usage', async () => {
+  sync.ensureReady = async () => '/tmp/ws-payment';
+  opencode.runPrompt = async () => ({
+    sessionId: 'ses_1', text: 'because of X',
+    usage: { tokensInput: 100, tokensOutput: 20, tokensReasoning: 0, costUsd: 0.01 },
+  });
+  await request(publicApp)
+    .post('/api/events/payment')
+    .send({ raw: { text: 'payment-bot why did txn_9 fail?' }, user: { id: 'u1', name: 'An' },
+      channel: { conversationId: 'c5' } })
+    .expect(200);
+  await waitFor(() => sent.length === 1);
+  const conv = convs.findActive(project.id, 'c5');
+  const rows = runs.listByProject(project.id).filter((r) => r.conversation_id === conv.id);
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].status, 'success');
+  assert.strictEqual(rows[0].tokens_input, 100);
+  assert.ok(rows[0].duration_ms >= 0);
+});
+
+test('a timed-out investigation records a runs row with status timeout', async () => {
+  sync.ensureReady = async () => '/tmp/ws-payment';
+  opencode.runPrompt = async () => { throw new Error('opencode timed out after 5 minutes'); };
+  await request(publicApp)
+    .post('/api/events/payment')
+    .send({ raw: { text: 'payment-bot check this' }, user: { id: 'u1', name: 'An' },
+      channel: { conversationId: 'c6' } })
+    .expect(200);
+  await waitFor(() => sent.length === 1);
+  const conv = convs.findActive(project.id, 'c6');
+  const rows = runs.listByProject(project.id).filter((r) => r.conversation_id === conv.id);
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].status, 'timeout');
+});
+
+test('a failed investigation records a runs row with status error and the error message', async () => {
+  sync.ensureReady = async () => { throw new Error('Source sync failed: app.git: denied'); };
+  await request(publicApp)
+    .post('/api/events/payment')
+    .send({ raw: { text: 'payment-bot check this' }, user: { id: 'u1', name: 'An' },
+      channel: { conversationId: 'c7' } })
+    .expect(200);
+  await waitFor(() => sent.length === 1);
+  const conv = convs.findActive(project.id, 'c7');
+  const rows = runs.listByProject(project.id).filter((r) => r.conversation_id === conv.id);
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].status, 'error');
+  assert.match(rows[0].error, /Source sync failed/);
 });

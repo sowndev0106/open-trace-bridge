@@ -5,17 +5,31 @@ const TIMEOUT_MS = 300000;
 // Indirection over spawn so tests can stub opencode invocations.
 const proc = { spawn };
 
+function emptyUsage() {
+  return { tokensInput: null, tokensOutput: null, tokensReasoning: null, costUsd: null };
+}
+
 function parseRunOutput(stdout) {
   let sessionId = null;
   const chunks = [];
+  let sawUsage = false;
+  const usage = { tokensInput: 0, tokensOutput: 0, tokensReasoning: 0, costUsd: 0 };
+
   for (const line of String(stdout).split('\n')) {
     if (!line.trim()) continue;
     let ev;
     try { ev = JSON.parse(line); } catch { continue; }
     if (!sessionId && ev.sessionID) sessionId = ev.sessionID;
     if (ev.type === 'text' && ev.part && typeof ev.part.text === 'string') chunks.push(ev.part.text);
+    if (ev.type === 'step_finish' && ev.part && ev.part.tokens) {
+      sawUsage = true;
+      usage.tokensInput += ev.part.tokens.input || 0;
+      usage.tokensOutput += ev.part.tokens.output || 0;
+      usage.tokensReasoning += ev.part.tokens.reasoning || 0;
+      usage.costUsd += ev.part.cost || 0;
+    }
   }
-  return { sessionId, text: chunks.join('') };
+  return { sessionId, text: chunks.join(''), usage: sawUsage ? usage : emptyUsage() };
 }
 
 function runPrompt({ dir, sessionId, text, conversationId }) {
