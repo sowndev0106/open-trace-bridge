@@ -44,7 +44,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-OpenCode remote control is published on `http://localhost:4096` for local setup and debugging.
+OpenCode remote control is published on `http://localhost:4096` (or `OPENCODE_PORT` below) for local setup and debugging.
 
 ## Configuration
 
@@ -52,6 +52,7 @@ OpenCode remote control is published on `http://localhost:4096` for local setup 
 | --- | --- | --- |
 | `PORT` | `6666` | Public event API port. |
 | `ADMIN_PORT` | `8667` | Private admin UI and `/internal` API port. |
+| `OPENCODE_PORT` | `4096` | OpenCode remote control port. Change if 4096 is already taken on the host. |
 | `OPENCODE_SERVER_PASSWORD` | empty | Optional password for OpenCode remote control. |
 | `OTB_DB_PATH` | `data/otb.sqlite` | SQLite database path. |
 | `OTB_WORKSPACES_DIR` | `workspaces` | Directory for generated project workspaces. |

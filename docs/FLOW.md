@@ -56,7 +56,7 @@ Docker runs the Express app and `opencode serve` in the same container.
 
 - `6666`: public event API.
 - `8667`: private admin UI and `/internal` API.
-- `4096`: OpenCode remote control, bound to host localhost only.
+- `4096` (or `OPENCODE_PORT`): OpenCode remote control, bound to host localhost only.
 
 Persisted data:
 

@@ -5,7 +5,7 @@ services:
     ports:
       - "6666:6666"                 # Public event API. Point the tunnel here.
       - "127.0.0.1:8667:8667"       # Admin UI + /internal. Host localhost only; do not tunnel.
-      - "127.0.0.1:4096:4096"       # OpenCode serve. Host localhost only.
+      - "127.0.0.1:${OPENCODE_PORT:-4096}:${OPENCODE_PORT:-4096}"  # OpenCode serve. Host localhost only.
     volumes:
       - ./data:/app/data
       - ./workspaces:/app/workspaces
@@ -14,6 +14,7 @@ services:
     environment:
       - PORT=6666
       - ADMIN_PORT=8667
+      - OPENCODE_PORT=${OPENCODE_PORT:-4096}
       - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD:-}
 
 volumes:
