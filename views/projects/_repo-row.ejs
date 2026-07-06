@@ -3,11 +3,14 @@
   <div class="form-grid">
     <div>
       <label>Git URL</label>
-      <input type="text" name="repos[<%= i %>][git_url]" value="<%= r.git_url || '' %>" placeholder="https://github.com/org/repo.git or git@github.com:org/repo.git">
+      <input type="text" name="repos[<%= i %>][git_url]" value="<%= r.git_url || '' %>" 
+             class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden"
+             placeholder="https://github.com/org/repo.git or git@github.com:org/repo.git">
     </div>
     <div>
       <label>Auth</label>
-      <select name="repos[<%= i %>][auth_type]">
+      <select name="repos[<%= i %>][auth_type]" data-auth-type-select
+              class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden">
         <option value="none" <%= r.auth_type === 'none' || !r.auth_type ? 'selected' : '' %>>none</option>
         <option value="https-token" <%= r.auth_type === 'https-token' ? 'selected' : '' %>>https-token</option>
         <option value="ssh" <%= r.auth_type === 'ssh' ? 'selected' : '' %>>ssh</option>
@@ -15,19 +18,21 @@
     </div>
     <div>
       <label>Branch</label>
-      <input type="text" name="repos[<%= i %>][branch]" value="<%= r.branch || 'main' %>">
+      <input type="text" name="repos[<%= i %>][branch]" value="<%= r.branch || 'main' %>"
+             class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden">
     </div>
   </div>
-  <div class="form-grid-two mt-3">
-    <div>
-      <label>Token</label>
-      <input type="password" name="repos[<%= i %>][token]" value="" autocomplete="new-password"
-             placeholder="<%= r.id ? 'Leave blank to keep the current token' : '' %>">
-    </div>
-    <div>
-      <label>SSH private key</label>
-      <textarea name="repos[<%= i %>][ssh_key]" placeholder="<%= r.id ? 'Leave blank to keep the current key' : '' %>"></textarea>
-    </div>
+  <div class="mt-3">
+    <label>Token</label>
+    <input type="password" name="repos[<%= i %>][token]" value="" autocomplete="new-password" data-token-input
+           class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden"
+           placeholder="<%= r.id ? 'Leave blank to keep the current token' : '' %>">
+  </div>
+  <div class="mt-3">
+    <label>SSH private key</label>
+    <textarea name="repos[<%= i %>][ssh_key]" data-ssh-key-input
+              class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden font-mono min-h-32"
+              placeholder="<%= r.id ? 'Leave blank to keep the current key' : '' %>"></textarea>
   </div>
   <div class="mt-3 flex items-center justify-between gap-4">
     <% if (r.id && r.sync_status) { %>

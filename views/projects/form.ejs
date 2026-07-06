@@ -198,6 +198,43 @@
     // Initialize existing API description editors
     document.querySelectorAll('[data-api-editor-container]').forEach(initApiRowEditor);
 
+    // Repo auth fields toggle logic
+    function updateAuthFields(rowEl) {
+      var select = rowEl.querySelector('[data-auth-type-select]');
+      var tokenInput = rowEl.querySelector('[data-token-input]');
+      var sshKeyInput = rowEl.querySelector('[data-ssh-key-input]');
+      if (!select || !tokenInput || !sshKeyInput) return;
+
+      var authType = select.value;
+      if (authType === 'https-token') {
+        tokenInput.disabled = false;
+        tokenInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
+        sshKeyInput.disabled = true;
+        sshKeyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
+      } else if (authType === 'ssh') {
+        tokenInput.disabled = true;
+        tokenInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
+        sshKeyInput.disabled = false;
+        sshKeyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
+      } else { // 'none'
+        tokenInput.disabled = true;
+        tokenInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
+        sshKeyInput.disabled = true;
+        sshKeyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
+      }
+    }
+
+    // Initialize existing repo rows
+    document.querySelectorAll('[data-rows="repos"] > [data-row]').forEach(updateAuthFields);
+
+    // Listen for changes on auth type selects
+    document.addEventListener('change', function (e) {
+      if (e.target.matches('[data-auth-type-select]')) {
+        var row = e.target.closest('[data-row]');
+        if (row) updateAuthFields(row);
+      }
+    });
+
     document.querySelectorAll('[data-add]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var kind = btn.getAttribute('data-add');
@@ -211,6 +248,9 @@
           if (container) {
             initApiRowEditor(container);
           }
+        }
+        if (kind === 'repos') {
+          updateAuthFields(newEl);
         }
       });
     });
