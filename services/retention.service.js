@@ -1,6 +1,7 @@
 const projects = require('../models/project.model');
 const convs = require('../models/conversation.model');
 const apicalls = require('../models/apicall.model');
+const runs = require('../models/run.model');
 
 const DEFAULT_INTERVAL_MS = 60 * 60 * 1000;
 
@@ -16,6 +17,7 @@ function runRetentionCleanup(now = new Date()) {
   let projectsChecked = 0;
   let conversationsDeleted = 0;
   let apiCallsDeleted = 0;
+  let runsDeleted = 0;
 
   for (const project of projects.list()) {
     const days = Number(project.chat_retention_days);
@@ -24,17 +26,18 @@ function runRetentionCleanup(now = new Date()) {
     const cutoff = cutoffFor(now, days);
     conversationsDeleted += convs.deleteOlderThan(project.id, cutoff);
     apiCallsDeleted += apicalls.deleteOlderThan(project.id, cutoff);
+    runsDeleted += runs.deleteOlderThan(project.id, cutoff);
   }
 
-  return { projectsChecked, conversationsDeleted, apiCallsDeleted };
+  return { projectsChecked, conversationsDeleted, apiCallsDeleted, runsDeleted };
 }
 
 function startRetentionJob({ intervalMs = DEFAULT_INTERVAL_MS } = {}) {
   const timer = setInterval(() => {
     try {
       const result = runRetentionCleanup();
-      if (result.conversationsDeleted || result.apiCallsDeleted) {
-        console.log(`[retention] deleted conversations=${result.conversationsDeleted} apiCalls=${result.apiCallsDeleted}`);
+      if (result.conversationsDeleted || result.apiCallsDeleted || result.runsDeleted) {
+        console.log(`[retention] deleted conversations=${result.conversationsDeleted} apiCalls=${result.apiCallsDeleted} runs=${result.runsDeleted}`);
       }
     } catch (err) {
       console.error('[retention] cleanup failed:', err.message);
