@@ -5,16 +5,16 @@
 @theme {
   --font-sans: Outfit, Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --color-ink-950: #f3f4f6; /* Very light gray */
-  --color-ink-700: #d1d5db; /* Light/medium gray */
-  --color-ink-500: #9ca3af; /* Muted gray */
-  --color-panel: #111827; /* Slate-900 */
-  --color-canvas: #030712; /* Slate-950 */
-  --color-line: #1f2937; /* Slate-800 */
-  --color-brand: #3b82f6; /* Accent blue */
-  --color-brand-dark: #2563eb;
-  --color-success: #10b981;
-  --color-danger: #ef4444;
+  --color-ink-950: #0f172a; /* Deep slate */
+  --color-ink-700: #334155; /* Slate gray */
+  --color-ink-500: #64748b; /* Muted gray */
+  --color-panel: #ffffff; /* White */
+  --color-canvas: #f8fafc; /* Slate-50 */
+  --color-line: #e2e8f0; /* Slate-200 */
+  --color-brand: #2563eb; /* Royal blue */
+  --color-brand-dark: #1d4ed8;
+  --color-success: #0d9488;
+  --color-danger: #e11d48;
 }
 
 @layer base {
@@ -27,7 +27,7 @@
   }
 
   code {
-    @apply rounded-md border border-line bg-slate-900 px-2 py-1 font-mono text-[0.8125rem] text-ink-700;
+    @apply rounded-md border border-line bg-slate-50 px-2 py-1 font-mono text-[0.8125rem] text-ink-700;
   }
 
   label {
@@ -40,7 +40,7 @@
   input[type="number"],
   textarea,
   select {
-    @apply mt-2 w-full rounded-lg border border-line bg-slate-950/50 px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden;
+    @apply mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden;
   }
 
   textarea {
@@ -58,7 +58,7 @@
   }
 
   .topbar {
-    @apply border-b border-line bg-slate-950/80 backdrop-blur-md;
+    @apply border-b border-line bg-white/95 backdrop-blur-md;
   }
 
   .topbar-inner {
@@ -70,7 +70,7 @@
   }
 
   .nav-link {
-    @apply rounded-lg px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-slate-900 hover:text-ink-950;
+    @apply rounded-lg px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-slate-100 hover:text-ink-950;
   }
 
   .page-kicker {
@@ -90,7 +90,7 @@
   }
 
   .panel {
-    @apply rounded-xl border border-line bg-panel shadow-md transition-all duration-300 hover:shadow-lg hover:border-slate-800;
+    @apply rounded-xl border border-line bg-panel shadow-sm transition-all duration-300 hover:shadow-md hover:border-slate-300;
   }
 
   .panel-body {
@@ -98,7 +98,7 @@
   }
 
   .table-shell {
-    @apply overflow-hidden rounded-xl border border-line bg-panel shadow-md;
+    @apply overflow-hidden rounded-xl border border-line bg-white shadow-sm;
   }
 
   .table-scroll {
@@ -110,7 +110,7 @@
   }
 
   .data-table thead {
-    @apply bg-slate-950/40 text-xs uppercase tracking-wider text-ink-500;
+    @apply bg-slate-50 text-xs uppercase tracking-wider text-ink-500;
   }
 
   .data-table th {
@@ -122,7 +122,7 @@
   }
 
   .data-table tbody {
-    @apply divide-y divide-line bg-panel;
+    @apply divide-y divide-line bg-white;
   }
 
   .btn {
@@ -134,11 +134,11 @@
   }
 
   .btn-secondary {
-    @apply border-line bg-slate-900 text-ink-700 hover:bg-slate-800 hover:text-ink-950;
+    @apply border-line bg-white text-ink-700 hover:bg-slate-50 hover:text-ink-950;
   }
 
   .btn-danger {
-    @apply border-red-950/30 bg-red-950/20 text-red-400 hover:bg-red-950/50 hover:text-red-300;
+    @apply border-red-200 bg-red-50 text-danger hover:bg-red-100;
   }
 
   .inline-form {
@@ -158,7 +158,7 @@
   }
 
   .error {
-    @apply rounded-lg border border-red-950 bg-red-950/10 px-4 py-3 text-sm text-red-400;
+    @apply rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger;
   }
 
   .error-list {
@@ -170,87 +170,27 @@
   }
 
   .status-active {
-    @apply border-emerald-950 bg-emerald-950/20 text-emerald-400;
+    @apply border-emerald-200 bg-emerald-50 text-success;
   }
 
   .status-muted {
-    @apply border-slate-800 bg-slate-900 text-ink-500;
+    @apply border-slate-200 bg-slate-100 text-ink-500;
   }
 
   .status-error {
-    @apply border-rose-950 bg-rose-950/20 text-rose-400;
+    @apply border-rose-200 bg-rose-50 text-danger;
   }
 
   .status-syncing {
-    @apply border-amber-950 bg-amber-950/20 text-amber-400;
+    @apply border-amber-200 bg-amber-50 text-amber-700;
   }
 
   .empty-state {
-    @apply rounded-xl border border-dashed border-line bg-panel px-6 py-10 text-center;
+    @apply rounded-xl border border-dashed border-line bg-white px-6 py-10 text-center;
   }
 
   .message-timeline {
     @apply relative;
-  }
-
-  /* Custom overrides for specific structures in forms and tables */
-  .bg-slate-50 {
-    background-color: var(--color-canvas) !important;
-  }
-  .bg-slate-100 {
-    background-color: var(--color-canvas) !important;
-    opacity: 0.6;
-  }
-  .bg-white {
-    background-color: var(--color-panel) !important;
-  }
-
-  /* Toast UI Editor Dark Mode overrides */
-  .toastui-editor-defaultUI {
-    border-color: var(--color-line) !important;
-    background-color: var(--color-panel) !important;
-  }
-  .toastui-editor-toolbar {
-    background-color: var(--color-canvas) !important;
-    border-bottom: 1px solid var(--color-line) !important;
-  }
-  .toastui-editor-toolbar .toastui-editor-button {
-    color: var(--color-ink-700) !important;
-    border-color: transparent !important;
-  }
-  .toastui-editor-toolbar .toastui-editor-button:hover {
-    background-color: var(--color-line) !important;
-  }
-  .toastui-editor-main {
-    background-color: var(--color-panel) !important;
-  }
-  .toastui-editor-main-tab {
-    background-color: var(--color-canvas) !important;
-    border-bottom: 1px solid var(--color-line) !important;
-  }
-  .toastui-editor-main-tab .toastui-editor-tabs .tab-item.active {
-    background-color: var(--color-panel) !important;
-    border-color: var(--color-line) !important;
-    color: var(--color-brand) !important;
-  }
-  .toastui-editor-editor, .toastui-editor-md-preview {
-    background-color: var(--color-panel) !important;
-    color: var(--color-ink-950) !important;
-  }
-  .toastui-editor-contents {
-    color: var(--color-ink-700) !important;
-  }
-  .toastui-editor-contents p, .toastui-editor-contents h1, .toastui-editor-contents h2, .toastui-editor-contents h3, .toastui-editor-contents h4, .toastui-editor-contents h5, .toastui-editor-contents h6 {
-    color: var(--color-ink-950) !important;
-  }
-  .toastui-editor-ww-container, .toastui-editor-md-container {
-    background-color: var(--color-panel) !important;
-  }
-  .toastui-editor-md-tab-container, .toastui-editor-ww-tab-container {
-    background-color: var(--color-canvas) !important;
-  }
-  .ProseMirror {
-    color: var(--color-ink-950) !important;
   }
 
   /* Metric Card Gradient Accents */
@@ -263,12 +203,12 @@
 
   /* Metric Card Hover Glow */
   .panel-metric {
-    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-lg;
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-md;
   }
-  .panel-metric.accent-blue:hover { @apply shadow-blue-500/5; }
-  .panel-metric.accent-purple:hover { @apply shadow-purple-500/5; }
-  .panel-metric.accent-red:hover { @apply shadow-red-500/5; }
-  .panel-metric.accent-green:hover { @apply shadow-emerald-500/5; }
-  .panel-metric.accent-orange:hover { @apply shadow-orange-500/5; }
-  .panel-metric.accent-teal:hover { @apply shadow-teal-500/5; }
+  .panel-metric.accent-blue:hover { @apply shadow-blue-500/10; }
+  .panel-metric.accent-purple:hover { @apply shadow-purple-500/10; }
+  .panel-metric.accent-red:hover { @apply shadow-red-500/10; }
+  .panel-metric.accent-green:hover { @apply shadow-emerald-500/10; }
+  .panel-metric.accent-orange:hover { @apply shadow-orange-500/10; }
+  .panel-metric.accent-teal:hover { @apply shadow-teal-500/10; }
 }
