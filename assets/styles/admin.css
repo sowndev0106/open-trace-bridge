@@ -34,11 +34,12 @@
   }
 
   input[type="text"],
+  input[type="password"],
   input[type="url"],
   input[type="number"],
   textarea,
   select {
-    @apply mt-2 w-full rounded-lg border-line bg-white text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand;
+    @apply mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden;
   }
 
   textarea {
