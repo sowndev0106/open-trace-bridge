@@ -2,7 +2,7 @@
 @plugin "@tailwindcss/forms";
 @source "../../views/**/*.ejs";
 
-@theme {
+:root {
   --font-sans: Outfit, Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-ink-950: #0f172a; /* Deep slate */
@@ -15,6 +15,34 @@
   --color-brand-dark: #1d4ed8;
   --color-success: #0d9488;
   --color-danger: #e11d48;
+}
+
+.dark {
+  --color-ink-950: #f3f4f6; /* Very light gray */
+  --color-ink-700: #d1d5db; /* Light/medium gray */
+  --color-ink-500: #9ca3af; /* Muted gray */
+  --color-panel: #111827; /* Slate-900 */
+  --color-canvas: #030712; /* Slate-950 */
+  --color-line: #1f2937; /* Slate-800 */
+  --color-brand: #3b82f6; /* Accent blue */
+  --color-brand-dark: #2563eb;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+}
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --color-ink-950: var(--color-ink-950);
+  --color-ink-700: var(--color-ink-700);
+  --color-ink-500: var(--color-ink-500);
+  --color-panel: var(--color-panel);
+  --color-canvas: var(--color-canvas);
+  --color-line: var(--color-line);
+  --color-brand: var(--color-brand);
+  --color-brand-dark: var(--color-brand-dark);
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
 }
 
 @layer base {
@@ -211,4 +239,82 @@
   .panel-metric.accent-green:hover { @apply shadow-emerald-500/10; }
   .panel-metric.accent-orange:hover { @apply shadow-orange-500/10; }
   .panel-metric.accent-teal:hover { @apply shadow-teal-500/10; }
+
+  /* Dark mode specific component overrides */
+  .dark .btn-secondary {
+    @apply border-line bg-slate-900 text-ink-700 hover:bg-slate-800 hover:text-ink-950;
+  }
+  .dark .btn-danger {
+    @apply border-red-950/30 bg-red-950/20 text-red-400 hover:bg-red-950/50 hover:text-red-300;
+  }
+  .dark .status-active {
+    @apply border-emerald-950 bg-emerald-950/20 text-emerald-400;
+  }
+  .dark .status-muted {
+    @apply border-slate-800 bg-slate-900 text-ink-500;
+  }
+  .dark .status-error {
+    @apply border-rose-950 bg-rose-950/20 text-rose-400;
+  }
+  .dark .status-syncing {
+    @apply border-amber-950 bg-amber-950/20 text-amber-400;
+  }
+  .dark .bg-slate-50 {
+    background-color: var(--color-canvas) !important;
+  }
+  .dark .bg-slate-100 {
+    background-color: var(--color-canvas) !important;
+    opacity: 0.6;
+  }
+  .dark .bg-white {
+    background-color: var(--color-panel) !important;
+  }
+
+  /* Toast UI Editor Dark Mode overrides */
+  .dark .toastui-editor-defaultUI {
+    border-color: var(--color-line) !important;
+    background-color: var(--color-panel) !important;
+  }
+  .dark .toastui-editor-toolbar {
+    background-color: var(--color-canvas) !important;
+    border-bottom: 1px solid var(--color-line) !important;
+  }
+  .dark .toastui-editor-toolbar .toastui-editor-button {
+    color: var(--color-ink-700) !important;
+    border-color: transparent !important;
+  }
+  .dark .toastui-editor-toolbar .toastui-editor-button:hover {
+    background-color: var(--color-line) !important;
+  }
+  .dark .toastui-editor-main {
+    background-color: var(--color-panel) !important;
+  }
+  .dark .toastui-editor-main-tab {
+    background-color: var(--color-canvas) !important;
+    border-bottom: 1px solid var(--color-line) !important;
+  }
+  .dark .toastui-editor-main-tab .toastui-editor-tabs .tab-item.active {
+    background-color: var(--color-panel) !important;
+    border-color: var(--color-line) !important;
+    color: var(--color-brand) !important;
+  }
+  .dark .toastui-editor-editor, .dark .toastui-editor-md-preview {
+    background-color: var(--color-panel) !important;
+    color: var(--color-ink-950) !important;
+  }
+  .dark .toastui-editor-contents {
+    color: var(--color-ink-700) !important;
+  }
+  .dark .toastui-editor-contents p, .dark .toastui-editor-contents h1, .dark .toastui-editor-contents h2, .dark .toastui-editor-contents h3, .dark .toastui-editor-contents h4, .dark .toastui-editor-contents h5, .dark .toastui-editor-contents h6 {
+    color: var(--color-ink-950) !important;
+  }
+  .dark .toastui-editor-ww-container, .dark .toastui-editor-md-container {
+    background-color: var(--color-panel) !important;
+  }
+  .dark .toastui-editor-md-tab-container, .dark .toastui-editor-ww-tab-container {
+    background-color: var(--color-canvas) !important;
+  }
+  .dark .ProseMirror {
+    color: var(--color-ink-950) !important;
+  }
 }
