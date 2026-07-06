@@ -39,6 +39,29 @@
     </section>
   <% } %>
 
+  <% if (isEditing) { %>
+    <section class="panel mb-6">
+      <div class="panel-body">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="section-heading">Integration Webhook & Logs</h2>
+            <p class="mt-1 text-sm text-ink-500">Send Teams events into OpenTraceBridge, or inspect the audit logs and chat history.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a id="view-chat-history-btn" class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#chat-history">View chat history</a>
+            <a id="view-api-calls-btn" class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#api-calls">View latest API calls</a>
+          </div>
+        </div>
+        <div class="mt-4">
+          <label class="text-xs font-semibold uppercase tracking-wider text-ink-500">Power Automate Webhook URL</label>
+          <div class="mt-2 overflow-x-auto rounded-lg border border-line bg-slate-50 p-4">
+            <code id="webhook-endpoint-url">https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&amp;conversationId=...&amp;userId=...&amp;userName=...</code>
+          </div>
+        </div>
+      </div>
+    </section>
+  <% } %>
+
   <section class="panel mb-6">
     <div class="panel-body space-y-5">
       <div class="form-grid">
@@ -85,38 +108,6 @@
     </div>
   </section>
 
-  <% if (isEditing) { %>
-    <section class="panel mb-6">
-      <div class="panel-body">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 class="section-heading">Power Automate endpoint</h2>
-            <p class="mt-2 text-sm text-ink-500">Use this URL shape when sending Teams events into OpenTraceBridge.</p>
-          </div>
-          <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations">Open audit trail</a>
-        </div>
-        <div class="mt-4 overflow-x-auto rounded-lg border border-line bg-slate-50 p-4">
-          <code>https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&amp;conversationId=...&amp;userId=...&amp;userName=...</code>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel mb-6">
-      <div class="panel-body">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 class="section-heading">History & Audits</h2>
-            <p class="mt-1 text-sm text-ink-500">Access Teams chat history and the audit log of recent API calls for this project.</p>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <a id="view-chat-history-btn" class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#chat-history">View chat history</a>
-            <a id="view-api-calls-btn" class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#api-calls">View latest API calls</a>
-          </div>
-        </div>
-      </div>
-    </section>
-  <% } %>
-
   <section class="panel mb-6">
     <div class="panel-body">
       <div class="mb-4">
@@ -154,6 +145,18 @@
 <script>
   (function () {
     var counters = { repos: <%= repos.length %>, apis: <%= apis.length %> };
+
+    // Update webhook endpoint URL with dynamic host
+    var webhookCodeEl = document.getElementById('webhook-endpoint-url');
+    if (webhookCodeEl) {
+      var origin = window.location.protocol + '//' + window.location.hostname;
+      if (window.location.port) {
+        // If on local admin port (8667), default public api is 6666
+        var port = window.location.port === '8667' ? '6666' : window.location.port;
+        origin += ':' + port;
+      }
+      webhookCodeEl.textContent = origin + '/api/events/<%= project ? project.slug : "" %>?text=...&conversationId=...&userId=...&userName=...';
+    }
     
     // Initialize system prompt editor
     var systemPromptTextarea = document.getElementById('system_prompt');

@@ -1,6 +1,13 @@
 <fieldset class="mb-4 rounded-lg border border-line p-4" data-row>
   <input type="hidden" name="apis[<%= i %>][id]" value="<%= a.id || '' %>">
   <div class="mb-3">
+    <label>Name</label>
+    <input type="text" name="apis[<%= i %>][name]" value="<%= a.name || '' %>" 
+           class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden"
+           placeholder="transaction-api">
+    <p class="field-help">Optional. If left blank, OpenTraceBridge derives a name from the curl URL host.</p>
+  </div>
+  <div class="mb-3">
     <label>Curl command</label>
     <textarea name="apis[<%= i %>][curl_command]" 
               class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden font-mono min-h-32"
@@ -9,13 +16,6 @@
     <% if (a.id && a.base_url) { %>
     <p class="field-help">Current: <code><%= a.allowed_methods || 'GET' %> <%= a.base_url %></code> &middot; auth header: <code><%= a.auth_header || 'Authorization' %></code></p>
     <% } %>
-  </div>
-  <div class="mb-3">
-    <label>Name</label>
-    <input type="text" name="apis[<%= i %>][name]" value="<%= a.name || '' %>" 
-           class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden"
-           placeholder="transaction-api">
-    <p class="field-help">Optional. If left blank, OpenTraceBridge derives a name from the curl URL host.</p>
   </div>
   <div class="mt-3" data-api-editor-container>
     <label>Markdown description</label>

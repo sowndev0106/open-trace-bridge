@@ -88,7 +88,7 @@ test('project edit form preserves workflows inside redesigned panels', async () 
   assert.strictEqual($('input[name="teams_webhook_url"]').val(), 'https://hook.example/payment');
   assert.strictEqual($('input[name="max_msg_length"]').val(), '20000');
   assert.strictEqual($('input[name="chat_retention_days"]').val(), '90');
-  assert.ok($(`a[href="/admin/projects/${project.id}/conversations"]`).filter((_, el) => $(el).text().trim() === 'Open audit trail').length >= 1);
+  assert.ok($(`a[href="/admin/projects/${project.id}/conversations"]`).filter((_, el) => $(el).text().trim() === 'Audit & Chats').length >= 1);
   assert.strictEqual($('input[name="repos[0][git_url]"]').val(), 'https://github.com/acme/payment.git');
   assert.strictEqual($('input[name="apis[0][name]"]').val(), 'transaction-api');
   assert.strictEqual($('template[data-template="repos"]').length, 1);
