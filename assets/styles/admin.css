@@ -3,17 +3,18 @@
 @source "../../views/**/*.ejs";
 
 @theme {
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --color-ink-950: #111827;
-  --color-ink-700: #374151;
-  --color-ink-500: #6b7280;
-  --color-panel: #ffffff;
-  --color-canvas: #f6f7fb;
-  --color-line: #d9dee8;
-  --color-brand: #2563eb;
-  --color-brand-dark: #1d4ed8;
-  --color-success: #047857;
-  --color-danger: #b91c1c;
+  --font-sans: Outfit, Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-ink-950: #f3f4f6; /* Very light gray */
+  --color-ink-700: #d1d5db; /* Light/medium gray */
+  --color-ink-500: #9ca3af; /* Muted gray */
+  --color-panel: #111827; /* Slate-900 */
+  --color-canvas: #030712; /* Slate-950 */
+  --color-line: #1f2937; /* Slate-800 */
+  --color-brand: #3b82f6; /* Accent blue */
+  --color-brand-dark: #2563eb;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
 }
 
 @layer base {
@@ -26,7 +27,7 @@
   }
 
   code {
-    @apply rounded-md border border-line bg-slate-50 px-2 py-1 font-mono text-[0.8125rem] text-ink-700;
+    @apply rounded-md border border-line bg-slate-900 px-2 py-1 font-mono text-[0.8125rem] text-ink-700;
   }
 
   label {
@@ -39,7 +40,7 @@
   input[type="number"],
   textarea,
   select {
-    @apply mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden;
+    @apply mt-2 w-full rounded-lg border border-line bg-slate-950/50 px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden;
   }
 
   textarea {
@@ -57,7 +58,7 @@
   }
 
   .topbar {
-    @apply border-b border-line bg-white/95 backdrop-blur;
+    @apply border-b border-line bg-slate-950/80 backdrop-blur-md;
   }
 
   .topbar-inner {
@@ -65,19 +66,19 @@
   }
 
   .brand-mark {
-    @apply flex h-9 w-9 items-center justify-center rounded-lg bg-ink-950 text-sm font-bold text-white;
+    @apply flex h-9 w-9 items-center justify-center rounded-lg bg-brand text-sm font-bold text-white shadow-md shadow-brand/20;
   }
 
   .nav-link {
-    @apply rounded-lg px-3 py-2 text-sm font-medium text-ink-700 hover:bg-slate-100 hover:text-ink-950;
+    @apply rounded-lg px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-slate-900 hover:text-ink-950;
   }
 
   .page-kicker {
-    @apply text-sm font-medium text-brand;
+    @apply text-sm font-medium tracking-wide uppercase text-brand;
   }
 
   .page-title {
-    @apply mt-2 text-3xl font-semibold tracking-normal text-ink-950;
+    @apply mt-1 text-3xl font-bold tracking-tight text-ink-950;
   }
 
   .page-subtitle {
@@ -89,7 +90,7 @@
   }
 
   .panel {
-    @apply rounded-lg border border-line bg-panel shadow-sm;
+    @apply rounded-xl border border-line bg-panel shadow-md transition-all duration-300 hover:shadow-lg hover:border-slate-800;
   }
 
   .panel-body {
@@ -97,7 +98,7 @@
   }
 
   .table-shell {
-    @apply overflow-hidden rounded-lg border border-line bg-white shadow-sm;
+    @apply overflow-hidden rounded-xl border border-line bg-panel shadow-md;
   }
 
   .table-scroll {
@@ -109,7 +110,7 @@
   }
 
   .data-table thead {
-    @apply bg-slate-50 text-xs uppercase tracking-normal text-ink-500;
+    @apply bg-slate-950/40 text-xs uppercase tracking-wider text-ink-500;
   }
 
   .data-table th {
@@ -121,23 +122,23 @@
   }
 
   .data-table tbody {
-    @apply divide-y divide-line bg-white;
+    @apply divide-y divide-line bg-panel;
   }
 
   .btn {
-    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold shadow-sm transition whitespace-nowrap;
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold shadow-sm transition whitespace-nowrap cursor-pointer active:scale-95;
   }
 
   .btn-primary {
-    @apply border-brand bg-brand text-white hover:bg-brand-dark;
+    @apply border-brand bg-brand text-white hover:bg-brand-dark hover:shadow-md hover:shadow-brand/20;
   }
 
   .btn-secondary {
-    @apply border-line bg-white text-ink-700 hover:bg-slate-50 hover:text-ink-950;
+    @apply border-line bg-slate-900 text-ink-700 hover:bg-slate-800 hover:text-ink-950;
   }
 
   .btn-danger {
-    @apply border-red-200 bg-red-50 text-danger hover:bg-red-100;
+    @apply border-red-950/30 bg-red-950/20 text-red-400 hover:bg-red-950/50 hover:text-red-300;
   }
 
   .inline-form {
@@ -157,7 +158,7 @@
   }
 
   .error {
-    @apply rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger;
+    @apply rounded-lg border border-red-950 bg-red-950/10 px-4 py-3 text-sm text-red-400;
   }
 
   .error-list {
@@ -169,26 +170,105 @@
   }
 
   .status-active {
-    @apply border-emerald-200 bg-emerald-50 text-success;
+    @apply border-emerald-950 bg-emerald-950/20 text-emerald-400;
   }
 
   .status-muted {
-    @apply border-slate-200 bg-slate-100 text-ink-500;
+    @apply border-slate-800 bg-slate-900 text-ink-500;
   }
 
   .status-error {
-    @apply border-rose-200 bg-rose-50 text-rose-700;
+    @apply border-rose-950 bg-rose-950/20 text-rose-400;
   }
 
   .status-syncing {
-    @apply border-amber-200 bg-amber-50 text-amber-700;
+    @apply border-amber-950 bg-amber-950/20 text-amber-400;
   }
 
   .empty-state {
-    @apply rounded-lg border border-dashed border-line bg-white px-6 py-10 text-center;
+    @apply rounded-xl border border-dashed border-line bg-panel px-6 py-10 text-center;
   }
 
   .message-timeline {
     @apply relative;
   }
+
+  /* Custom overrides for specific structures in forms and tables */
+  .bg-slate-50 {
+    background-color: var(--color-canvas) !important;
+  }
+  .bg-slate-100 {
+    background-color: var(--color-canvas) !important;
+    opacity: 0.6;
+  }
+  .bg-white {
+    background-color: var(--color-panel) !important;
+  }
+
+  /* Toast UI Editor Dark Mode overrides */
+  .toastui-editor-defaultUI {
+    border-color: var(--color-line) !important;
+    background-color: var(--color-panel) !important;
+  }
+  .toastui-editor-toolbar {
+    background-color: var(--color-canvas) !important;
+    border-bottom: 1px solid var(--color-line) !important;
+  }
+  .toastui-editor-toolbar .toastui-editor-button {
+    color: var(--color-ink-700) !important;
+    border-color: transparent !important;
+  }
+  .toastui-editor-toolbar .toastui-editor-button:hover {
+    background-color: var(--color-line) !important;
+  }
+  .toastui-editor-main {
+    background-color: var(--color-panel) !important;
+  }
+  .toastui-editor-main-tab {
+    background-color: var(--color-canvas) !important;
+    border-bottom: 1px solid var(--color-line) !important;
+  }
+  .toastui-editor-main-tab .toastui-editor-tabs .tab-item.active {
+    background-color: var(--color-panel) !important;
+    border-color: var(--color-line) !important;
+    color: var(--color-brand) !important;
+  }
+  .toastui-editor-editor, .toastui-editor-md-preview {
+    background-color: var(--color-panel) !important;
+    color: var(--color-ink-950) !important;
+  }
+  .toastui-editor-contents {
+    color: var(--color-ink-700) !important;
+  }
+  .toastui-editor-contents p, .toastui-editor-contents h1, .toastui-editor-contents h2, .toastui-editor-contents h3, .toastui-editor-contents h4, .toastui-editor-contents h5, .toastui-editor-contents h6 {
+    color: var(--color-ink-950) !important;
+  }
+  .toastui-editor-ww-container, .toastui-editor-md-container {
+    background-color: var(--color-panel) !important;
+  }
+  .toastui-editor-md-tab-container, .toastui-editor-ww-tab-container {
+    background-color: var(--color-canvas) !important;
+  }
+  .ProseMirror {
+    color: var(--color-ink-950) !important;
+  }
+
+  /* Metric Card Gradient Accents */
+  .accent-blue { border-top: 4px solid var(--color-brand); }
+  .accent-purple { border-top: 4px solid #8b5cf6; }
+  .accent-red { border-top: 4px solid var(--color-danger); }
+  .accent-green { border-top: 4px solid var(--color-success); }
+  .accent-orange { border-top: 4px solid #f97316; }
+  .accent-teal { border-top: 4px solid #14b8a6; }
+
+  /* Metric Card Hover Glow */
+  .panel-metric {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-lg;
+  }
+  .panel-metric.accent-blue:hover { @apply shadow-blue-500/5; }
+  .panel-metric.accent-purple:hover { @apply shadow-purple-500/5; }
+  .panel-metric.accent-red:hover { @apply shadow-red-500/5; }
+  .panel-metric.accent-green:hover { @apply shadow-emerald-500/5; }
+  .panel-metric.accent-orange:hover { @apply shadow-orange-500/5; }
+  .panel-metric.accent-teal:hover { @apply shadow-teal-500/5; }
 }
