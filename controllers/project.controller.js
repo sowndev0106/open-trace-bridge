@@ -2,32 +2,14 @@ const { getDb } = require('../lib/db');
 const projects = require('../models/project.model');
 const repos = require('../models/repo.model');
 const apis = require('../models/api.model');
-const apicalls = require('../models/apicall.model');
-const convs = require('../models/conversation.model');
 const { validateProjectBundle } = require('../services/adminValidation');
 const sync = require('../services/sync.service');
 
-function auditRows(projectId) {
-  return {
-    apiCalls: apicalls.listByProject(projectId).slice(0, 25),
-    conversationRows: convs.listByProject(projectId).slice(0, 10),
-  };
-}
-
-function renderProjectForm(res, status, {
-  project,
-  repoRows,
-  apiRows,
-  errors = [],
-  apiCalls = [],
-  conversationRows = [],
-}) {
+function renderProjectForm(res, status, { project, repoRows, apiRows, errors = [] }) {
   return res.status(status).render('projects/form', {
     project,
     repos: repoRows || [],
     apis: apiRows || [],
-    apiCalls,
-    conversations: conversationRows,
     errors,
     error: errors[0] || null,
   });
@@ -92,7 +74,6 @@ function editProjectForm(req, res) {
     project: p,
     repoRows: repos.listByProject(p.id),
     apiRows: apis.listByProject(p.id),
-    ...auditRows(p.id),
   });
 }
 
@@ -111,7 +92,6 @@ function updateProject(req, res) {
       project: { ...p, ...req.body, ...values.project, id: p.id },
       repoRows: values.repos,
       apiRows: values.apis,
-      ...auditRows(p.id),
       errors,
     });
   }

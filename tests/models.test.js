@@ -28,9 +28,10 @@ test('project CRUD + findBySlug', () => {
 test('repos and api groups per project', () => {
   const p = projects.create({ slug: 's', name: 'S', keyword: 'k', system_prompt: '', teams_webhook_url: '' });
   repos.create({ project_id: p.id, git_url: 'https://github.com/a/b.git', auth_type: 'https-token', token: 'tok', ssh_key: null, branch: 'main' });
-  const g = apis.create({ project_id: p.id, name: 'txn-api', base_url: 'https://api.internal', api_key: 'key1', auth_header: 'Authorization', allowed_methods: 'GET', description_md: '# Txn API' });
+  const g = apis.create({ project_id: p.id, name: 'txn-api', base_url: 'https://api.internal', api_key: 'key1', auth_header: 'Authorization', allowed_methods: 'GET', description_md: '# Txn API', curl_command: 'curl https://api.internal' });
   assert.strictEqual(repos.listByProject(p.id).length, 1);
   assert.strictEqual(apis.findByProjectAndName(p.id, 'txn-api').id, g.id);
+  assert.strictEqual(apis.findByProjectAndName(p.id, 'txn-api').curl_command, 'curl https://api.internal');
 });
 
 test('repo sync status lifecycle: pending -> syncing -> error stamps synced_at', () => {
@@ -78,15 +79,16 @@ test('repos.update resets sync status only when git content changes', () => {
 test('apis.update rewrites all fields', () => {
   const p = projects.create({ slug: 'u2', name: 'U2', keyword: '', system_prompt: '', teams_webhook_url: '' });
   const a = apis.create({ project_id: p.id, name: 'one', base_url: 'https://x.example', api_key: 'k1',
-    auth_header: 'Authorization', allowed_methods: 'GET', description_md: 'd' });
+    auth_header: 'Authorization', allowed_methods: 'GET', description_md: 'd', curl_command: 'curl https://x.example' });
   const row = apis.update(a.id, { name: 'two', base_url: 'https://y.example', api_key: 'k2',
-    auth_header: 'X-Key', allowed_methods: 'GET,POST', description_md: 'e' });
+    auth_header: 'X-Key', allowed_methods: 'GET,POST', description_md: 'e', curl_command: 'curl https://y.example' });
   assert.strictEqual(row.name, 'two');
   assert.strictEqual(row.base_url, 'https://y.example');
   assert.strictEqual(row.api_key, 'k2');
   assert.strictEqual(row.auth_header, 'X-Key');
   assert.strictEqual(row.allowed_methods, 'GET,POST');
   assert.strictEqual(row.description_md, 'e');
+  assert.strictEqual(row.curl_command, 'curl https://y.example');
 });
 
 test('conversation lifecycle + messages', () => {

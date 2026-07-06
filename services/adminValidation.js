@@ -128,7 +128,7 @@ function validateApiGroupInput(input) {
         errors.push('Allowed methods can only include GET, POST, PUT, PATCH, and DELETE.');
       }
       return {
-        values: { ...parsed, allowed_methods: methods.join(',') },
+        values: { ...parsed, allowed_methods: methods.join(','), curl_command: clean(input.curl_command) },
         errors,
       };
     } catch (err) {
@@ -155,6 +155,7 @@ function validateApiGroupInput(input) {
     auth_header: clean(input.auth_header),
     allowed_methods: methods.join(','),
     description_md: String(input.description_md ?? ''),
+    curl_command: String(input.curl_command ?? ''),
   };
 
   if (!values.name) {
@@ -217,6 +218,7 @@ function validateProjectBundle(body, { existingRepos = [], existingApis = [] } =
       if (!clean(input.base_url)) input.base_url = existing.base_url || '';
       if (!clean(input.auth_header)) input.auth_header = existing.auth_header || '';
       if (!clean(input.allowed_methods)) input.allowed_methods = existing.allowed_methods || '';
+      input.curl_command = existing.curl_command || '';
     }
     const { values, errors: rowErrors } = validateApiGroupInput(input);
     for (const message of rowErrors) allErrors.push(`API group #${i + 1}: ${message}`);

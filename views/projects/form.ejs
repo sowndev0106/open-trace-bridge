@@ -21,6 +21,7 @@
     <div class="flex items-center gap-2">
       <a href="/admin/projects" class="btn btn-secondary">Back to projects</a>
       <% if (isEditing) { %>
+        <a href="/admin/projects/<%= project.id %>/conversations" class="btn btn-secondary">Audit & Chats</a>
         <button class="btn btn-secondary" type="submit" form="sync-form">Sync now</button>
       <% } %>
       <button class="btn btn-primary" type="submit">Save</button>
@@ -101,56 +102,16 @@
 
     <section class="panel mb-6">
       <div class="panel-body">
-        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 class="section-heading">Latest API calls</h2>
-            <p class="mt-1 text-sm text-ink-500">Recent calls made through the OpenCode <code>call_api</code> tool for this project.</p>
+            <h2 class="section-heading">History & Audits</h2>
+            <p class="mt-1 text-sm text-ink-500">Access Teams chat history and the audit log of recent API calls for this project.</p>
           </div>
-          <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations">Open full audit</a>
+          <div class="flex flex-wrap gap-2">
+            <a id="view-chat-history-btn" class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#chat-history">View chat history</a>
+            <a id="view-api-calls-btn" class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#api-calls">View latest API calls</a>
+          </div>
         </div>
-
-        <% if (apiCalls && apiCalls.length) { %>
-          <%- include('../conversations/_api-calls-table', { apiCalls, showConversation: true }) %>
-        <% } else { %>
-          <div class="rounded-lg border border-dashed border-line bg-slate-50 px-4 py-5 text-sm text-ink-500">No API calls have been recorded yet.</div>
-        <% } %>
-      </div>
-    </section>
-
-    <section class="panel mb-6">
-      <div class="panel-body">
-        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 class="section-heading">Chat history</h2>
-            <p class="mt-1 text-sm text-ink-500">Recent Teams conversations saved for this project.</p>
-          </div>
-          <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations">View all chats</a>
-        </div>
-
-        <% if (conversations && conversations.length) { %>
-          <div class="table-shell shadow-none">
-            <div class="table-scroll">
-              <table class="data-table">
-                <thead>
-                  <tr><th>ID</th><th>Teams conversation</th><th>OpenCode session</th><th>Status</th><th>Updated</th></tr>
-                </thead>
-                <tbody>
-                  <% for (const c of conversations) { %>
-                  <tr data-chat-history-row>
-                    <td><a class="font-semibold text-brand hover:text-brand-dark" href="/admin/conversations/<%= c.id %>">#<%= c.id %></a></td>
-                    <td><%= c.teams_conversation_id %></td>
-                    <td><code><%= c.opencode_session_id || '-' %></code></td>
-                    <td><span class="status-badge <%= c.status === 'active' ? 'status-active' : 'status-muted' %>"><%= c.status %></span></td>
-                    <td><%= c.updated_at %></td>
-                  </tr>
-                  <% } %>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        <% } else { %>
-          <div class="rounded-lg border border-dashed border-line bg-slate-50 px-4 py-5 text-sm text-ink-500">No chat history has been recorded yet.</div>
-        <% } %>
       </div>
     </section>
   <% } %>

@@ -221,6 +221,40 @@ test('api group can be created from pasted curl and markdown description', async
   assert.strictEqual(rows[0].description_md, 'Search transactions by reference id.');
 });
 
+test('stored curl command loads back into the edit form and survives a blank re-save', async () => {
+  const project = seedProject();
+  const curl = 'curl -H "x-api-key: secret123" "https://api2.example.com/api/v2/invoices/logs"';
+
+  await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+    slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
+    teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+    chat_retention_days: '90',
+    'apis[0][name]': 'invoice-api',
+    'apis[0][curl_command]': curl,
+    'apis[0][description_md]': 'Invoice logs.',
+  }).expect(302);
+
+  const page = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(page.text);
+  assert.strictEqual($('textarea[name="apis[0][curl_command]"]').text(), curl);
+
+  const api = apis.listByProject(project.id)[0];
+  await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+    slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
+    teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
+    chat_retention_days: '90',
+    'apis[0][id]': String(api.id),
+    'apis[0][name]': 'invoice-api',
+    'apis[0][curl_command]': '',
+    'apis[0][description_md]': 'Invoice logs.',
+  }).expect(302);
+
+  const rows = apis.listByProject(project.id);
+  assert.strictEqual(rows[0].curl_command, curl);
+  assert.strictEqual(rows[0].api_key, 'secret123');
+  assert.strictEqual(rows[0].auth_header, 'x-api-key');
+});
+
 test('api row form only offers name, curl, and description inputs plus a parsed summary', async () => {
   const project = seedProject();
   apis.create({
@@ -346,7 +380,7 @@ test('conversation detail shows the API calls made by that conversation with ful
   assert.match(response.text, /(&quot;|&#34;)total(&quot;|&#34;)|"total"/);
 });
 
-test('project edit page shows latest API calls', async () => {
+test('project edit page links latest API calls instead of inlining them', async () => {
   const project = seedProject();
   apicalls.add({
     project_id: project.id,
@@ -359,10 +393,11 @@ test('project edit page shows latest API calls', async () => {
   const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(response.text);
 
-  assert.match(response.text, /Latest API calls/);
-  assert.match(response.text, /transaction-api/);
-  assert.match(response.text, /https:\/\/api\.internal\/transactions\/txn_123/);
-  assert.strictEqual($('[data-api-call-row]').length, 1);
+  const button = $(`a[href="/admin/projects/${project.id}/conversations#api-calls"]`);
+  assert.strictEqual(button.length, 1);
+  assert.strictEqual(button.text().trim(), 'View latest API calls');
+  assert.strictEqual($('[data-api-call-row]').length, 0);
+  assert.doesNotMatch(response.text, /api\.internal\/transactions\/txn_123/);
 });
 
 test('conversation detail renders message timeline', async () => {
@@ -396,7 +431,7 @@ test('conversation detail renders message timeline', async () => {
   assert.match(response.text, /message-timeline/);
 });
 
-test('project edit page links recent chat history', async () => {
+test('project edit page links chat history instead of inlining it', async () => {
   const project = seedProject();
   const conversation = convs.create(project.id, 'teams-conv-1');
   convs.setSession(conversation.id, 'ses_abc');
@@ -411,10 +446,17 @@ test('project edit page links recent chat history', async () => {
   const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(response.text);
 
-  assert.match(response.text, /Chat history/);
-  assert.match(response.text, /teams-conv-1/);
-  assert.strictEqual($(`a[href="/admin/conversations/${conversation.id}"]`).length >= 1, true);
-  assert.strictEqual($('[data-chat-history-row]').length, 1);
+  const button = $(`a[href="/admin/projects/${project.id}/conversations#chat-history"]`);
+  assert.strictEqual(button.length, 1);
+  assert.strictEqual(button.text().trim(), 'View chat history');
+  assert.strictEqual($('[data-chat-history-row]').length, 0);
+  assert.doesNotMatch(response.text, /teams-conv-1/);
+
+  const listPage = await request(adminApp).get(`/admin/projects/${project.id}/conversations`).expect(200);
+  const $$ = cheerio.load(listPage.text);
+  assert.strictEqual($$('#chat-history').length, 1);
+  assert.strictEqual($$('#api-calls').length, 1);
+  assert.match(listPage.text, /teams-conv-1/);
 });
 
 test('create, update, and Sync now each trigger exactly one background sync', async () => {

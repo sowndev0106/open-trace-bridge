@@ -1,11 +1,11 @@
 const { getDb } = require('../lib/db');
 
-function create({ project_id, name, base_url, api_key, auth_header, allowed_methods, description_md }) {
+function create({ project_id, name, base_url, api_key, auth_header, allowed_methods, description_md, curl_command }) {
   const info = getDb().prepare(
-    `INSERT INTO api_groups (project_id, name, base_url, api_key, auth_header, allowed_methods, description_md)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO api_groups (project_id, name, base_url, api_key, auth_header, allowed_methods, description_md, curl_command)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(project_id, name, base_url, api_key || '', auth_header || 'Authorization',
-    allowed_methods || 'GET', description_md || '');
+    allowed_methods || 'GET', description_md || '', curl_command || '');
   return getDb().prepare('SELECT * FROM api_groups WHERE id = ?').get(info.lastInsertRowid);
 }
 function listByProject(project_id) {
@@ -16,12 +16,12 @@ function findByProjectAndName(project_id, name) {
 }
 function remove(id) { getDb().prepare('DELETE FROM api_groups WHERE id = ?').run(id); }
 
-function update(id, { name, base_url, api_key, auth_header, allowed_methods, description_md }) {
+function update(id, { name, base_url, api_key, auth_header, allowed_methods, description_md, curl_command }) {
   getDb().prepare(
     `UPDATE api_groups SET name = ?, base_url = ?, api_key = ?, auth_header = ?,
-       allowed_methods = ?, description_md = ? WHERE id = ?`
+       allowed_methods = ?, description_md = ?, curl_command = ? WHERE id = ?`
   ).run(name, base_url, api_key || '', auth_header || 'Authorization',
-    allowed_methods || 'GET', description_md || '', id);
+    allowed_methods || 'GET', description_md || '', curl_command || '', id);
   return getDb().prepare('SELECT * FROM api_groups WHERE id = ?').get(id);
 }
 
