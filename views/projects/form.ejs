@@ -60,7 +60,8 @@
 
       <div>
         <label for="system_prompt">System prompt</label>
-        <textarea id="system_prompt" name="system_prompt"><%= project ? (project.system_prompt || '') : '' %></textarea>
+        <textarea id="system_prompt" name="system_prompt" class="hidden"><%= project ? (project.system_prompt || '') : '' %></textarea>
+        <div id="system_prompt_editor" class="mt-2 bg-white rounded-lg border border-line"></div>
       </div>
 
       <div class="form-grid">
@@ -149,16 +150,68 @@
   </section>
 </form>
 
+<script src="https://cdn.jsdelivr.net/npm/@toast-ui/editor@3.2.2/dist/toastui-editor-all.min.js"></script>
 <script>
   (function () {
     var counters = { repos: <%= repos.length %>, apis: <%= apis.length %> };
+    
+    // Initialize system prompt editor
+    var systemPromptTextarea = document.getElementById('system_prompt');
+    if (systemPromptTextarea) {
+      var systemPromptEditor = new toastui.Editor({
+        el: document.querySelector('#system_prompt_editor'),
+        height: '350px',
+        initialEditType: 'markdown',
+        previewStyle: 'vertical',
+        initialValue: systemPromptTextarea.value,
+        usageStatistics: false,
+        events: {
+          change: function () {
+            systemPromptTextarea.value = systemPromptEditor.getMarkdown();
+          }
+        }
+      });
+    }
+
+    // API row editor initializer
+    function initApiRowEditor(container) {
+      var textarea = container.querySelector('.api-description-textarea');
+      var editorEl = container.querySelector('.api-description-editor');
+      if (!textarea || !editorEl || editorEl.dataset.initialized) return;
+
+      var editor = new toastui.Editor({
+        el: editorEl,
+        height: '250px',
+        initialEditType: 'markdown',
+        previewStyle: 'vertical',
+        initialValue: textarea.value,
+        usageStatistics: false,
+        events: {
+          change: function () {
+            textarea.value = editor.getMarkdown();
+          }
+        }
+      });
+      editorEl.dataset.initialized = 'true';
+    }
+
+    // Initialize existing API description editors
+    document.querySelectorAll('[data-api-editor-container]').forEach(initApiRowEditor);
+
     document.querySelectorAll('[data-add]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var kind = btn.getAttribute('data-add');
         var tpl = document.querySelector('template[data-template="' + kind + '"]');
         var holder = document.createElement('div');
         holder.innerHTML = tpl.innerHTML.replace(/__I__/g, counters[kind]++);
-        document.querySelector('[data-rows="' + kind + '"]').appendChild(holder.firstElementChild);
+        var newEl = holder.firstElementChild;
+        document.querySelector('[data-rows="' + kind + '"]').appendChild(newEl);
+        if (kind === 'apis') {
+          var container = newEl.querySelector('[data-api-editor-container]');
+          if (container) {
+            initApiRowEditor(container);
+          }
+        }
       });
     });
     document.addEventListener('click', function (e) {
