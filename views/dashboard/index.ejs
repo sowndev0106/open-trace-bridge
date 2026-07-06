@@ -1,0 +1,98 @@
+<%- include('../layout-head') %>
+
+<section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <p class="page-kicker">Usage overview</p>
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Questions, response time, error rate, API calls, tokens, and cost across projects.</p>
+  </div>
+  <form method="get" class="flex items-center gap-2">
+    <select name="days" onchange="this.form.submit()">
+      <% [7, 30, 90].forEach(function(d) { %>
+        <option value="<%= d %>" <%= days === d ? 'selected' : '' %>><%= d %> days</option>
+      <% }); %>
+    </select>
+    <select name="project" onchange="this.form.submit()">
+      <option value="">All projects</option>
+      <% allProjects.forEach(function(p) { %>
+        <option value="<%= p.id %>" <%= filterProjectId === p.id ? 'selected' : '' %>><%= p.name %></option>
+      <% }); %>
+    </select>
+  </form>
+</section>
+
+<section class="mb-6 grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
+  <div class="panel panel-body">
+    <p class="text-sm font-medium text-ink-500">Total questions</p>
+    <p class="mt-2 text-2xl font-semibold text-ink-950"><%= totals.questions %></p>
+  </div>
+  <div class="panel panel-body">
+    <p class="text-sm font-medium text-ink-500">Avg response time</p>
+    <p class="mt-2 text-2xl font-semibold text-ink-950">
+      <%= totals.totalRuns ? Math.round(perProject.reduce((a, r) => a + (r.avgDurationMs || 0) * r.totalRuns, 0) / totals.totalRuns) + ' ms' : 'n/a' %>
+    </p>
+  </div>
+  <div class="panel panel-body">
+    <p class="text-sm font-medium text-ink-500">Error rate</p>
+    <p class="mt-2 text-2xl font-semibold text-ink-950">
+      <%= totals.totalRuns ? (100 * totals.errorRuns / totals.totalRuns).toFixed(1) + '%' : 'n/a' %>
+    </p>
+  </div>
+  <div class="panel panel-body">
+    <p class="text-sm font-medium text-ink-500">call_api count</p>
+    <p class="mt-2 text-2xl font-semibold text-ink-950"><%= totals.apiCallCount %></p>
+  </div>
+  <div class="panel panel-body">
+    <p class="text-sm font-medium text-ink-500">Total tokens</p>
+    <p class="mt-2 text-2xl font-semibold text-ink-950"><%= (totals.totalTokensInput + totals.totalTokensOutput) || 'n/a' %></p>
+  </div>
+  <div class="panel panel-body">
+    <p class="text-sm font-medium text-ink-500">Total cost</p>
+    <p class="mt-2 text-2xl font-semibold text-ink-950"><%= totals.totalCostUsd ? '$' + totals.totalCostUsd.toFixed(4) : 'n/a' %></p>
+  </div>
+</section>
+
+<section class="mb-6 panel panel-body">
+  <p class="mb-3 text-sm font-medium text-ink-500">Questions per day</p>
+  <% if (!chart.length) { %>
+    <p class="text-sm text-ink-500">No questions in this range.</p>
+  <% } else {
+       const max = Math.max(...chart.map(function(row) { return row.count; }));
+  %>
+  <div class="flex items-end gap-1" style="height: 120px;">
+    <% chart.forEach(function(row) { %>
+      <div class="flex flex-col items-center justify-end" style="height: 100%;">
+        <div style="width: 16px; height: <%= Math.max(4, Math.round(100 * row.count / max)) %>%; background: currentColor;" class="rounded-t text-brand" title="<%= row.day %>: <%= row.count %>"></div>
+      </div>
+    <% }); %>
+  </div>
+  <% } %>
+</section>
+
+<section class="table-shell">
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Project</th><th>Questions</th><th>Avg duration</th><th>Error %</th>
+          <th>call_api</th><th>Tokens</th><th>Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% perProject.forEach(function(row) { %>
+        <tr>
+          <td><%= row.project.name %></td>
+          <td><%= row.questions %></td>
+          <td><%= row.avgDurationMs != null ? Math.round(row.avgDurationMs) + ' ms' : 'n/a' %></td>
+          <td><%= row.totalRuns ? (100 * row.errorRate).toFixed(1) + '%' : 'n/a' %></td>
+          <td><%= row.apiCallCount %></td>
+          <td><%= (row.totalTokensInput != null && row.totalTokensOutput != null) ? (row.totalTokensInput + row.totalTokensOutput) : 'n/a' %></td>
+          <td><%= row.totalCostUsd != null ? '$' + row.totalCostUsd.toFixed(4) : 'n/a' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include('../layout-foot') %>
