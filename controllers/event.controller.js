@@ -1,7 +1,7 @@
 const projects = require('../models/project.model');
 const convs = require('../models/conversation.model');
 const messages = require('../models/message.model');
-const { extractPrompt } = require('../lib/eventGateway');
+const { extractPrompt, COMMANDS } = require('../lib/eventGateway');
 const sync = require('../services/sync.service');
 const opencode = require('../services/opencode.service');
 const webhook = require('../services/webhook.service');
@@ -29,6 +29,27 @@ async function investigate(project, conv, prompt) {
   return result.text || '(agent returned no text)';
 }
 
+function guideMarkdown(project) {
+  const lines = COMMANDS.map((c) => `- \`${project.keyword} /${c.name}\` — ${c.description}`);
+  return [
+    `Ask a question with \`${project.keyword} <your question>\` and the agent will investigate.`,
+    '',
+    '**Commands**',
+    ...lines,
+  ].join('\n');
+}
+
+function ensureConversation(project, ev) {
+  let conv = convs.findActive(project.id, ev.conversationId);
+  if (!conv) conv = convs.create(project.id, ev.conversationId);
+  return conv;
+}
+
+function recordInboundAndReply(conv, ev, res, action) {
+  messages.add({ conversation_id: conv.id, direction: 'in', user_id: ev.userId, user_name: ev.userName, content: ev.text });
+  res.json({ handled: true, action, conversationId: conv.id });
+}
+
 function handleEvent(req, res) {
   const project = projects.findBySlug(req.params.slug);
   if (!project) return res.status(404).json({ error: `No project found for slug "${req.params.slug}"` });
@@ -38,11 +59,42 @@ function handleEvent(req, res) {
     return res.status(400).json({ error: 'Missing text or conversationId' });
   }
 
-  const { isNew, isPullSource, prompt } = extractPrompt(ev.text, project.keyword);
+  const { command, prompt } = extractPrompt(ev.text, project.keyword);
 
-  if (isPullSource) {
-    let conv = convs.findActive(project.id, ev.conversationId);
-    if (!conv) conv = convs.create(project.id, ev.conversationId);
+  if (command === 'guide') {
+    const conv = ensureConversation(project, ev);
+    recordInboundAndReply(conv, ev, res, 'guide');
+    const markdown = guideMarkdown(project);
+    webhook.sendTeamsMessage(project.teams_webhook_url, {
+      status: 'info',
+      title: `${project.name} - Available commands`,
+      markdown,
+      metadata: { project: project.slug },
+      maxLength: project.max_msg_length,
+    })
+      .then(() => messages.add({ conversation_id: conv.id, direction: 'out', content: markdown }))
+      .catch((err) => console.error('Webhook fail:', err.message));
+    return;
+  }
+
+  if (command === 'unknown') {
+    const conv = ensureConversation(project, ev);
+    recordInboundAndReply(conv, ev, res, 'unknown-command');
+    const markdown = `Unrecognized command. Type \`${project.keyword} /guide\` to see available commands.`;
+    webhook.sendTeamsMessage(project.teams_webhook_url, {
+      status: 'warning',
+      title: `${project.name} - Unknown command`,
+      markdown,
+      metadata: { project: project.slug },
+      maxLength: project.max_msg_length,
+    })
+      .then(() => messages.add({ conversation_id: conv.id, direction: 'out', content: markdown }))
+      .catch((err) => console.error('Webhook fail:', err.message));
+    return;
+  }
+
+  if (command === 'pull-source') {
+    const conv = ensureConversation(project, ev);
     messages.add({ conversation_id: conv.id, direction: 'in', user_id: ev.userId, user_name: ev.userName, content: ev.text });
     res.json({ handled: true, action: 'pull-source' });
     sync.syncProject(project.id)
@@ -69,7 +121,7 @@ function handleEvent(req, res) {
   }
 
   let conv = convs.findActive(project.id, ev.conversationId);
-  if (isNew) {
+  if (command === 'new') {
     if (conv) convs.close(conv.id);
     conv = convs.create(project.id, ev.conversationId);
     messages.add({ conversation_id: conv.id, direction: 'in', user_id: ev.userId, user_name: ev.userName, content: ev.text });

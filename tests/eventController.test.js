@@ -89,3 +89,35 @@ test('message path reports sync failure through the error webhook', async () => 
   assert.strictEqual(sent[0].status, 'error');
   assert.match(sent[0].markdown, /Source sync failed/);
 });
+
+test('/guide responds without starting an OpenCode session and lists commands', async () => {
+  const res = await request(publicApp)
+    .post('/api/events/payment')
+    .send({ raw: { text: 'payment-bot /guide' }, user: { id: 'u1', name: 'An' },
+      channel: { conversationId: 'c3' } })
+    .expect(200);
+  assert.strictEqual(res.body.action, 'guide');
+  await waitFor(() => sent.length === 1);
+  assert.strictEqual(sent[0].status, 'info');
+  assert.match(sent[0].markdown, /\/new/);
+  assert.match(sent[0].markdown, /\/pull-source/);
+  assert.match(sent[0].markdown, /\/guide/);
+  assert.match(sent[0].markdown, /payment-bot/);
+  const conv = convs.findActive(project.id, 'c3');
+  assert.ok(conv);
+  await waitFor(() => messages.listByConversation(conv.id).length === 2);
+});
+
+test('unknown slash command sends a hint card and never calls the agent', async () => {
+  let called = false;
+  opencode.runPrompt = async () => { called = true; return { sessionId: 'ses_x', text: 'should not run' }; };
+  const res = await request(publicApp)
+    .post('/api/events/payment')
+    .send({ raw: { text: 'payment-bot /doesnotexist' }, user: { id: 'u1', name: 'An' },
+      channel: { conversationId: 'c4' } })
+    .expect(200);
+  assert.strictEqual(res.body.action, 'unknown-command');
+  await waitFor(() => sent.length === 1);
+  assert.match(sent[0].markdown, /\/guide/);
+  assert.strictEqual(called, false);
+});
