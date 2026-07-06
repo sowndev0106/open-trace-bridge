@@ -15,7 +15,7 @@
       <% for (const m of messages) { %>
         <% const isInbound = m.direction === 'in'; %>
         <article class="flex <%= isInbound ? 'justify-start' : 'justify-end' %>">
-          <div class="max-w-3xl rounded-lg border <%= isInbound ? 'border-line bg-white' : 'border-blue-100 bg-blue-50' %> p-4">
+          <div class="max-w-3xl rounded-lg border <%= isInbound ? 'border-line bg-slate-900/40' : 'border-blue-900/40 bg-blue-950/30' %> p-4">
             <div class="mb-2 flex flex-wrap items-center gap-2">
               <strong class="text-sm text-ink-950"><%= isInbound ? (m.user_name || 'user') : 'bot' %></strong>
               <small class="text-xs text-ink-500"><%= m.created_at %></small>
