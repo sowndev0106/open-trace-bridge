@@ -1,8 +1,166 @@
 <%- include('../layout-head') %>
-<section class="panel" id="chat-root"
+<section class="chat-shell" id="chat-root"
   data-project-id="<%= project.id %>"
   data-busy="<%= busy ? '1' : '0' %>">
-  <h1><%= project.name %></h1>
+
+  <header class="flex items-center justify-between gap-3 mb-4">
+    <div class="flex items-center gap-3">
+      <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/edit">&larr; Back</a>
+      <div>
+        <h1 class="page-title"><%= project.name %> &mdash; Agent chat</h1>
+        <p class="text-xs text-ink-500">Talks directly to this project's OpenCode agent.</p>
+      </div>
+    </div>
+    <form method="post" action="/admin/projects/<%= project.id %>/chat/new"
+      onsubmit="return confirm('Close this conversation and start a new one?');">
+      <button type="submit" class="btn btn-secondary">New conversation</button>
+    </form>
+  </header>
+
+  <div class="panel chat-panel">
+    <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
+    <div id="chat-busy-banner" class="chat-banner hidden">
+      The agent is still working on a previous message &mdash; reload shortly.
+    </div>
+    <form id="chat-form" class="chat-composer">
+      <textarea id="chat-input" rows="2" placeholder="Ask the agent… (Enter to send, Shift+Enter for a new line)"></textarea>
+      <button type="submit" id="chat-send" class="btn btn-primary">Send</button>
+    </form>
+  </div>
+
   <script type="application/json" id="chat-history"><%- JSON.stringify(chatMessages).replace(/</g, '\\u003c') %></script>
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
+<script>
+(function () {
+  const root = document.getElementById('chat-root');
+  const projectId = root.dataset.projectId;
+  const list = document.getElementById('chat-messages');
+  const form = document.getElementById('chat-form');
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('chat-send');
+  const busyBanner = document.getElementById('chat-busy-banner');
+
+  function renderMarkdown(el, text) {
+    el.innerHTML = DOMPurify.sanitize(marked.parse(text));
+  }
+  function addBubble(direction, content) {
+    const wrap = document.createElement('div');
+    wrap.className = direction === 'in' ? 'chat-row chat-row-user' : 'chat-row chat-row-agent';
+    const bubble = document.createElement('div');
+    bubble.className = direction === 'in' ? 'chat-bubble chat-bubble-user' : 'chat-bubble chat-bubble-agent';
+    if (direction === 'in') bubble.textContent = content;
+    else if (content.startsWith('[error] ')) {
+      bubble.classList.add('chat-bubble-error');
+      bubble.textContent = content;
+    } else renderMarkdown(bubble, content);
+    wrap.appendChild(bubble);
+    list.appendChild(wrap);
+    list.scrollTop = list.scrollHeight;
+    return bubble;
+  }
+  function addMeta(bubble, text) {
+    const meta = document.createElement('div');
+    meta.className = 'chat-meta';
+    meta.textContent = text;
+    bubble.appendChild(meta);
+  }
+  function setBusy(busy) {
+    input.disabled = busy;
+    sendBtn.disabled = busy;
+  }
+
+  // Render persisted history.
+  const history = JSON.parse(document.getElementById('chat-history').textContent || '[]');
+  history.forEach((m) => addBubble(m.direction, m.content));
+  if (root.dataset.busy === '1') { busyBanner.classList.remove('hidden'); setBusy(true); }
+
+  // Minimal SSE-over-fetch reader: emits {event, data} per "\n\n" frame.
+  async function readSse(response, onEvent) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf('\n\n')) >= 0) {
+        const frame = buf.slice(0, idx); buf = buf.slice(idx + 2);
+        let event = 'message', data = '';
+        for (const line of frame.split('\n')) {
+          if (line.startsWith('event: ')) event = line.slice(7);
+          else if (line.startsWith('data: ')) data += line.slice(6);
+        }
+        if (data) onEvent(event, JSON.parse(data));
+      }
+    }
+  }
+
+  async function send(text) {
+    setBusy(true);
+    addBubble('in', text);
+    const agentBubble = addBubble('out', '');
+    const status = document.createElement('div');
+    status.className = 'chat-status';
+    status.textContent = 'Starting agent…';
+    agentBubble.appendChild(status);
+    let acc = '';
+    try {
+      const res = await fetch(`/admin/projects/${projectId}/chat/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (res.status === 409) { status.textContent = 'A run is already in progress for this project.'; return; }
+      if (res.status === 401) { window.location = '/admin/login'; return; }
+      if (!res.ok) { status.textContent = `Request failed (${res.status}).`; return; }
+      await readSse(res, (event, data) => {
+        if (event === 'tool') status.textContent = `Running ${data.name}${data.status ? ` (${data.status})` : ''}…`;
+        if (event === 'text') {
+          acc += data.text;
+          status.remove();
+          renderMarkdown(agentBubble, acc);
+          list.scrollTop = list.scrollHeight;
+        }
+        if (event === 'done') {
+          renderMarkdown(agentBubble, data.text || acc);
+          const u = data.usage || {};
+          const parts = [`${Math.round(data.durationMs / 1000)}s`];
+          if (u.tokensInput != null) parts.push(`${((u.tokensInput || 0) + (u.tokensOutput || 0)).toLocaleString()} tok`);
+          if (u.costUsd != null) parts.push(`$${Number(u.costUsd).toFixed(4)}`);
+          addMeta(agentBubble, parts.join(' · '));
+        }
+        if (event === 'error') {
+          status.remove();
+          agentBubble.classList.add('chat-bubble-error');
+          agentBubble.textContent = `Error: ${data.message}`;
+        }
+      });
+    } catch (err) {
+      agentBubble.classList.add('chat-bubble-error');
+      agentBubble.textContent = `Connection lost: ${err.message}. The run may still finish — reload to see the result.`;
+    } finally {
+      setBusy(false);
+      input.focus();
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || input.disabled) return;
+    input.value = '';
+    send(text);
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      form.requestSubmit();
+    }
+  });
+})();
+</script>
 <%- include('../layout-foot') %>

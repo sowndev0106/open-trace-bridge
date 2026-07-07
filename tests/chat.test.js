@@ -97,3 +97,17 @@ test('empty text is a 400; new conversation closes the active one', async () => 
   assert.strictEqual(convs.findActive(project.id, ADMIN_CHANNEL), undefined);
   assert.strictEqual(getDb().prepare('SELECT status FROM conversations WHERE id = ?').get(conv.id).status, 'closed');
 });
+
+test('chat page renders history JSON, composer, and new-conversation button', async () => {
+  const conv = convs.create(project.id, ADMIN_CHANNEL);
+  messages.add({ conversation_id: conv.id, direction: 'in', user_id: 'admin', user_name: 'Admin', content: 'q1' });
+  messages.add({ conversation_id: conv.id, direction: 'out', content: '**bold answer**' });
+
+  const res = await agent.get(`/admin/projects/${project.id}/chat`).expect(200);
+  assert.match(res.text, /id="chat-history"/);
+  assert.match(res.text, /bold answer/);
+  assert.match(res.text, /id="chat-input"/);
+  assert.match(res.text, /chat\/new/);
+  assert.match(res.text, /marked/); // markdown renderer CDN
+  assert.match(res.text, /purify/i); // DOMPurify CDN
+});

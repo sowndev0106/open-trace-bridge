@@ -21,6 +21,7 @@
     <div class="flex items-center gap-2">
       <a href="/admin/projects" class="btn btn-secondary">Back to projects</a>
       <% if (isEditing) { %>
+        <a href="/admin/projects/<%= project.id %>/chat" class="btn btn-secondary">Chat</a>
         <a href="/admin/projects/<%= project.id %>/conversations" class="btn btn-secondary">Audit & Chats</a>
         <button class="btn btn-secondary" type="submit" form="sync-form">Sync now</button>
       <% } %>

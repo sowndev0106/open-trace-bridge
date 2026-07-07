@@ -72,6 +72,7 @@
             </td>
             <td>
               <div class="flex justify-end gap-2">
+                <a class="btn btn-primary" href="/admin/projects/<%= p.id %>/chat">Chat</a>
                 <a class="btn btn-secondary" href="/admin/projects/<%= p.id %>/conversations">View logs</a>
                 <a class="btn btn-secondary" href="/admin/projects/<%= p.id %>/edit">Edit</a>
                 <form class="inline-form" method="post" action="/admin/projects/<%= p.id %>/delete"

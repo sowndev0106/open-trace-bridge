@@ -318,3 +318,26 @@
     color: var(--color-ink-950) !important;
   }
 }
+
+/* Per-project agent chat */
+@layer components {
+  .chat-shell { display: flex; flex-direction: column; min-height: calc(100vh - 9rem); }
+  .chat-panel { display: flex; flex-direction: column; flex: 1; min-height: 24rem; }
+  .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem 0.25rem; }
+  .chat-row { display: flex; }
+  .chat-row-user { justify-content: flex-end; }
+  .chat-row-agent { justify-content: flex-start; }
+  .chat-bubble { max-width: 46rem; border-radius: 0.75rem; padding: 0.625rem 0.875rem; font-size: 0.875rem; line-height: 1.5; overflow-wrap: anywhere; }
+  .chat-bubble-user { background: var(--color-brand); color: #fff; white-space: pre-wrap; }
+  .chat-bubble-agent { background: var(--color-canvas); color: var(--color-ink-950); border: 1px solid var(--color-line); }
+  .chat-bubble-agent pre { overflow-x: auto; padding: 0.5rem; border-radius: 0.375rem; background: #0b1120; color: #f9fafb; margin: 0.5rem 0; }
+  .chat-bubble-agent code { font-family: var(--font-mono); font-size: 0.8125rem; }
+  .chat-bubble-agent p { margin: 0.375rem 0; }
+  .chat-bubble-agent ul, .chat-bubble-agent ol { margin: 0.375rem 0 0.375rem 1.25rem; list-style: disc; }
+  .chat-bubble-error { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent); }
+  .chat-status { font-size: 0.75rem; color: var(--color-ink-500); font-style: italic; }
+  .chat-meta { margin-top: 0.375rem; font-size: 0.6875rem; color: var(--color-ink-500); font-family: var(--font-mono); }
+  .chat-banner { margin: 0.5rem 0; padding: 0.5rem 0.75rem; border-radius: 0.5rem; background: color-mix(in srgb, #f59e0b 15%, transparent); color: #b45309; font-size: 0.8125rem; }
+  .chat-composer { display: flex; gap: 0.5rem; align-items: flex-end; padding-top: 0.75rem; border-top: 1px solid var(--color-line); }
+  .chat-composer textarea { flex: 1; resize: none; margin-top: 0; }
+}

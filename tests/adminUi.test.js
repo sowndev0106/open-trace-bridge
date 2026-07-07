@@ -614,3 +614,10 @@ test('Save button is at the top inside the single unified form', async () => {
   assert.strictEqual($(`form#sync-form[action="/admin/projects/${project.id}/sync"]`).length, 1);
   assert.strictEqual($('button[form="sync-form"]').length, 1);
 });
+
+test('projects index links to the per-project chat page', async () => {
+  const project = seedProject();
+  const response = await agent.get('/admin/projects').expect(200);
+  const $ = cheerio.load(response.text);
+  assert.ok($(`a[href="/admin/projects/${project.id}/chat"]`).length >= 1);
+});
