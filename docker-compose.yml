@@ -5,7 +5,7 @@ services:
     ports:
       - "6666:6666"                 # Public event API. Point the tunnel here.
       - "127.0.0.1:8667:8667"       # Admin UI + /internal. Host localhost only; do not tunnel.
-      - "127.0.0.1:${OPENCODE_PORT:-4096}:${OPENCODE_PORT:-4096}"  # OpenCode serve. Host localhost only.
+      - "127.0.0.1:${OPENCODE_UI_PORT:-8668}:${OPENCODE_UI_PORT:-8668}"  # OpenCode UI proxy (admin session required).
     volumes:
       - ./data:/app/data
       - ./workspaces:/app/workspaces
@@ -19,6 +19,7 @@ services:
       - ADMIN_USERNAME=${ADMIN_USERNAME:-}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
       - COOKIE_SECURE=${COOKIE_SECURE:-}
+      - OPENCODE_UI_PORT=${OPENCODE_UI_PORT:-8668}
 
 volumes:
   opencode-state:

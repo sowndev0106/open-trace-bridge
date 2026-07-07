@@ -20,6 +20,7 @@ router.get('/conversations/:id', cc.detail);
 
 const chat = require('../controllers/chat.controller');
 router.get('/projects/:id/chat', chat.chatPage);
+router.get('/projects/:id/opencode', chat.opencodePage);
 router.post('/projects/:id/chat/messages', chat.postMessage);
 router.post('/projects/:id/chat/new', chat.newConversation);
 

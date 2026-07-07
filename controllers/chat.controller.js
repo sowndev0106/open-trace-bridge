@@ -81,6 +81,15 @@ async function postMessage(req, res) {
   }
 }
 
+function opencodePage(req, res) {
+  const project = projects.findById(req.params.id);
+  if (!project) return res.status(404).send('Project not found');
+  res.render('projects/opencode', {
+    project,
+    opencodeUiPort: Number(process.env.OPENCODE_UI_PORT || 8668),
+  });
+}
+
 function newConversation(req, res) {
   const project = projects.findById(req.params.id);
   if (!project) return res.status(404).send('Project not found');
@@ -89,4 +98,4 @@ function newConversation(req, res) {
   res.redirect(`/admin/projects/${project.id}/chat`);
 }
 
-module.exports = { chatPage, postMessage, newConversation, ADMIN_CHANNEL };
+module.exports = { chatPage, postMessage, newConversation, opencodePage, ADMIN_CHANNEL };

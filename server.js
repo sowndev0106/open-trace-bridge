@@ -40,9 +40,13 @@ adminApp.use(notFound);
 
 const PORT = process.env.PORT || 6666;
 const ADMIN_PORT = process.env.ADMIN_PORT || 8667;
+const OPENCODE_UI_PORT = process.env.OPENCODE_UI_PORT || 8668;
 if (require.main === module) {
   publicApp.listen(PORT, () => console.log(`OpenTraceBridge public API listening on port ${PORT}`));
   adminApp.listen(ADMIN_PORT, () => console.log(`OpenTraceBridge admin UI listening on port ${ADMIN_PORT} (private)`));
+  const { createOpencodeProxy } = require('./services/opencodeProxy.service');
+  createOpencodeProxy().listen(OPENCODE_UI_PORT, () =>
+    console.log(`OpenCode UI proxy listening on port ${OPENCODE_UI_PORT} (admin session required)`));
   retention.startRetentionJob();
 }
 module.exports = { publicApp, adminApp };

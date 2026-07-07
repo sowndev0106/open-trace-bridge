@@ -56,7 +56,8 @@ OpenCode remote control is published on `http://localhost:4096` (or `OPENCODE_PO
 | `ADMIN_USERNAME` | empty | Admin UI login username (required — the admin UI refuses to serve pages until both credentials are set). |
 | `ADMIN_PASSWORD` | empty | Admin UI login password (required). |
 | `COOKIE_SECURE` | empty | Set to `true` when the admin UI is served over HTTPS so the session cookie is Secure-only. |
-| `OPENCODE_PORT` | `4096` | OpenCode remote control port. Change if 4096 is already taken on the host. |
+| `OPENCODE_PORT` | `4096` | OpenCode remote control port (container-internal; no longer published to the host). |
+| `OPENCODE_UI_PORT` | `8668` | OpenCode UI reverse proxy port. Requires an admin session cookie; injects the opencode basic-auth server-side. |
 | `OPENCODE_SERVER_PASSWORD` | empty | Optional password for OpenCode remote control. |
 | `OTB_DB_PATH` | `data/otb.sqlite` | SQLite database path. |
 | `OTB_WORKSPACES_DIR` | `workspaces` | Directory for generated project workspaces. |
@@ -83,6 +84,17 @@ stream live; messages, runs, and costs are recorded exactly like Teams
 conversations under the synthetic conversation id `admin-ui`, so they appear in
 the dashboard stats and conversation history. **New conversation** starts a
 fresh OpenCode session. One chat run per project executes at a time.
+
+### Embedded OpenCode UI
+
+Each project also has an **OpenCode** button that embeds the full OpenCode web
+interface inside the admin console (iframe served through a reverse proxy on
+`OPENCODE_UI_PORT`). The proxy requires a valid admin session cookie and
+injects the opencode basic-auth password server-side, so the raw
+`opencode serve` port stays unpublished and the password never reaches the
+browser. Sessions opened under `workspaces/<slug>` are limited by that
+project's generated `opencode.json` (no edit/bash/webfetch, only that
+project's `call_api` groups).
 
 Saving a project (or adding/removing repos) force-syncs its sources into the
 project workspace in the background; the admin UI shows per-repo sync status

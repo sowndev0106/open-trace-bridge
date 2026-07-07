@@ -111,3 +111,12 @@ test('chat page renders history JSON, composer, and new-conversation button', as
   assert.match(res.text, /marked/); // markdown renderer CDN
   assert.match(res.text, /purify/i); // DOMPurify CDN
 });
+
+test('opencode embed page renders iframe behind auth', async () => {
+  const res = await agent.get(`/admin/projects/${project.id}/opencode`).expect(200);
+  assert.match(res.text, /opencode-frame/);
+  assert.match(res.text, /8668/);
+
+  const request = require('supertest');
+  await request(adminApp).get(`/admin/projects/${project.id}/opencode`).expect(302);
+});
