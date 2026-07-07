@@ -11,6 +11,7 @@ services:
       - ./workspaces:/app/workspaces
       - opencode-state:/root/.local/share/opencode
       - opencode-config:/root/.config/opencode
+      - project-homes:/home    # per-project users' opencode sessions
     environment:
       - PORT=6666
       - ADMIN_PORT=8667
@@ -24,3 +25,4 @@ services:
 volumes:
   opencode-state:
   opencode-config:
+  project-homes:

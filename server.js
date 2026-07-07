@@ -42,6 +42,8 @@ const PORT = process.env.PORT || 6666;
 const ADMIN_PORT = process.env.ADMIN_PORT || 8667;
 const OPENCODE_UI_PORT = process.env.OPENCODE_UI_PORT || 8668;
 if (require.main === module) {
+  // Root-only perms on the DB dir and SSH keys before any agent can run.
+  require('./services/projectUser.service').secureSharedDirs();
   publicApp.listen(PORT, () => console.log(`OpenTraceBridge public API listening on port ${PORT}`));
   adminApp.listen(ADMIN_PORT, () => console.log(`OpenTraceBridge admin UI listening on port ${ADMIN_PORT} (private)`));
   const { createOpencodeProxy } = require('./services/opencodeProxy.service');

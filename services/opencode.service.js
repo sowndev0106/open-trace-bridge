@@ -67,7 +67,7 @@ function parseRunOutput(stdout) {
   return parser.finish();
 }
 
-function runPromptStream({ dir, sessionId, text, conversationId, onEvent }) {
+function runPromptStream({ dir, sessionId, text, conversationId, onEvent, runAs }) {
   return new Promise((resolve, reject) => {
     const args = ['run', '--format', 'json'];
     if (sessionId) args.push('-s', sessionId);
@@ -80,7 +80,18 @@ function runPromptStream({ dir, sessionId, text, conversationId, onEvent }) {
     const env = { ...process.env, PWD: dir };
     if (conversationId != null) env.OTB_CONVERSATION_ID = String(conversationId);
     else delete env.OTB_CONVERSATION_ID;
-    const child = proc.spawn('opencode', args, { cwd: dir, env, stdio: ['ignore', 'pipe', 'pipe'] });
+    const spawnOpts = { cwd: dir, env, stdio: ['ignore', 'pipe', 'pipe'] };
+    // Drop privileges to the per-project OS user so the kernel blocks reads
+    // outside this project's workspace (see projectUser.service).
+    if (runAs) {
+      spawnOpts.uid = runAs.uid;
+      spawnOpts.gid = runAs.gid;
+      env.HOME = runAs.home;
+      env.USER = runAs.name;
+      delete env.XDG_DATA_HOME;
+      delete env.XDG_CONFIG_HOME;
+    }
+    const child = proc.spawn('opencode', args, spawnOpts);
 
     const parser = createStreamParser(onEvent);
     let stderr = '';

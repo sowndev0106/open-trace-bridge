@@ -85,6 +85,21 @@ conversations under the synthetic conversation id `admin-ui`, so they appear in
 the dashboard stats and conversation history. **New conversation** starts a
 fresh OpenCode session. One chat run per project executes at a time.
 
+### Per-project isolation
+
+Inside the container each `opencode run` executes as a dedicated system user
+(`otb-<slug>`), created on first use. The project workspace is chowned to that
+user (`0750`), while the SQLite data directory and `workspaces/.keys` are
+root-only (`0700`). A prompt-injected agent that tries to read another
+project's workspace, the DB (which holds repo tokens and API keys), or the SSH
+keys gets a kernel-level permission error. Per-user opencode sessions persist
+in the `project-homes` volume. On a dev host (non-root) this is skipped and
+opencode runs as the current user.
+
+Note: the embedded OpenCode UI (below) is served by a single `opencode serve`
+process running as root — treat it as an admin power tool; the tracked chat
+and Teams paths are the isolated ones.
+
 ### Embedded OpenCode UI
 
 Each project also has an **OpenCode** button that embeds the full OpenCode web

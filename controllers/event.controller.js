@@ -6,6 +6,7 @@ const { extractPrompt, COMMANDS } = require('../lib/eventGateway');
 const sync = require('../services/sync.service');
 const opencode = require('../services/opencode.service');
 const webhook = require('../services/webhook.service');
+const projectUser = require('../services/projectUser.service');
 
 function eventFromRequest(req) {
   if (req.method === 'GET') {
@@ -27,7 +28,9 @@ async function investigate(project, conv, prompt) {
   const startedAt = Date.now();
   try {
     const ws = await sync.ensureReady(project);
-    const result = await opencode.runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt, conversationId: conv.id });
+    const runAs = projectUser.ensureProjectUser(project.slug);
+    projectUser.ownWorkspace(ws, runAs);
+    const result = await opencode.runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt, conversationId: conv.id, runAs });
     if (!conv.opencode_session_id) convs.setSession(conv.id, result.sessionId);
     const usage = result.usage || {};
     runs.add({

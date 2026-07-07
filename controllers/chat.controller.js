@@ -4,6 +4,7 @@ const messages = require('../models/message.model');
 const runs = require('../models/run.model');
 const sync = require('../services/sync.service');
 const opencode = require('../services/opencode.service');
+const projectUser = require('../services/projectUser.service');
 
 // Synthetic channel id marking admin-UI chats in the conversations table.
 const ADMIN_CHANNEL = 'admin-ui';
@@ -44,8 +45,10 @@ async function postMessage(req, res) {
   const startedAt = Date.now();
   try {
     const ws = await sync.ensureReady(project);
+    const runAs = projectUser.ensureProjectUser(project.slug);
+    projectUser.ownWorkspace(ws, runAs);
     const result = await opencode.runPromptStream({
-      dir: ws, sessionId: conv.opencode_session_id, text, conversationId: conv.id,
+      dir: ws, sessionId: conv.opencode_session_id, text, conversationId: conv.id, runAs,
       onEvent: (ev) => {
         if (ev.type === 'tool') sseSend(res, 'tool', { name: ev.name, status: ev.status });
         if (ev.type === 'text') sseSend(res, 'text', { text: ev.text });
