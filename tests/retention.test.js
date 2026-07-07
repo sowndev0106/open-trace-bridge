@@ -79,3 +79,15 @@ test('retention cleanup skips projects with retention set to zero', () => {
   assert.strictEqual(apicalls.listByProject(project.id).length, 1);
   assert.strictEqual(runs.listByProject(project.id).length, 1);
 });
+
+const sessionModel = require('../models/session.model');
+
+test('retention cleanup deletes expired sessions regardless of projects', () => {
+  sessionModel.create();
+  sessionModel.create();
+  getDb().prepare(`UPDATE sessions SET expires_at = datetime('now', '-1 day') WHERE id = (SELECT MIN(id) FROM sessions)`).run();
+
+  const result = retention.runRetentionCleanup();
+  assert.strictEqual(result.sessionsDeleted, 1);
+  assert.strictEqual(getDb().prepare('SELECT COUNT(*) AS c FROM sessions').get().c, 1);
+});
