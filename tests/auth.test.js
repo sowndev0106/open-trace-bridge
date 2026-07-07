@@ -45,3 +45,59 @@ test('session model: touch extends expiry, deleteByToken removes, deleteExpired 
   getDb().prepare(`UPDATE sessions SET expires_at = datetime('now', '-1 hour')`).run();
   assert.strictEqual(sessions.deleteExpired(), 1);
 });
+
+const auth = require('../services/auth.service');
+
+test('auth service: verifyCredentials checks env credentials in constant time', () => {
+  process.env.ADMIN_USERNAME = 'admin';
+  process.env.ADMIN_PASSWORD = 'correct horse battery staple';
+  assert.strictEqual(auth.isConfigured(), true);
+  assert.strictEqual(auth.verifyCredentials('admin', 'correct horse battery staple'), true);
+  assert.strictEqual(auth.verifyCredentials('admin', 'wrong'), false);
+  assert.strictEqual(auth.verifyCredentials('other', 'correct horse battery staple'), false);
+  assert.strictEqual(auth.verifyCredentials('', ''), false);
+});
+
+test('auth service: fails closed when credentials are not configured', () => {
+  const u = process.env.ADMIN_USERNAME; const p = process.env.ADMIN_PASSWORD;
+  delete process.env.ADMIN_USERNAME;
+  delete process.env.ADMIN_PASSWORD;
+  try {
+    assert.strictEqual(auth.isConfigured(), false);
+    assert.strictEqual(auth.verifyCredentials('', ''), false);
+    assert.strictEqual(auth.verifyCredentials(undefined, undefined), false);
+  } finally {
+    process.env.ADMIN_USERNAME = u; process.env.ADMIN_PASSWORD = p;
+  }
+});
+
+test('auth service: rate limiter blocks after 5 failures and can be cleared', () => {
+  auth.resetRateLimitForTest();
+  const ip = '10.0.0.9';
+  for (let i = 0; i < 4; i++) auth.recordFailure(ip);
+  assert.strictEqual(auth.isRateLimited(ip), false);
+  auth.recordFailure(ip);
+  assert.strictEqual(auth.isRateLimited(ip), true);
+  assert.strictEqual(auth.isRateLimited('10.0.0.10'), false);
+  auth.clearFailures(ip);
+  assert.strictEqual(auth.isRateLimited(ip), false);
+});
+
+test('auth service: session cookie helpers', () => {
+  const cookie = auth.sessionCookie('abc123');
+  assert.match(cookie, /^otb_session=abc123; /);
+  assert.match(cookie, /HttpOnly/);
+  assert.match(cookie, /SameSite=Lax/);
+  assert.match(cookie, /Path=\//);
+  assert.doesNotMatch(cookie, /Secure/); // COOKIE_SECURE not set in tests
+
+  const cleared = auth.clearedSessionCookie();
+  assert.match(cleared, /^otb_session=; /);
+  assert.match(cleared, /Max-Age=0/);
+
+  assert.strictEqual(
+    auth.tokenFromRequest({ headers: { cookie: 'foo=1; otb_session=tok%3D1; bar=2' } }),
+    'tok=1'
+  );
+  assert.strictEqual(auth.tokenFromRequest({ headers: {} }), undefined);
+});
