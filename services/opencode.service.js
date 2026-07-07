@@ -9,18 +9,31 @@ function emptyUsage() {
   return { tokensInput: null, tokensOutput: null, tokensReasoning: null, costUsd: null };
 }
 
-function parseRunOutput(stdout) {
+// Incremental parser over opencode's JSON-lines output. push() consumes raw
+// chunks (which may split lines arbitrarily); finish() flushes and returns
+// the aggregate result. parseRunOutput and runPromptStream share this.
+function createStreamParser(onEvent = () => {}) {
+  let buffer = '';
   let sessionId = null;
   const chunks = [];
   let sawUsage = false;
   const usage = { tokensInput: 0, tokensOutput: 0, tokensReasoning: 0, costUsd: 0 };
 
-  for (const line of String(stdout).split('\n')) {
-    if (!line.trim()) continue;
+  function handleLine(line) {
+    if (!line.trim()) return;
     let ev;
-    try { ev = JSON.parse(line); } catch { continue; }
-    if (!sessionId && ev.sessionID) sessionId = ev.sessionID;
-    if (ev.type === 'text' && ev.part && typeof ev.part.text === 'string') chunks.push(ev.part.text);
+    try { ev = JSON.parse(line); } catch { return; }
+    if (!sessionId && ev.sessionID) {
+      sessionId = ev.sessionID;
+      onEvent({ type: 'session', sessionId });
+    }
+    if (ev.type === 'text' && ev.part && typeof ev.part.text === 'string') {
+      chunks.push(ev.part.text);
+      onEvent({ type: 'text', text: ev.part.text });
+    }
+    if (ev.part && ev.part.type === 'tool' && ev.part.tool) {
+      onEvent({ type: 'tool', name: ev.part.tool, status: (ev.part.state && ev.part.state.status) || '' });
+    }
     if (ev.type === 'step_finish' && ev.part && ev.part.tokens) {
       sawUsage = true;
       usage.tokensInput += ev.part.tokens.input || 0;
@@ -29,10 +42,32 @@ function parseRunOutput(stdout) {
       usage.costUsd += ev.part.cost || 0;
     }
   }
-  return { sessionId, text: chunks.join(''), usage: sawUsage ? usage : emptyUsage() };
+
+  return {
+    push(chunk) {
+      buffer += chunk;
+      let idx;
+      while ((idx = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, idx);
+        buffer = buffer.slice(idx + 1);
+        handleLine(line);
+      }
+    },
+    finish() {
+      if (buffer) handleLine(buffer);
+      buffer = '';
+      return { sessionId, text: chunks.join(''), usage: sawUsage ? usage : emptyUsage() };
+    },
+  };
 }
 
-function runPrompt({ dir, sessionId, text, conversationId }) {
+function parseRunOutput(stdout) {
+  const parser = createStreamParser();
+  parser.push(String(stdout));
+  return parser.finish();
+}
+
+function runPromptStream({ dir, sessionId, text, conversationId, onEvent }) {
   return new Promise((resolve, reject) => {
     const args = ['run', '--format', 'json'];
     if (sessionId) args.push('-s', sessionId);
@@ -47,23 +82,28 @@ function runPrompt({ dir, sessionId, text, conversationId }) {
     else delete env.OTB_CONVERSATION_ID;
     const child = proc.spawn('opencode', args, { cwd: dir, env, stdio: ['ignore', 'pipe', 'pipe'] });
 
-    let stdout = '', stderr = '';
+    const parser = createStreamParser(onEvent);
+    let stderr = '';
     const timer = setTimeout(() => {
       child.kill('SIGKILL');
       reject(new Error(`opencode timed out after ${TIMEOUT_MS / 60000} minutes`));
     }, TIMEOUT_MS);
 
-    child.stdout.on('data', (d) => { stdout += d; });
+    child.stdout.on('data', (d) => parser.push(String(d)));
     child.stderr.on('data', (d) => { stderr += d; });
     child.on('error', (err) => { clearTimeout(timer); reject(err); });
     child.on('close', (code) => {
       clearTimeout(timer);
       if (code !== 0) return reject(new Error(`opencode exit ${code}: ${stderr.slice(0, 500)}`));
-      const parsed = parseRunOutput(stdout);
+      const parsed = parser.finish();
       if (!parsed.sessionId) return reject(new Error(`Could not parse sessionID from opencode output`));
       resolve(parsed);
     });
   });
 }
 
-module.exports = { parseRunOutput, runPrompt, proc };
+function runPrompt(opts) {
+  return runPromptStream(opts);
+}
+
+module.exports = { parseRunOutput, runPrompt, runPromptStream, proc };
