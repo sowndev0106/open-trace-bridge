@@ -1,0 +1,8 @@
+<%- include('../layout-head') %>
+<section class="panel" id="chat-root"
+  data-project-id="<%= project.id %>"
+  data-busy="<%= busy ? '1' : '0' %>">
+  <h1><%= project.name %></h1>
+  <script type="application/json" id="chat-history"><%- JSON.stringify(chatMessages).replace(/</g, '\\u003c') %></script>
+</section>
+<%- include('../layout-foot') %>

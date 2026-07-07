@@ -18,4 +18,9 @@ router.get('/projects/:id/sync-status', pc.syncStatus);
 router.get('/projects/:id/conversations', cc.listForProject);
 router.get('/conversations/:id', cc.detail);
 
+const chat = require('../controllers/chat.controller');
+router.get('/projects/:id/chat', chat.chatPage);
+router.post('/projects/:id/chat/messages', chat.postMessage);
+router.post('/projects/:id/chat/new', chat.newConversation);
+
 module.exports = router;
