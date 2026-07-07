@@ -61,13 +61,22 @@ function ownWorkspace(dir, user) {
 }
 
 // Root-only shared secrets: the SQLite DB (repo tokens, API keys, messages)
-// and the SSH key directory must be invisible to project users.
+// and the SSH key directory must be invisible to project users. Existing
+// project workspaces also lose world access here so a project that has never
+// run yet is still unreadable to its neighbours.
 function secureSharedDirs() {
   if (!isRoot()) return;
+  const workspacesDir = process.env.OTB_WORKSPACES_DIR || 'workspaces';
   const dbDir = path.dirname(process.env.OTB_DB_PATH || 'data/otb.sqlite');
-  const keysDir = path.join(process.env.OTB_WORKSPACES_DIR || 'workspaces', '.keys');
+  const keysDir = path.join(workspacesDir, '.keys');
   for (const dir of [dbDir, keysDir]) {
     try { fs.chmodSync(dir, 0o700); } catch { /* missing dir is fine */ }
+  }
+  let entries = [];
+  try { entries = fs.readdirSync(workspacesDir, { withFileTypes: true }); } catch { return; }
+  for (const entry of entries) {
+    if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+    try { fs.chmodSync(path.join(workspacesDir, entry.name), 0o750); } catch { /* ignore */ }
   }
 }
 
