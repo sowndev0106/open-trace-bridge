@@ -10,7 +10,8 @@ OpenTraceBridge connects Microsoft Teams incident questions to an OpenCode-power
 - Lets OpenCode call approved API groups through the `call_api` MCP tool without exposing API keys to the agent.
 - Stores projects, repositories, API groups, conversations, messages, and API-call audit rows in SQLite.
 - Sends asynchronous investigation results to Microsoft Teams through a project webhook.
-- Provides an admin UI for project, repository, API group, conversation, and audit management.
+- Provides an admin UI for project, repository, API group, conversation, and audit management, protected by a session-cookie login.
+- Provides a per-project admin chat page that talks to the project's OpenCode agent with live streaming.
 
 ## Architecture
 
@@ -52,6 +53,9 @@ OpenCode remote control is published on `http://localhost:4096` (or `OPENCODE_PO
 | --- | --- | --- |
 | `PORT` | `6666` | Public event API port. |
 | `ADMIN_PORT` | `8667` | Private admin UI and `/internal` API port. |
+| `ADMIN_USERNAME` | empty | Admin UI login username (required — the admin UI refuses to serve pages until both credentials are set). |
+| `ADMIN_PASSWORD` | empty | Admin UI login password (required). |
+| `COOKIE_SECURE` | empty | Set to `true` when the admin UI is served over HTTPS so the session cookie is Secure-only. |
 | `OPENCODE_PORT` | `4096` | OpenCode remote control port. Change if 4096 is already taken on the host. |
 | `OPENCODE_SERVER_PASSWORD` | empty | Optional password for OpenCode remote control. |
 | `OTB_DB_PATH` | `data/otb.sqlite` | SQLite database path. |
@@ -59,16 +63,26 @@ OpenCode remote control is published on `http://localhost:4096` (or `OPENCODE_PO
 
 ## Admin Setup
 
-1. Create a project with a unique slug, name, keyword, system prompt, Teams webhook URL, max message length, and chat retention days.
-2. Add repository rows (HTTPS token, SSH key, or unauthenticated) and API group rows on the same page — one **Save** button at the top writes everything at once. Leaving a secret field blank keeps the stored value.
-3. Add API groups by pasting a working `curl` command plus a markdown description for the agent. OpenTraceBridge extracts the base URL, method, auth header, and API key from the curl command, stores the secret server-side, and redacts it from generated workspace instructions.
-4. Point Power Automate at:
+1. Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env` and sign in at `http://localhost:8667/admin/login`. Sessions last 7 days (sliding) and survive server restarts; failed logins are rate limited (5 per 15 minutes per IP).
+2. Create a project with a unique slug, name, keyword, system prompt, Teams webhook URL, max message length, and chat retention days.
+3. Add repository rows (HTTPS token, SSH key, or unauthenticated) and API group rows on the same page — one **Save** button at the top writes everything at once. Leaving a secret field blank keeps the stored value.
+4. Add API groups by pasting a working `curl` command plus a markdown description for the agent. OpenTraceBridge extracts the base URL, method, auth header, and API key from the curl command, stores the secret server-side, and redacts it from generated workspace instructions.
+5. Point Power Automate at:
 
 ```text
 https://<public-host>/api/events/<project-slug>?text=...&conversationId=...&userId=...&userName=...
 ```
 
 Use `<keyword> /new` in Teams to close the active conversation and start a new OpenCode session.
+
+### Admin chat
+
+Open **Chat** from a project row (or the project edit page) to talk to the
+project's OpenCode agent directly from the browser. Tool steps and the answer
+stream live; messages, runs, and costs are recorded exactly like Teams
+conversations under the synthetic conversation id `admin-ui`, so they appear in
+the dashboard stats and conversation history. **New conversation** starts a
+fresh OpenCode session. One chat run per project executes at a time.
 
 Saving a project (or adding/removing repos) force-syncs its sources into the
 project workspace in the background; the admin UI shows per-repo sync status
