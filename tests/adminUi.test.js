@@ -55,7 +55,7 @@ test('projects index renders modern project table actions and endpoint copy', as
   assert.strictEqual($('h1').text().trim(), 'Projects');
   assert.strictEqual($('a[href="/admin/projects/new"]').first().text().trim(), 'New project');
   assert.strictEqual($(`a[href="/admin/projects/${project.id}/edit"]`).length, 1);
-  assert.strictEqual($(`a[href="/admin/projects/${project.id}/conversations"]`).filter((_, el) => $(el).text().trim() === 'View logs').length, 1);
+  assert.strictEqual($(`a[href="/admin/projects/${project.id}/conversations"]`).length, 1);
   assert.strictEqual($(`form[action="/admin/projects/${project.id}/delete"][method="post"]`).length, 1);
   assert.match(response.text, /\/api\/events\/payment/);
   assert.match(response.text, /payment-bot/);
@@ -91,12 +91,13 @@ test('project edit form preserves workflows inside redesigned panels', async () 
   assert.strictEqual($('input[name="teams_webhook_url"]').val(), 'https://hook.example/payment');
   assert.strictEqual($('input[name="max_msg_length"]').val(), '20000');
   assert.strictEqual($('input[name="chat_retention_days"]').val(), '90');
-  assert.ok($(`a[href="/admin/projects/${project.id}/conversations"]`).filter((_, el) => $(el).text().trim() === 'Audit & Chats').length >= 1);
+  assert.ok($(`a[href="/admin/projects/${project.id}/conversations"]`).filter((_, el) => $(el).text().trim() === 'Audit').length >= 1);
   assert.strictEqual($('input[name="repos[0][git_url]"]').val(), 'https://github.com/acme/payment.git');
   assert.strictEqual($('input[name="apis[0][name]"]').val(), 'transaction-api');
   assert.strictEqual($('template[data-template="repos"]').length, 1);
   assert.strictEqual($('template[data-template="apis"]').length, 1);
-  assert.match(response.text, /https:\/\/6666\.sowndev\.com\/api\/events\/payment/);
+  assert.match(response.text, /\/api\/events\/payment/);
+  assert.match(response.text, /webhook-endpoint-url/); // client-side host rewrite hook
   assert.match(response.text, /panel-body/);
 });
 
@@ -398,7 +399,7 @@ test('project edit page links latest API calls instead of inlining them', async 
 
   const button = $(`a[href="/admin/projects/${project.id}/conversations#api-calls"]`);
   assert.strictEqual(button.length, 1);
-  assert.strictEqual(button.text().trim(), 'View latest API calls');
+  assert.strictEqual(button.text().trim(), 'API calls');
   assert.strictEqual($('[data-api-call-row]').length, 0);
   assert.doesNotMatch(response.text, /api\.internal\/transactions\/txn_123/);
 });
@@ -430,7 +431,8 @@ test('conversation detail renders message timeline', async () => {
   assert.match(response.text, /ses_abc/);
   assert.match(response.text, /Son/);
   assert.match(response.text, /investigate txn_123/);
-  assert.match(response.text, /I found the failing API call/);
+  // Outbound messages ship URL-encoded in data-raw and render client-side.
+  assert.match(response.text, new RegExp(encodeURIComponent('I found the failing API call.')));
   assert.match(response.text, /message-timeline/);
 });
 
@@ -451,7 +453,7 @@ test('project edit page links chat history instead of inlining it', async () => 
 
   const button = $(`a[href="/admin/projects/${project.id}/conversations#chat-history"]`);
   assert.strictEqual(button.length, 1);
-  assert.strictEqual(button.text().trim(), 'View chat history');
+  assert.strictEqual(button.text().trim(), 'Chat history');
   assert.strictEqual($('[data-chat-history-row]').length, 0);
   assert.doesNotMatch(response.text, /teams-conv-1/);
 
@@ -609,7 +611,7 @@ test('Save button is at the top inside the single unified form', async () => {
   const mainForm = $(`form[action="/admin/projects/${project.id}"]`);
   assert.strictEqual(mainForm.length, 1);
   // Save button lives in the header section (first section inside the form).
-  assert.strictEqual(mainForm.find('section').first().find('button.btn-primary[type="submit"]').text().trim(), 'Save');
+  assert.strictEqual(mainForm.find('section').first().find('button.btn-primary[type="submit"]').text().trim(), 'Save project');
   // Sync now posts through the external sync form.
   assert.strictEqual($(`form#sync-form[action="/admin/projects/${project.id}/sync"]`).length, 1);
   assert.strictEqual($('button[form="sync-form"]').length, 1);

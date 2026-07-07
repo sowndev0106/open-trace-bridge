@@ -1,83 +1,184 @@
 <%- include('../layout-head') %>
+
 <section class="chat-shell" id="chat-root"
   data-project-id="<%= project.id %>"
   data-busy="<%= busy ? '1' : '0' %>">
 
-  <header class="flex items-center justify-between gap-3 mb-4">
-    <div class="flex items-center gap-3">
-      <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/edit">&larr; Back</a>
+  <!-- Chat header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <a class="btn btn-secondary" href="/admin/projects/<%= project.id %>/edit" style="padding:0 0.75rem">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd"/></svg>
+        Back
+      </a>
       <div>
-        <h1 class="page-title"><%= project.name %> &mdash; Agent chat</h1>
-        <p class="text-xs text-ink-500">Talks directly to this project's OpenCode agent.</p>
+        <div style="display:flex;align-items:center;gap:0.625rem">
+          <h1 style="font-size:1.125rem;font-weight:700;letter-spacing:-0.02em;color:var(--color-ink-950)"><%= project.name %></h1>
+          <span style="font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:9999px;background:color-mix(in srgb,var(--color-brand) 12%,transparent);color:var(--color-brand);font-weight:600;border:1px solid color-mix(in srgb,var(--color-brand) 25%,transparent)">Agent chat</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--color-ink-500);margin-top:0.125rem">Streams directly to this project's OpenCode agent</p>
       </div>
     </div>
-    <form method="post" action="/admin/projects/<%= project.id %>/chat/new"
-      onsubmit="return confirm('Close this conversation and start a new one?');">
-      <button type="submit" class="btn btn-secondary">New conversation</button>
-    </form>
-  </header>
 
-  <div class="panel chat-panel">
-    <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
-    <div id="chat-busy-banner" class="chat-banner hidden">
-      The agent is still working on a previous message &mdash; reload shortly.
-    </div>
-    <form id="chat-form" class="chat-composer">
-      <textarea id="chat-input" rows="2" placeholder="Ask the agent… (Enter to send, Shift+Enter for a new line)"></textarea>
-      <button type="submit" id="chat-send" class="btn btn-primary">Send</button>
+    <form method="post" action="/admin/projects/<%= project.id %>/chat/new"
+      onsubmit="return confirm('Close this conversation and start a new OpenCode session?');">
+      <button type="submit" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clip-rule="evenodd"/></svg>
+        New conversation
+      </button>
     </form>
   </div>
 
-  <script type="application/json" id="chat-history"><%- JSON.stringify(chatMessages).replace(/</g, '\\u003c') %></script>
+  <!-- Chat panel -->
+  <div class="chat-panel">
+
+    <!-- Messages area -->
+    <div id="chat-messages" class="chat-messages" aria-live="polite">
+      <!-- Empty state - shown via JS when no messages -->
+    </div>
+
+    <!-- Busy banner -->
+    <div id="chat-busy-banner" class="chat-banner hidden">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+      The agent is still working on a previous message — please reload shortly.
+    </div>
+
+    <!-- Composer -->
+    <form id="chat-form" class="chat-composer">
+      <textarea id="chat-input" rows="2"
+        placeholder="Ask the agent… (Enter to send, Shift+Enter for new line)"></textarea>
+      <button type="submit" id="chat-send" class="btn btn-primary" style="padding:0 1rem;align-self:flex-end;height:2.5rem">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z"/></svg>
+        Send
+      </button>
+    </form>
+  </div>
+
 </section>
 
+<!-- History JSON -->
+<script type="application/json" id="chat-history"><%- JSON.stringify(chatMessages).replace(/</g, '\\u003c') %></script>
+
+<!-- Marked + DOMPurify -->
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
 <script>
 (function () {
-  const root = document.getElementById('chat-root');
+  const root      = document.getElementById('chat-root');
   const projectId = root.dataset.projectId;
-  const list = document.getElementById('chat-messages');
-  const form = document.getElementById('chat-form');
-  const input = document.getElementById('chat-input');
-  const sendBtn = document.getElementById('chat-send');
+  const list      = document.getElementById('chat-messages');
+  const form      = document.getElementById('chat-form');
+  const input     = document.getElementById('chat-input');
+  const sendBtn   = document.getElementById('chat-send');
   const busyBanner = document.getElementById('chat-busy-banner');
 
-  function renderMarkdown(el, text) {
-    el.innerHTML = DOMPurify.sanitize(marked.parse(text));
+  // ── Markdown render ──
+  function renderMd(el, text) {
+    el.innerHTML = DOMPurify.sanitize(marked.parse(text || ''));
   }
+
+  // ── Empty state ──
+  const EXAMPLE_PROMPTS = [
+    'Investigate why txn_123 failed',
+    'Check recent error logs for payment service',
+    'Why is API response slow today?',
+    'Summarize latest incident',
+  ];
+
+  function showEmptyState() {
+    const el = document.createElement('div');
+    el.id = 'chat-empty';
+    el.className = 'chat-empty';
+    el.innerHTML = `
+      <div class="chat-empty-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div>
+        <p style="font-size:0.9375rem;font-weight:600;color:var(--color-ink-700);margin-bottom:0.25rem">Ask the OpenCode agent</p>
+        <p style="font-size:0.8125rem;color:var(--color-ink-500)">The agent can inspect source code, call internal APIs, and investigate incidents.</p>
+      </div>
+      <div class="chat-empty-chips">
+        ${EXAMPLE_PROMPTS.map(p => `<button type="button" class="chat-chip" data-prompt="${p}">${p}</button>`).join('')}
+      </div>
+    `;
+    list.appendChild(el);
+
+    el.querySelectorAll('[data-prompt]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        input.value = this.dataset.prompt;
+        input.focus();
+      });
+    });
+  }
+
+  // ── Bubble factory ──
   function addBubble(direction, content) {
-    const wrap = document.createElement('div');
-    wrap.className = direction === 'in' ? 'chat-row chat-row-user' : 'chat-row chat-row-agent';
+    // Remove empty state on first message
+    var emptyEl = document.getElementById('chat-empty');
+    if (emptyEl) emptyEl.remove();
+
+    const row = document.createElement('div');
+    row.className = direction === 'in'
+      ? 'chat-row chat-row-user'
+      : 'chat-row chat-row-agent';
+
+    if (direction === 'out') {
+      // Agent avatar
+      const avatar = document.createElement('div');
+      avatar.className = 'chat-avatar';
+      avatar.innerHTML = `<svg width="14" height="14" viewBox="0 0 20 20" fill="white"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`;
+      row.appendChild(avatar);
+    }
+
     const bubble = document.createElement('div');
-    bubble.className = direction === 'in' ? 'chat-bubble chat-bubble-user' : 'chat-bubble chat-bubble-agent';
-    if (direction === 'in') bubble.textContent = content;
-    else if (content.startsWith('[error] ')) {
+    bubble.className = direction === 'in'
+      ? 'chat-bubble chat-bubble-user'
+      : 'chat-bubble chat-bubble-agent';
+
+    if (direction === 'in') {
+      bubble.textContent = content;
+    } else if (content && content.startsWith('[error] ')) {
       bubble.classList.add('chat-bubble-error');
       bubble.textContent = content;
-    } else renderMarkdown(bubble, content);
-    wrap.appendChild(bubble);
-    list.appendChild(wrap);
+    } else {
+      renderMd(bubble, content);
+    }
+
+    row.appendChild(bubble);
+    list.appendChild(row);
     list.scrollTop = list.scrollHeight;
     return bubble;
   }
+
   function addMeta(bubble, text) {
     const meta = document.createElement('div');
     meta.className = 'chat-meta';
     meta.textContent = text;
     bubble.appendChild(meta);
   }
+
   function setBusy(busy) {
     input.disabled = busy;
     sendBtn.disabled = busy;
+    sendBtn.style.opacity = busy ? '0.5' : '1';
   }
 
-  // Render persisted history.
+  // ── Load history ──
   const history = JSON.parse(document.getElementById('chat-history').textContent || '[]');
-  history.forEach((m) => addBubble(m.direction, m.content));
-  if (root.dataset.busy === '1') { busyBanner.classList.remove('hidden'); setBusy(true); }
+  if (history.length === 0) {
+    showEmptyState();
+  } else {
+    history.forEach(m => addBubble(m.direction, m.content));
+  }
 
-  // Minimal SSE-over-fetch reader: emits {event, data} per "\n\n" frame.
+  if (root.dataset.busy === '1') {
+    busyBanner.classList.remove('hidden');
+    setBusy(true);
+  }
+
+  // ── SSE reader ──
   async function readSse(response, onEvent) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -99,14 +200,17 @@
     }
   }
 
+  // ── Send message ──
   async function send(text) {
     setBusy(true);
     addBubble('in', text);
     const agentBubble = addBubble('out', '');
-    const status = document.createElement('div');
-    status.className = 'chat-status';
-    status.textContent = 'Starting agent…';
-    agentBubble.appendChild(status);
+
+    const statusEl = document.createElement('div');
+    statusEl.className = 'chat-status';
+    statusEl.textContent = 'Starting agent…';
+    agentBubble.appendChild(statusEl);
+
     let acc = '';
     try {
       const res = await fetch(`/admin/projects/${projectId}/chat/messages`, {
@@ -114,27 +218,30 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       });
-      if (res.status === 409) { status.textContent = 'A run is already in progress for this project.'; return; }
+      if (res.status === 409) { statusEl.textContent = 'A run is already in progress for this project.'; return; }
       if (res.status === 401) { window.location = '/admin/login'; return; }
-      if (!res.ok) { status.textContent = `Request failed (${res.status}).`; return; }
+      if (!res.ok) { statusEl.textContent = `Request failed (${res.status}).`; return; }
+
       await readSse(res, (event, data) => {
-        if (event === 'tool') status.textContent = `Running ${data.name}${data.status ? ` (${data.status})` : ''}…`;
+        if (event === 'tool') {
+          statusEl.textContent = `Running ${data.name}${data.status ? ` (${data.status})` : ''}…`;
+        }
         if (event === 'text') {
           acc += data.text;
-          status.remove();
-          renderMarkdown(agentBubble, acc);
+          statusEl.remove();
+          renderMd(agentBubble, acc);
           list.scrollTop = list.scrollHeight;
         }
         if (event === 'done') {
-          renderMarkdown(agentBubble, data.text || acc);
+          renderMd(agentBubble, data.text || acc);
           const u = data.usage || {};
           const parts = [`${Math.round(data.durationMs / 1000)}s`];
-          if (u.tokensInput != null) parts.push(`${((u.tokensInput || 0) + (u.tokensOutput || 0)).toLocaleString()} tok`);
+          if (u.tokensInput != null) parts.push(`${((u.tokensInput||0)+(u.tokensOutput||0)).toLocaleString()} tok`);
           if (u.costUsd != null) parts.push(`$${Number(u.costUsd).toFixed(4)}`);
           addMeta(agentBubble, parts.join(' · '));
         }
         if (event === 'error') {
-          status.remove();
+          statusEl.remove();
           agentBubble.classList.add('chat-bubble-error');
           agentBubble.textContent = `Error: ${data.message}`;
         }
@@ -148,19 +255,28 @@
     }
   }
 
-  form.addEventListener('submit', (e) => {
+  // ── Event listeners ──
+  form.addEventListener('submit', e => {
     e.preventDefault();
     const text = input.value.trim();
     if (!text || input.disabled) return;
     input.value = '';
     send(text);
   });
-  input.addEventListener('keydown', (e) => {
+
+  input.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       form.requestSubmit();
     }
   });
+
+  // Auto-resize textarea
+  input.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+  });
 })();
 </script>
+
 <%- include('../layout-foot') %>

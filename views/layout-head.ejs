@@ -6,79 +6,119 @@
   <title>OpenTraceBridge Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/styles/admin.css">
   <!-- TOAST UI Editor Style -->
   <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor.min.css" />
   <script>
-    // Initialize theme before layout is rendered to avoid flickering
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Initialize theme before layout renders to avoid flicker
+    (function() {
+      var stored = localStorage.getItem('color-theme');
+      if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
   </script>
 </head>
 <body>
 <div class="app-shell">
+
+  <!-- Topbar -->
   <header class="topbar">
     <div class="topbar-inner">
-      <a href="/admin/projects" class="flex items-center gap-3">
+
+      <!-- Brand -->
+      <a href="/admin/projects" class="flex items-center gap-3" style="text-decoration:none">
         <span class="brand-mark">OT</span>
         <span>
-          <span class="block text-sm font-semibold text-ink-950">OpenTraceBridge</span>
-          <span class="block text-xs text-ink-500">Admin console</span>
+          <span style="display:block;font-size:0.875rem;font-weight:700;color:var(--color-ink-950);letter-spacing:-0.02em">OpenTraceBridge</span>
+          <span style="display:block;font-size:0.6875rem;color:var(--color-ink-500);margin-top:0.0625rem">Admin console</span>
         </span>
       </a>
-      <nav class="flex items-center gap-2" aria-label="Primary navigation">
-        <a class="nav-link" href="/admin/dashboard">Dashboard</a>
-        <a class="nav-link" href="/admin/projects">Projects</a>
-        <form method="post" action="/admin/logout" class="inline">
-          <button type="submit" class="nav-link cursor-pointer">Logout</button>
-        </form>
-        <button id="theme-toggle" class="nav-link flex items-center justify-center p-2 rounded-lg cursor-pointer text-ink-500 hover:text-ink-950 focus:outline-hidden" aria-label="Toggle theme">
-          <!-- Light Mode Icon (Sun) -->
-          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-          <!-- Dark Mode Icon (Moon) -->
-          <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+
+      <!-- Nav -->
+      <nav style="display:flex;align-items:center;gap:0.25rem" aria-label="Primary navigation">
+
+        <!-- Dashboard -->
+        <a class="nav-link" id="nav-dashboard" href="/admin/dashboard">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0">
+            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+          </svg>
+          Dashboard
+        </a>
+
+        <!-- Projects -->
+        <a class="nav-link" id="nav-projects" href="/admin/projects">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0">
+            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+          </svg>
+          Projects
+        </a>
+
+        <!-- Separator -->
+        <div style="width:1px;height:1.25rem;background:var(--color-border-strong);margin:0 0.25rem"></div>
+
+        <!-- Theme toggle -->
+        <button id="theme-toggle" class="nav-link" style="padding:0.4375rem;min-width:2rem;min-height:2rem" aria-label="Toggle theme" title="Toggle dark/light mode">
+          <!-- Sun icon -->
+          <svg id="icon-sun" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" style="display:none">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" clip-rule="evenodd"/>
+          </svg>
+          <!-- Moon icon -->
+          <svg id="icon-moon" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" style="display:none">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+          </svg>
         </button>
+
+        <!-- Logout -->
+        <form method="post" action="/admin/logout" style="display:inline">
+          <button type="submit" class="nav-link" style="color:var(--color-danger);opacity:0.85" title="Sign out">
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0">
+              <path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clip-rule="evenodd"/>
+              <path fill-rule="evenodd" d="M6 10a.75.75 0 01.75-.75h9.546l-1.048-.943a.75.75 0 111.004-1.114l2.5 2.25a.75.75 0 010 1.114l-2.5 2.25a.75.75 0 11-1.004-1.114l1.048-.943H6.75A.75.75 0 016 10z" clip-rule="evenodd"/>
+            </svg>
+            Logout
+          </button>
+        </form>
+
       </nav>
     </div>
   </header>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-      const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
-      if (document.documentElement.classList.contains('dark')) {
-        themeToggleLightIcon.classList.remove('hidden');
-      } else {
-        themeToggleDarkIcon.classList.remove('hidden');
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var sunIcon  = document.getElementById('icon-sun');
+      var moonIcon = document.getElementById('icon-moon');
+      var btn      = document.getElementById('theme-toggle');
+      var isDark   = document.documentElement.classList.contains('dark');
+
+      function applyIcons(dark) {
+        if (dark) { sunIcon.style.display = 'block'; moonIcon.style.display = 'none'; }
+        else       { sunIcon.style.display = 'none';  moonIcon.style.display = 'block'; }
       }
 
-      const themeToggleBtn = document.getElementById('theme-toggle');
-      themeToggleBtn.addEventListener('click', function() {
-        themeToggleDarkIcon.classList.toggle('hidden');
-        themeToggleLightIcon.classList.toggle('hidden');
+      applyIcons(isDark);
 
-        if (localStorage.getItem('color-theme')) {
-          if (localStorage.getItem('color-theme') === 'light') {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('color-theme', 'dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('color-theme', 'light');
-          }
-        } else {
-          if (document.documentElement.classList.contains('dark')) {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('color-theme', 'light');
-          } else {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('color-theme', 'dark');
-          }
-        }
+      btn.addEventListener('click', function() {
+        isDark = !isDark;
+        document.documentElement.classList.toggle('dark', isDark);
+        localStorage.setItem('color-theme', isDark ? 'dark' : 'light');
+        applyIcons(isDark);
       });
+
+      // Active nav link detection
+      var path = window.location.pathname;
+      var navDashboard = document.getElementById('nav-dashboard');
+      var navProjects  = document.getElementById('nav-projects');
+
+      if (path.startsWith('/admin/dashboard')) {
+        navDashboard.classList.add('nav-link-active');
+      } else if (path.startsWith('/admin/projects') || path.startsWith('/admin/conversations')) {
+        navProjects.classList.add('nav-link-active');
+      }
     });
   </script>
+
   <main class="app-container">

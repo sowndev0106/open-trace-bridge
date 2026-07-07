@@ -12,67 +12,89 @@
 <% } %>
 
 <form method="post" action="<%= formAction %>">
-  <section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+
+  <!-- Page header -->
+  <section style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;justify-content:space-between">
     <div>
       <p class="page-kicker"><%= isEditing ? 'Project settings' : 'Project setup' %></p>
       <h1 class="page-title"><%= isEditing ? project.name : 'New project' %></h1>
-      <p class="page-subtitle">Configure how Teams events become investigation sessions and which systems the agent can inspect. One Save writes everything on this page.</p>
+      <p class="page-subtitle">Configure Teams events, agent context, repositories, and internal API groups. One Save writes everything.</p>
     </div>
-    <div class="flex items-center gap-2">
-      <a href="/admin/projects" class="btn btn-secondary">Back to projects</a>
+    <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+      <a href="/admin/projects" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd"/></svg>
+        Projects
+      </a>
       <% if (isEditing) { %>
-        <a href="/admin/projects/<%= project.id %>/chat" class="btn btn-secondary">Chat</a>
-        <a href="/admin/projects/<%= project.id %>/conversations" class="btn btn-secondary">Audit & Chats</a>
-        <button class="btn btn-secondary" type="submit" form="sync-form">Sync now</button>
+        <a href="/admin/projects/<%= project.id %>/chat" class="btn btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path d="M3.505 2.365A41.369 41.369 0 019 2c1.863 0 3.697.124 5.495.365 1.247.167 2.18 1.108 2.435 2.268a4.45 4.45 0 00-.577-.069 43.141 43.141 0 00-4.706 0C9.229 4.696 7.5 6.727 7.5 8.998v2.24c0 1.413.67 2.735 1.76 3.562l-2.98 2.98A.75.75 0 015 17.25v-3.443c-.501-.048-1-.106-1.495-.172C2.033 13.438 1 12.162 1 10.72V5.28c0-1.441 1.033-2.717 2.505-2.914z"/><path d="M14 6c-.762 0-1.52.02-2.271.062C10.157 6.148 9 7.434 9 8.998v2.24c0 1.564 1.157 2.85 2.729 2.936.509.028 1.019.042 1.532.042 .846 0 1.683-.034 2.505-.103l2.98 2.98A.75.75 0 0020 16.25v-3.22c.187-.726.282-1.487.282-2.271 0-1.565-1.157-2.85-2.729-2.936A41.645 41.645 0 0014 6z"/></svg>
+          Chat
+        </a>
+        <a href="/admin/projects/<%= project.id %>/opencode" class="btn btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6.28 5.22a.75.75 0 010 1.06L2.56 10l3.72 3.72a.75.75 0 01-1.06 1.06L.97 10.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0zm7.44 0a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L17.44 10l-3.72-3.72a.75.75 0 010-1.06zM11.377 2.011a.75.75 0 01.612.867l-2.5 14.5a.75.75 0 01-1.478-.255l2.5-14.5a.75.75 0 01.866-.612z" clip-rule="evenodd"/></svg>
+          OpenCode
+        </a>
+        <a href="/admin/projects/<%= project.id %>/conversations" class="btn btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+          Audit
+        </a>
+        <button class="btn btn-secondary" type="submit" form="sync-form">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.389zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd"/></svg>
+          Sync now
+        </button>
       <% } %>
-      <button class="btn btn-primary" type="submit">Save</button>
+      <button class="btn btn-primary" type="submit">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/></svg>
+        Save project
+      </button>
     </div>
   </section>
 
+  <!-- Errors -->
   <% if (errorList.length) { %>
-    <section class="error mb-5" role="alert">
-      <p class="font-semibold">Please fix these fields:</p>
+    <section class="error" style="margin-bottom:1.25rem" role="alert">
+      <p style="font-weight:700">Please fix these fields:</p>
       <ul class="error-list">
-        <% for (const item of errorList) { %>
-          <li><%= item %></li>
-        <% } %>
+        <% for (const item of errorList) { %><li><%= item %></li><% } %>
       </ul>
     </section>
   <% } %>
 
+  <!-- Integration webhook (edit mode only) -->
   <% if (isEditing) { %>
-    <section class="panel mb-6">
+    <section class="panel" style="margin-bottom:1.25rem">
       <div class="panel-body">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem">
           <div>
-            <h2 class="section-heading">Integration Webhook & Logs</h2>
-            <p class="mt-1 text-sm text-ink-500">Send Teams events into OpenTraceBridge, or inspect the audit logs and chat history.</p>
+            <h2 class="section-heading">Integration</h2>
+            <p style="font-size:0.8125rem;color:var(--color-ink-500);margin-top:0.25rem">Point Power Automate at this URL to send Teams events into OpenTraceBridge.</p>
           </div>
-          <div class="flex flex-wrap gap-2">
-            <a id="view-chat-history-btn" class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#chat-history">View chat history</a>
-            <a id="view-api-calls-btn" class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#api-calls">View latest API calls</a>
-          </div>
-        </div>
-        <div class="mt-4">
-          <label class="text-xs font-semibold uppercase tracking-wider text-ink-500">Power Automate Webhook URL</label>
-          <div class="mt-2 overflow-x-auto rounded-lg border border-line bg-slate-50 p-4">
-            <code id="webhook-endpoint-url">https://6666.sowndev.com/api/events/<%= project.slug %>?text=...&amp;conversationId=...&amp;userId=...&amp;userName=...</code>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+            <a id="view-chat-history-btn" class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#chat-history">Chat history</a>
+            <a id="view-api-calls-btn"    class="btn btn-secondary" href="/admin/projects/<%= project.id %>/conversations#api-calls">API calls</a>
           </div>
         </div>
+        <!-- Webhook URL display -->
+        <div style="border-radius:0.75rem;border:1px solid var(--color-border);background:var(--color-panel-alt);padding:0.875rem 1rem;font-family:var(--font-mono);font-size:0.8125rem;color:var(--color-ink-700);overflow-x:auto;word-break:break-all">
+          <code id="webhook-endpoint-url" style="background:none;border:none;padding:0;color:inherit;font-size:inherit">https://your-host/api/events/<%= project.slug %>?text=...&amp;conversationId=...&amp;userId=...&amp;userName=...</code>
+        </div>
+        <p class="field-help" style="margin-top:0.5rem">Use the <strong>OneDrive → Upload file from URL</strong> action in Power Automate if the HTTP action requires a premium license.</p>
       </div>
     </section>
   <% } %>
 
-  <section class="panel mb-6">
-    <div class="panel-body space-y-5">
+  <!-- Core settings -->
+  <section class="panel" style="margin-bottom:1.25rem">
+    <div class="panel-body" style="display:flex;flex-direction:column;gap:1.25rem">
+      <h2 class="section-heading">Core settings</h2>
       <div class="form-grid">
         <div>
           <label for="slug">Slug</label>
           <input id="slug" type="text" name="slug" value="<%= project ? project.slug : '' %>" required pattern="[a-z0-9-]+">
-          <p class="field-help">Lowercase letters, numbers, and hyphens. Used in the event URL.</p>
+          <p class="field-help">Lowercase + hyphens only. Used in the event URL path.</p>
         </div>
         <div>
-          <label for="name">Name</label>
+          <label for="name">Display name</label>
           <input id="name" type="text" name="name" value="<%= project ? project.name : '' %>" required>
         </div>
         <div>
@@ -85,199 +107,184 @@
       <div>
         <label for="system_prompt">System prompt</label>
         <textarea id="system_prompt" name="system_prompt" class="hidden"><%= project ? (project.system_prompt || '') : '' %></textarea>
-        <div id="system_prompt_editor" class="mt-2 bg-white rounded-lg border border-line"></div>
+        <div id="system_prompt_editor" style="margin-top:0.375rem;background:var(--color-panel-alt);border-radius:0.75rem;border:1px solid var(--color-border-strong)"></div>
       </div>
 
       <div class="form-grid">
         <div>
           <label for="teams_webhook_url">Teams webhook URL</label>
-          <input id="teams_webhook_url" type="url" name="teams_webhook_url" value="<%= project ? (project.teams_webhook_url || '') : '' %>" placeholder="https://outlook.office.com/webhook/...">
+          <input id="teams_webhook_url" type="url" name="teams_webhook_url"
+                 value="<%= project ? (project.teams_webhook_url || '') : '' %>"
+                 placeholder="https://outlook.office.com/webhook/...">
+          <p class="field-help">Power Automate "When HTTP request is received" trigger URL.</p>
         </div>
         <div>
           <label for="max_msg_length">Max message length</label>
           <input id="max_msg_length" type="number" name="max_msg_length" min="500" required
                  value="<%= project && project.max_msg_length ? project.max_msg_length : 20000 %>">
-          <p class="field-help">Longer results are split while preserving code fences.</p>
+          <p class="field-help">Characters. Longer results split at block boundaries.</p>
         </div>
         <div>
-          <label for="chat_retention_days">Chat retention days</label>
+          <label for="chat_retention_days">Chat retention (days)</label>
           <input id="chat_retention_days" type="number" name="chat_retention_days" min="0" required
                  value="<%= project && project.chat_retention_days !== undefined ? project.chat_retention_days : 90 %>">
-          <p class="field-help">Messages, conversations, and API-call audit rows older than this are deleted. Use 0 to keep history.</p>
+          <p class="field-help">0 = keep forever. Cleans messages, conversations, and API-call audit rows.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="panel mb-6">
+  <!-- Repositories -->
+  <section class="panel" style="margin-bottom:1.25rem">
     <div class="panel-body">
-      <div class="mb-4">
-        <h2 class="section-heading">Repos</h2>
-        <p class="mt-1 text-sm text-ink-500">Rows are saved together with the project when you press Save.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:1rem;flex-wrap:wrap">
+        <div>
+          <h2 class="section-heading">Repositories</h2>
+          <p style="font-size:0.8125rem;color:var(--color-ink-500);margin-top:0.25rem">Cloned into the project workspace for the agent to inspect.</p>
+        </div>
+        <button type="button" class="btn btn-secondary" data-add="repos" style="flex-shrink:0">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/></svg>
+          Add repo
+        </button>
       </div>
-      <div data-rows="repos">
+      <div data-rows="repos" style="display:flex;flex-direction:column;gap:0.75rem">
         <% repos.forEach((r, i) => { %>
           <%- include('_repo-row', { r, i, syncBadgeClass }) %>
         <% }) %>
       </div>
-      <button type="button" class="btn btn-secondary" data-add="repos">Add repo</button>
       <template data-template="repos"><%- include('_repo-row', { r: {}, i: '__I__', syncBadgeClass }) %></template>
     </div>
   </section>
 
-  <section class="panel mb-6">
+  <!-- API Endpoints -->
+  <section class="panel" style="margin-bottom:1.25rem">
     <div class="panel-body">
-      <div class="mb-4">
-        <h2 class="section-heading">API Endpoints (Curl)</h2>
-        <p class="mt-1 text-sm text-ink-500">Paste curl commands or edit stored API rows. Rows are saved together with the project when you press Save.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:1rem;flex-wrap:wrap">
+        <div>
+          <h2 class="section-heading">API endpoints</h2>
+          <p style="font-size:0.8125rem;color:var(--color-ink-500);margin-top:0.25rem">Paste curl commands — OpenTraceBridge extracts base URL, method, auth header, and API key. Secrets stored server-side.</p>
+        </div>
+        <button type="button" class="btn btn-secondary" data-add="apis" style="flex-shrink:0">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/></svg>
+          Add API
+        </button>
       </div>
-      <div data-rows="apis">
+      <div data-rows="apis" style="display:flex;flex-direction:column;gap:0.75rem">
         <% apis.forEach((a, i) => { %>
           <%- include('_api-row', { a, i }) %>
         <% }) %>
       </div>
-      <button type="button" class="btn btn-secondary" data-add="apis">Add API endpoint</button>
       <template data-template="apis"><%- include('_api-row', { a: {}, i: '__I__' }) %></template>
     </div>
   </section>
+
 </form>
 
 <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"></script>
 <script>
-  (function () {
-    var counters = { repos: <%= repos.length %>, apis: <%= apis.length %> };
+(function () {
+  var counters = { repos: <%= repos.length %>, apis: <%= apis.length %> };
 
-    // Update webhook endpoint URL with dynamic host
-    var webhookCodeEl = document.getElementById('webhook-endpoint-url');
-    if (webhookCodeEl) {
-      var origin = window.location.protocol + '//' + window.location.hostname;
-      if (window.location.port) {
-        // If on local admin port (8667), default public api is 6666
-        var port = window.location.port === '8667' ? '6666' : window.location.port;
-        origin += ':' + port;
-      }
-      webhookCodeEl.textContent = origin + '/api/events/<%= project ? project.slug : "" %>?text=...&conversationId=...&userId=...&userName=...';
+  // Update webhook URL to actual host
+  var webhookCodeEl = document.getElementById('webhook-endpoint-url');
+  if (webhookCodeEl) {
+    var origin = window.location.protocol + '//' + window.location.hostname;
+    if (window.location.port) {
+      var port = window.location.port === '8667' ? '6666' : window.location.port;
+      origin += ':' + port;
     }
-    
-    // Initialize system prompt editor
-    var systemPromptTextarea = document.getElementById('system_prompt');
-    if (systemPromptTextarea) {
-      var systemPromptEditor = new toastui.Editor({
-        el: document.querySelector('#system_prompt_editor'),
-        height: '700px',
-        initialEditType: 'markdown',
-        previewStyle: 'tab',
-        initialValue: systemPromptTextarea.value,
-        usageStatistics: false,
-        events: {
-          change: function () {
-            systemPromptTextarea.value = systemPromptEditor.getMarkdown();
-          }
-        }
-      });
-    }
+    webhookCodeEl.textContent = origin + '/api/events/<%= project ? project.slug : "" %>?text=...&conversationId=...&userId=...&userName=...';
+  }
 
-    // API row editor initializer
-    function initApiRowEditor(container) {
-      var textarea = container.querySelector('.api-description-textarea');
-      var editorEl = container.querySelector('.api-description-editor');
-      if (!textarea || !editorEl || editorEl.dataset.initialized) return;
-
-      var editor = new toastui.Editor({
-        el: editorEl,
-        height: '500px',
-        initialEditType: 'markdown',
-        previewStyle: 'tab',
-        initialValue: textarea.value,
-        usageStatistics: false,
-        events: {
-          change: function () {
-            textarea.value = editor.getMarkdown();
-          }
-        }
-      });
-      editorEl.dataset.initialized = 'true';
-    }
-
-    // Initialize existing API description editors
-    document.querySelectorAll('[data-api-editor-container]').forEach(initApiRowEditor);
-
-    // Repo auth fields toggle logic
-    function updateAuthFields(rowEl) {
-      var select = rowEl.querySelector('[data-auth-type-select]');
-      var tokenInput = rowEl.querySelector('[data-token-input]');
-      var sshKeyInput = rowEl.querySelector('[data-ssh-key-input]');
-      if (!select || !tokenInput || !sshKeyInput) return;
-
-      var authType = select.value;
-      if (authType === 'https-token') {
-        tokenInput.disabled = false;
-        tokenInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
-        sshKeyInput.disabled = true;
-        sshKeyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
-      } else if (authType === 'ssh') {
-        tokenInput.disabled = true;
-        tokenInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
-        sshKeyInput.disabled = false;
-        sshKeyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
-      } else { // 'none'
-        tokenInput.disabled = true;
-        tokenInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
-        sshKeyInput.disabled = true;
-        sshKeyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-50');
-      }
-    }
-
-    // Initialize existing repo rows
-    document.querySelectorAll('[data-rows="repos"] > [data-row]').forEach(updateAuthFields);
-
-    // Listen for changes on auth type selects
-    document.addEventListener('change', function (e) {
-      if (e.target.matches('[data-auth-type-select]')) {
-        var row = e.target.closest('[data-row]');
-        if (row) updateAuthFields(row);
-      }
+  // System prompt editor
+  var spTextarea = document.getElementById('system_prompt');
+  if (spTextarea) {
+    var spEditor = new toastui.Editor({
+      el: document.querySelector('#system_prompt_editor'),
+      height: '600px',
+      initialEditType: 'markdown',
+      previewStyle: 'tab',
+      initialValue: spTextarea.value,
+      usageStatistics: false,
+      events: { change: function() { spTextarea.value = spEditor.getMarkdown(); } }
     });
+  }
 
-    document.querySelectorAll('[data-add]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var kind = btn.getAttribute('data-add');
-        var tpl = document.querySelector('template[data-template="' + kind + '"]');
-        var holder = document.createElement('div');
-        holder.innerHTML = tpl.innerHTML.replace(/__I__/g, counters[kind]++);
-        var newEl = holder.firstElementChild;
-        document.querySelector('[data-rows="' + kind + '"]').appendChild(newEl);
-        if (kind === 'apis') {
-          var container = newEl.querySelector('[data-api-editor-container]');
-          if (container) {
-            initApiRowEditor(container);
-          }
-        }
-        if (kind === 'repos') {
-          updateAuthFields(newEl);
-        }
-      });
+  // API row markdown editor
+  function initApiRowEditor(container) {
+    var ta = container.querySelector('.api-description-textarea');
+    var el = container.querySelector('.api-description-editor');
+    if (!ta || !el || el.dataset.initialized) return;
+    var ed = new toastui.Editor({
+      el: el, height: '400px',
+      initialEditType: 'markdown', previewStyle: 'tab',
+      initialValue: ta.value, usageStatistics: false,
+      events: { change: function() { ta.value = ed.getMarkdown(); } }
     });
-    document.addEventListener('click', function (e) {
-      var btn = e.target.closest('[data-remove]');
-      if (btn) btn.closest('[data-row]').remove();
+    el.dataset.initialized = 'true';
+  }
+  document.querySelectorAll('[data-api-editor-container]').forEach(initApiRowEditor);
+
+  // Repo auth field toggle — show/hide instead of just disable
+  function updateAuthFields(rowEl) {
+    var select   = rowEl.querySelector('[data-auth-type-select]');
+    var tokenWrap = rowEl.querySelector('[data-token-wrap]');
+    var sshWrap   = rowEl.querySelector('[data-ssh-wrap]');
+    if (!select) return;
+    var v = select.value;
+    if (tokenWrap) tokenWrap.style.display = (v === 'https-token') ? '' : 'none';
+    if (sshWrap)   sshWrap.style.display   = (v === 'ssh')         ? '' : 'none';
+    var tokenInput = rowEl.querySelector('[data-token-input]');
+    var sshInput   = rowEl.querySelector('[data-ssh-key-input]');
+    if (tokenInput) tokenInput.disabled = (v !== 'https-token');
+    if (sshInput)   sshInput.disabled   = (v !== 'ssh');
+  }
+
+  document.querySelectorAll('[data-rows="repos"] > [data-row]').forEach(updateAuthFields);
+
+  document.addEventListener('change', function(e) {
+    if (e.target.matches('[data-auth-type-select]')) {
+      var row = e.target.closest('[data-row]');
+      if (row) updateAuthFields(row);
+    }
+  });
+
+  // Add row buttons
+  document.querySelectorAll('[data-add]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var kind = btn.getAttribute('data-add');
+      var tpl = document.querySelector('template[data-template="' + kind + '"]');
+      var holder = document.createElement('div');
+      holder.innerHTML = tpl.innerHTML.replace(/__I__/g, counters[kind]++);
+      var newEl = holder.firstElementChild;
+      document.querySelector('[data-rows="' + kind + '"]').appendChild(newEl);
+      if (kind === 'apis') {
+        var c = newEl.querySelector('[data-api-editor-container]');
+        if (c) initApiRowEditor(c);
+      }
+      if (kind === 'repos') updateAuthFields(newEl);
     });
-  })();
+  });
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-remove]');
+    if (btn) btn.closest('[data-row]').remove();
+  });
+})();
 </script>
 
-<% if (project && project.id && repos.some((r) => r.sync_status === 'pending' || r.sync_status === 'syncing')) { %>
+<% if (project && project.id && repos.some(r => r.sync_status === 'pending' || r.sync_status === 'syncing')) { %>
 <script>
-  (function () {
-    var timer = setInterval(function () {
-      fetch('/admin/projects/<%= project.id %>/sync-status')
-        .then(function (r) { return r.json(); })
-        .then(function (s) {
-          var busy = s.repos.some(function (r) { return r.sync_status === 'pending' || r.sync_status === 'syncing'; });
-          if (!busy) { clearInterval(timer); location.reload(); }
-        })
-        .catch(function () {});
-    }, 3000);
-  })();
+(function() {
+  var timer = setInterval(function() {
+    fetch('/admin/projects/<%= project.id %>/sync-status')
+      .then(r => r.json())
+      .then(s => {
+        var busy = s.repos.some(r => r.sync_status === 'pending' || r.sync_status === 'syncing');
+        if (!busy) { clearInterval(timer); location.reload(); }
+      }).catch(function(){});
+  }, 3000);
+})();
 </script>
 <% } %>
 

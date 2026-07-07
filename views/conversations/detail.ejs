@@ -1,42 +1,81 @@
 <%- include('../layout-head') %>
 
-<section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+<section style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem">
   <div>
     <p class="page-kicker"><%= project.name %></p>
     <h1 class="page-title">Conversation #<%= conv.id %></h1>
-    <p class="page-subtitle">Session <code><%= conv.opencode_session_id || '-' %></code> with status <span class="status-badge <%= conv.status === 'active' ? 'status-active' : 'status-muted' %>"><%= conv.status %></span></p>
+    <p class="page-subtitle" style="display:flex;align-items:center;gap:0.625rem;flex-wrap:wrap">
+      Session <code style="font-size:0.75rem"><%= conv.opencode_session_id || '—' %></code>
+      <span class="status-badge <%= conv.status === 'active' ? 'status-active' : 'status-muted' %>"><%= conv.status %></span>
+    </p>
   </div>
-  <a href="/admin/projects/<%= project.id %>/conversations" class="btn btn-secondary">Back to audit</a>
+  <a href="/admin/projects/<%= project.id %>/conversations" class="btn btn-secondary">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd"/></svg>
+    Back to conversations
+  </a>
 </section>
 
-<section class="panel">
+<!-- Message timeline -->
+<section class="panel message-timeline" style="margin-bottom:1.25rem">
   <div class="panel-body">
-    <div class="message-timeline space-y-5">
+    <% if (!messages.length) { %>
+      <div style="padding:2.5rem;text-align:center;color:var(--color-ink-500);font-size:0.875rem">No messages in this conversation.</div>
+    <% } else { %>
+    <div style="display:flex;flex-direction:column;gap:1rem">
       <% for (const m of messages) { %>
-        <% const isInbound = m.direction === 'in'; %>
-        <article class="flex <%= isInbound ? 'justify-start' : 'justify-end' %>">
-          <div class="max-w-3xl rounded-lg border <%= isInbound ? 'border-line bg-slate-50/50 dark:bg-slate-900/40' : 'border-blue-200/60 bg-blue-50/50 dark:border-blue-900/40 dark:bg-blue-950/30' %> p-4">
-            <div class="mb-2 flex flex-wrap items-center gap-2">
-              <strong class="text-sm text-ink-950"><%= isInbound ? (m.user_name || 'user') : 'bot' %></strong>
-              <small class="text-xs text-ink-500"><%= m.created_at %></small>
+        <% const isIn = m.direction === 'in'; %>
+        <article style="display:flex;<%= isIn ? 'justify-content:flex-end' : 'justify-content:flex-start;align-items:flex-end;gap:0.5rem' %>">
+          <% if (!isIn) { %>
+            <div style="flex-shrink:0;width:1.875rem;height:1.875rem;border-radius:0.5rem;background:var(--grad-brand);display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:800;color:#fff;box-shadow:0 2px 8px var(--color-brand-glow)">OT</div>
+          <% } %>
+          <div style="max-width:42rem;border-radius:<%= isIn ? '1rem 1rem 0.25rem 1rem' : '0.25rem 1rem 1rem 1rem' %>;
+               padding:0.75rem 1rem;
+               background:<%= isIn ? 'var(--grad-brand)' : 'var(--color-panel-alt)' %>;
+               border:1px solid <%= isIn ? 'transparent' : 'var(--color-border)' %>;
+               box-shadow:<%= isIn ? '0 4px 16px var(--color-brand-glow)' : '0 1px 4px rgba(0,0,0,0.06)' %>">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">
+              <span style="font-size:0.75rem;font-weight:700;color:<%= isIn ? 'rgba(255,255,255,0.85)' : 'var(--color-ink-950)' %>"><%= isIn ? (m.user_name || 'user') : 'agent' %></span>
+              <span style="font-size:0.6875rem;color:<%= isIn ? 'rgba(255,255,255,0.55)' : 'var(--color-ink-500)' %>"><%= m.created_at %></span>
             </div>
-            <div class="whitespace-pre-wrap text-sm leading-6 text-ink-700"><%= m.content %></div>
+            <% if (isIn) { %>
+              <div style="font-size:0.875rem;line-height:1.65;color:#fff;white-space:pre-wrap"><%= m.content %></div>
+            <% } else { %>
+              <div class="msg-content" style="font-size:0.875rem;line-height:1.65;color:var(--color-ink-950)" data-raw="<%= encodeURIComponent(m.content || '') %>"></div>
+            <% } %>
           </div>
         </article>
       <% } %>
     </div>
-  </div>
-</section>
-
-<section class="panel mt-6">
-  <div class="panel-body">
-    <h2 class="section-heading mb-4">API calls</h2>
-    <% if (apiCalls && apiCalls.length) { %>
-      <%- include('_api-calls-table', { apiCalls, showConversation: false }) %>
-    <% } else { %>
-      <div class="rounded-lg border border-dashed border-line bg-slate-50 px-4 py-5 text-sm text-ink-500">This conversation has not made any API calls.</div>
     <% } %>
   </div>
 </section>
+
+<!-- API calls -->
+<section class="panel">
+  <div class="panel-body">
+    <h2 class="section-heading" style="margin-bottom:1rem">API calls</h2>
+    <% if (apiCalls && apiCalls.length) { %>
+      <%- include('_api-calls-table', { apiCalls, showConversation: false }) %>
+    <% } else { %>
+      <div style="border-radius:0.75rem;border:1px dashed var(--color-border-strong);background:var(--color-panel-alt);padding:1.5rem;text-align:center;font-size:0.875rem;color:var(--color-ink-500)">
+        No API calls were made during this conversation.
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<!-- Render markdown for agent messages -->
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
+<script>
+document.querySelectorAll('.msg-content[data-raw]').forEach(function(el) {
+  var text = decodeURIComponent(el.dataset.raw || '');
+  el.innerHTML = DOMPurify.sanitize(marked.parse(text));
+  // Style inline code and pre in rendered markdown
+  el.querySelectorAll('pre').forEach(function(pre) {
+    pre.style.cssText = 'background:#0d1424;color:#c8d3f5;border-radius:0.5rem;padding:0.75rem;overflow-x:auto;font-size:0.8125rem;margin:0.5rem 0;border:1px solid rgba(255,255,255,0.06)';
+  });
+});
+</script>
 
 <%- include('../layout-foot') %>

@@ -46,9 +46,9 @@ test('dashboard renders stat cards and respects the days filter', async () => {
   const page = await agent.get('/admin/dashboard').expect(200);
   cheerio.load(page.text);
   assert.match(page.text, /Payment/);
-  assert.match(page.text, /Total questions/);
+  assert.match(page.text, /Questions/);
   assert.match(page.text, /Error rate/);
-  assert.match(page.text, /call_api/);
+  assert.match(page.text, /API calls/);
 
   const filtered = await agent.get('/admin/dashboard?days=7').expect(200);
   assert.match(filtered.text, /Payment/);
