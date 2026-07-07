@@ -5,6 +5,7 @@ const cheerio = require('cheerio');
 
 process.env.OTB_DB_PATH = ':memory:';
 
+const { loginAgent } = require('./helpers/auth');
 const { adminApp } = require('../server');
 const { resetDbForTest } = require('../lib/db');
 const projects = require('../models/project.model');
@@ -13,8 +14,10 @@ const messages = require('../models/message.model');
 const apicalls = require('../models/apicall.model');
 const runs = require('../models/run.model');
 
-beforeEach(() => {
+let agent;
+beforeEach(async () => {
   resetDbForTest();
+  agent = await loginAgent(adminApp);
 });
 
 function seedProject(overrides = {}) {
@@ -40,19 +43,19 @@ test('dashboard renders stat cards and respects the days filter', async () => {
   runs.add({ project_id: project.id, conversation_id: conv.id, status: 'error', duration_ms: 500, error: 'boom' });
   apicalls.add({ project_id: project.id, group_name: 'txn', method: 'GET', url: 'https://api.example/x', status: 200 });
 
-  const page = await request(adminApp).get('/admin/dashboard').expect(200);
+  const page = await agent.get('/admin/dashboard').expect(200);
   cheerio.load(page.text);
   assert.match(page.text, /Payment/);
   assert.match(page.text, /Total questions/);
   assert.match(page.text, /Error rate/);
   assert.match(page.text, /call_api/);
 
-  const filtered = await request(adminApp).get('/admin/dashboard?days=7').expect(200);
+  const filtered = await agent.get('/admin/dashboard?days=7').expect(200);
   assert.match(filtered.text, /Payment/);
 });
 
 test('dashboard shows n/a for projects with no runs yet', async () => {
   seedProject({ slug: 'empty-proj', keyword: 'empty-bot' });
-  const page = await request(adminApp).get('/admin/dashboard').expect(200);
+  const page = await agent.get('/admin/dashboard').expect(200);
   assert.match(page.text, /n\/a/);
 });

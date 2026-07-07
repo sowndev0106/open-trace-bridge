@@ -5,6 +5,7 @@ const cheerio = require('cheerio');
 
 process.env.OTB_DB_PATH = ':memory:';
 
+const { loginAgent } = require('./helpers/auth');
 const { adminApp } = require('../server');
 const { resetDbForTest } = require('../lib/db');
 const projects = require('../models/project.model');
@@ -15,8 +16,10 @@ const messages = require('../models/message.model');
 const apicalls = require('../models/apicall.model');
 const sync = require('../services/sync.service');
 
-beforeEach(() => {
+let agent;
+beforeEach(async () => {
   resetDbForTest();
+  agent = await loginAgent(adminApp);
 });
 
 function seedProject(overrides = {}) {
@@ -35,18 +38,18 @@ function seedProject(overrides = {}) {
 test('admin layout links the compiled Tailwind stylesheet and serves it', async () => {
   seedProject();
 
-  const page = await request(adminApp).get('/admin/projects').expect(200);
+  const page = await agent.get('/admin/projects').expect(200);
   assert.match(page.text, /\/assets\/styles\/admin\.css/);
   assert.match(page.text, /OpenTraceBridge/);
 
-  const css = await request(adminApp).get('/assets/styles/admin.css').expect(200);
+  const css = await agent.get('/assets/styles/admin.css').expect(200);
   assert.match(css.text, /\.app-shell|\.btn|\.panel/);
 });
 
 test('projects index renders modern project table actions and endpoint copy', async () => {
   const project = seedProject();
 
-  const response = await request(adminApp).get('/admin/projects').expect(200);
+  const response = await agent.get('/admin/projects').expect(200);
   const $ = cheerio.load(response.text);
 
   assert.strictEqual($('h1').text().trim(), 'Projects');
@@ -77,7 +80,7 @@ test('project edit form preserves workflows inside redesigned panels', async () 
     description_md: 'Read transactions.',
   });
 
-  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(response.text);
 
   assert.strictEqual($(`form[action="/admin/projects/${project.id}"][method="post"]`).length, 1);
@@ -98,7 +101,7 @@ test('project edit form preserves workflows inside redesigned panels', async () 
 });
 
 test('project create validation shows all field errors and preserves input', async () => {
-  const response = await request(adminApp)
+  const response = await agent
     .post('/admin/projects')
     .type('form')
     .send({
@@ -127,7 +130,7 @@ test('project create validation shows all field errors and preserves input', asy
 test('project form saves chat retention days', async () => {
   const project = seedProject();
 
-  await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+  await agent.post(`/admin/projects/${project.id}`).type('form').send({
     slug: 'payment',
     name: 'Payment',
     keyword: 'payment-bot',
@@ -140,14 +143,14 @@ test('project form saves chat retention days', async () => {
   const updated = projects.findById(project.id);
   assert.strictEqual(updated.chat_retention_days, 30);
 
-  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(response.text);
   assert.strictEqual($('input[name="chat_retention_days"]').val(), '30');
 });
 
 test('bundle validation rejects a bad repo row with prefixed errors and creates nothing', async () => {
   const project = seedProject();
-  const response = await request(adminApp)
+  const response = await agent
     .post(`/admin/projects/${project.id}`)
     .type('form')
     .send({
@@ -169,7 +172,7 @@ test('bundle validation rejects a bad repo row with prefixed errors and creates 
 
 test('bundle validation rejects a bad API row with prefixed errors and creates nothing', async () => {
   const project = seedProject();
-  const response = await request(adminApp)
+  const response = await agent
     .post(`/admin/projects/${project.id}`)
     .type('form')
     .send({
@@ -194,7 +197,7 @@ test('bundle validation rejects a bad API row with prefixed errors and creates n
 test('api group can be created from pasted curl and markdown description', async () => {
   const project = seedProject();
 
-  await request(adminApp)
+  await agent
     .post(`/admin/projects/${project.id}`)
     .type('form')
     .send({
@@ -225,7 +228,7 @@ test('stored curl command loads back into the edit form and survives a blank re-
   const project = seedProject();
   const curl = 'curl -H "x-api-key: secret123" "https://api2.example.com/api/v2/invoices/logs"';
 
-  await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+  await agent.post(`/admin/projects/${project.id}`).type('form').send({
     slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
     teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
     chat_retention_days: '90',
@@ -234,12 +237,12 @@ test('stored curl command loads back into the edit form and survives a blank re-
     'apis[0][description_md]': 'Invoice logs.',
   }).expect(302);
 
-  const page = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const page = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(page.text);
   assert.strictEqual($('textarea[name="apis[0][curl_command]"]').text(), curl);
 
   const api = apis.listByProject(project.id)[0];
-  await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+  await agent.post(`/admin/projects/${project.id}`).type('form').send({
     slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
     teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
     chat_retention_days: '90',
@@ -267,7 +270,7 @@ test('api row form only offers name, curl, and description inputs plus a parsed 
     description_md: 'Search transactions.',
   });
 
-  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(response.text);
 
   assert.strictEqual($('input[name="apis[0][name]"]').length, 1);
@@ -293,7 +296,7 @@ test('existing API row keeps parsed fields when saved without a new curl command
     description_md: 'Old description.',
   });
 
-  await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+  await agent.post(`/admin/projects/${project.id}`).type('form').send({
     slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
     teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
     chat_retention_days: '90',
@@ -314,7 +317,7 @@ test('existing API row keeps parsed fields when saved without a new curl command
 
 test('new API row without a curl command is rejected', async () => {
   const project = seedProject();
-  const response = await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+  const response = await agent.post(`/admin/projects/${project.id}`).type('form').send({
     slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
     teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
     chat_retention_days: '90',
@@ -341,7 +344,7 @@ test('conversation audit list renders redesigned tables', async () => {
     status: 200,
   });
 
-  const response = await request(adminApp).get(`/admin/projects/${project.id}/conversations`).expect(200);
+  const response = await agent.get(`/admin/projects/${project.id}/conversations`).expect(200);
   const $ = cheerio.load(response.text);
 
   assert.strictEqual($('h1').text().trim(), 'Conversations');
@@ -369,7 +372,7 @@ test('conversation detail shows the API calls made by that conversation with ful
     url: 'https://api.internal/transactions/txn_OTHER', status: 200,
   });
 
-  const response = await request(adminApp).get(`/admin/conversations/${conversation.id}`).expect(200);
+  const response = await agent.get(`/admin/conversations/${conversation.id}`).expect(200);
   const $ = cheerio.load(response.text);
 
   assert.match(response.text, /API calls/);
@@ -390,7 +393,7 @@ test('project edit page links latest API calls instead of inlining them', async 
     status: 200,
   });
 
-  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(response.text);
 
   const button = $(`a[href="/admin/projects/${project.id}/conversations#api-calls"]`);
@@ -419,7 +422,7 @@ test('conversation detail renders message timeline', async () => {
     content: 'I found the failing API call.',
   });
 
-  const response = await request(adminApp).get(`/admin/conversations/${conversation.id}`).expect(200);
+  const response = await agent.get(`/admin/conversations/${conversation.id}`).expect(200);
   const $ = cheerio.load(response.text);
 
   assert.strictEqual($('h1').text().trim(), `Conversation #${conversation.id}`);
@@ -443,7 +446,7 @@ test('project edit page links chat history instead of inlining it', async () => 
     content: 'payment-bot investigate txn_123',
   });
 
-  const response = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(response.text);
 
   const button = $(`a[href="/admin/projects/${project.id}/conversations#chat-history"]`);
@@ -452,7 +455,7 @@ test('project edit page links chat history instead of inlining it', async () => 
   assert.strictEqual($('[data-chat-history-row]').length, 0);
   assert.doesNotMatch(response.text, /teams-conv-1/);
 
-  const listPage = await request(adminApp).get(`/admin/projects/${project.id}/conversations`).expect(200);
+  const listPage = await agent.get(`/admin/projects/${project.id}/conversations`).expect(200);
   const $$ = cheerio.load(listPage.text);
   assert.strictEqual($$('#chat-history').length, 1);
   assert.strictEqual($$('#api-calls').length, 1);
@@ -464,7 +467,7 @@ test('create, update, and Sync now each trigger exactly one background sync', as
   const origTrigger = sync.triggerSync;
   sync.triggerSync = (id, opts = {}) => { triggered.push({ id: Number(id), reason: opts.reason }); return Promise.resolve(); };
   try {
-    await request(adminApp).post('/admin/projects').type('form').send({
+    await agent.post('/admin/projects').type('form').send({
       slug: 'billing', name: 'Billing', keyword: 'billing-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000', chat_retention_days: '90',
       'repos[0][git_url]': 'https://github.com/acme/billing.git',
@@ -473,11 +476,11 @@ test('create, update, and Sync now each trigger exactly one background sync', as
     }).expect(302);
     const project = projects.findBySlug('billing');
     assert.strictEqual(repos.listByProject(project.id).length, 1);
-    await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+    await agent.post(`/admin/projects/${project.id}`).type('form').send({
       slug: 'billing', name: 'Billing 2', keyword: 'billing-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/b', max_msg_length: '20000', chat_retention_days: '90',
     }).expect(302);
-    await request(adminApp).post(`/admin/projects/${project.id}/sync`).expect(302);
+    await agent.post(`/admin/projects/${project.id}/sync`).expect(302);
     assert.deepStrictEqual(triggered.map((t) => t.reason), ['create', 'update', 'manual']);
     assert.deepStrictEqual(triggered.map((t) => t.id), Array(3).fill(project.id));
   } finally {
@@ -491,14 +494,14 @@ test('sync-status endpoint returns derived project status and per-repo rows', as
     auth_type: 'none', branch: 'main' });
   repos.setSyncStatus(repo.id, { status: 'error', error: 'auth denied' });
 
-  const res = await request(adminApp).get(`/admin/projects/${project.id}/sync-status`).expect(200);
+  const res = await agent.get(`/admin/projects/${project.id}/sync-status`).expect(200);
   assert.strictEqual(res.body.project, 'error');
   assert.strictEqual(res.body.repos.length, 1);
   assert.strictEqual(res.body.repos[0].sync_status, 'error');
   assert.strictEqual(res.body.repos[0].sync_error, 'auth denied');
   assert.ok(res.body.repos[0].synced_at);
 
-  await request(adminApp).get('/admin/projects/999/sync-status').expect(404);
+  await agent.get('/admin/projects/999/sync-status').expect(404);
 });
 
 test('projects list shows a source sync badge per project', async () => {
@@ -507,7 +510,7 @@ test('projects list shows a source sync badge per project', async () => {
     auth_type: 'none', branch: 'main' });
   repos.setSyncStatus(repo.id, { status: 'success' });
 
-  const res = await request(adminApp).get('/admin/projects').expect(200);
+  const res = await agent.get('/admin/projects').expect(200);
   const $ = cheerio.load(res.text);
   assert.match($('thead').text(), /Source/);
   assert.strictEqual($('[data-project-sync]').first().text().trim(), 'success');
@@ -519,7 +522,7 @@ test('project edit shows per-repo status, error detail, and a Sync now button', 
     auth_type: 'none', branch: 'main' });
   repos.setSyncStatus(repo.id, { status: 'error', error: 'auth denied' });
 
-  const res = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const res = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(res.text);
   assert.strictEqual($(`form[action="/admin/projects/${project.id}/sync"]`).length, 1);
   assert.strictEqual($(`[data-repo-status="${repo.id}"] .status-badge`).text().trim(), 'error');
@@ -531,11 +534,11 @@ test('project edit embeds the status poller only while a sync is unfinished', as
   const repo = repos.create({ project_id: project.id, git_url: 'https://github.com/acme/payment.git',
     auth_type: 'none', branch: 'main' }); // sync_status defaults to 'pending'
 
-  let res = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  let res = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   assert.match(res.text, /sync-status/);
 
   repos.setSyncStatus(repo.id, { status: 'success' });
-  res = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  res = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   assert.ok(!/setInterval/.test(res.text));
 });
 
@@ -546,7 +549,7 @@ test('save-all reconciles rows: edit one, add one, omit one (deleted)', async ()
   const origTrigger = sync.triggerSync;
   sync.triggerSync = () => Promise.resolve();
   try {
-    await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+    await agent.post(`/admin/projects/${project.id}`).type('form').send({
       slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
       chat_retention_days: '90',
@@ -577,7 +580,7 @@ test('blank token on save keeps the stored secret; secrets are never echoed', as
   const origTrigger = sync.triggerSync;
   sync.triggerSync = () => Promise.resolve();
   try {
-    await request(adminApp).post(`/admin/projects/${project.id}`).type('form').send({
+    await agent.post(`/admin/projects/${project.id}`).type('form').send({
       slug: 'payment', name: 'Payment', keyword: 'payment-bot', system_prompt: 'x',
       teams_webhook_url: 'https://hook.example/payment', max_msg_length: '20000',
       chat_retention_days: '90',
@@ -591,7 +594,7 @@ test('blank token on save keeps the stored secret; secrets are never echoed', as
   }
   assert.strictEqual(repos.listByProject(project.id)[0].token, 'ghp_supersecrettoken');
 
-  const page = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const page = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   assert.ok(!page.text.includes('ghp_supersecrettoken'));
   const $ = cheerio.load(page.text);
   assert.strictEqual($('input[name="repos[0][token]"]').attr('type'), 'password');
@@ -601,7 +604,7 @@ test('blank token on save keeps the stored secret; secrets are never echoed', as
 
 test('Save button is at the top inside the single unified form', async () => {
   const project = seedProject();
-  const res = await request(adminApp).get(`/admin/projects/${project.id}/edit`).expect(200);
+  const res = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(res.text);
   const mainForm = $(`form[action="/admin/projects/${project.id}"]`);
   assert.strictEqual(mainForm.length, 1);

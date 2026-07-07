@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in - OpenTraceBridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles/admin.css">
+</head>
+<body>
+  <main class="min-h-screen flex items-center justify-center px-4">
+    <form method="post" action="/admin/login" class="panel w-full max-w-sm p-8 flex flex-col gap-4">
+      <div class="flex items-center gap-3">
+        <span class="brand-mark">OT</span>
+        <span>
+          <span class="block text-sm font-semibold text-ink-950">OpenTraceBridge</span>
+          <span class="block text-xs text-ink-500">Admin console sign in</span>
+        </span>
+      </div>
+      <% if (!configured) { %>
+        <p class="text-sm text-danger">Admin credentials are not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD in the environment.</p>
+      <% } %>
+      <% if (error) { %>
+        <p class="text-sm text-danger" role="alert"><%= error %></p>
+      <% } %>
+      <input type="hidden" name="next" value="<%= next %>">
+      <label class="block text-sm">
+        <span class="text-ink-700">Username</span>
+        <input name="username" autocomplete="username" required autofocus>
+      </label>
+      <label class="block text-sm">
+        <span class="text-ink-700">Password</span>
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit" class="btn" <%= configured ? '' : 'disabled' %>>Sign in</button>
+    </form>
+  </main>
+</body>
+</html>

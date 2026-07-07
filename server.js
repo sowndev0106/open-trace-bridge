@@ -21,6 +21,7 @@ publicApp.use('/api', require('./routes/events.routes'));
 publicApp.use(notFound);
 
 // Private admin app: dashboard and internal call-api.
+const auth = require('./services/auth.service');
 const adminApp = express();
 adminApp.use(express.json({ limit: '1mb' }));
 adminApp.use(express.urlencoded({ extended: true }));
@@ -29,9 +30,12 @@ adminApp.set('views', path.join(__dirname, 'views'));
 adminApp.use('/assets', express.static(path.join(__dirname, 'public')));
 adminApp.use(logger);
 adminApp.get('/health', (req, res) => res.json({ status: 'ok', scope: 'admin' }));
+adminApp.use('/internal', require('./routes/internal.routes')); // token-guarded, no session auth
 adminApp.get('/', (req, res) => res.redirect('/admin/projects'));
+adminApp.use('/admin', auth.originCheck);
+adminApp.use('/admin', require('./routes/auth.routes')); // login: reachable without a session
+adminApp.use('/admin', auth.requireAuth);
 adminApp.use('/admin', require('./routes/admin.routes'));
-adminApp.use('/internal', require('./routes/internal.routes'));
 adminApp.use(notFound);
 
 const PORT = process.env.PORT || 6666;

@@ -2,7 +2,9 @@ const router = require('express').Router();
 const pc = require('../controllers/project.controller');
 const cc = require('../controllers/conversation.controller');
 const dc = require('../controllers/dashboard.controller');
+const ac = require('../controllers/auth.controller');
 
+router.post('/logout', ac.logout);
 router.get('/', (req, res) => res.redirect('/admin/projects'));
 router.get('/dashboard', dc.dashboard);
 router.get('/projects', pc.listProjects);
