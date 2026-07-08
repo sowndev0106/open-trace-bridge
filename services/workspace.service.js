@@ -99,6 +99,17 @@ function buildOpencodeConfig(project) {
   };
 }
 
+// DM-admin sessions: full tool access, same guarded MCP. The OS-user sandbox
+// (otb-<slug>) still applies; this config must never be the default one.
+function buildOpencodeAdminConfig(project) {
+  const cfg = buildOpencodeConfig(project);
+  return { ...cfg, permission: { edit: 'allow', bash: 'allow', webfetch: 'allow' } };
+}
+
+function adminConfigPathFor(ws) {
+  return path.join(ws, 'opencode.admin.json');
+}
+
 function gitEnvFor(repo, keyFile) {
   if (repo.auth_type === 'ssh' && repo.ssh_key) {
     fs.writeFileSync(keyFile, repo.ssh_key.trim() + '\n', { mode: 0o600 });
@@ -169,10 +180,12 @@ function writeWorkspaceFiles(project, apiGroups) {
   fs.mkdirSync(ws, { recursive: true });
   fs.writeFileSync(path.join(ws, 'AGENTS.md'), buildAgentsMd(project, apiGroups));
   fs.writeFileSync(path.join(ws, 'opencode.json'), JSON.stringify(buildOpencodeConfig(project), null, 2));
+  fs.writeFileSync(adminConfigPathFor(ws), JSON.stringify(buildOpencodeAdminConfig(project), null, 2));
   return ws;
 }
 
 module.exports = {
   buildAgentsMd, buildOpencodeConfig, getInternalToken, repoDirName,
   git, workspacePathFor, redactGitError, syncRepo, pruneRemovedRepos, writeWorkspaceFiles,
+  buildOpencodeAdminConfig, adminConfigPathFor,
 };

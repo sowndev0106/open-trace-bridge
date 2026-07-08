@@ -1,9 +1,9 @@
-const path = require('path');
 const convs = require('../models/conversation.model');
 const runs = require('../models/run.model');
 const sync = require('./sync.service');
 const opencode = require('./opencode.service');
 const projectUser = require('./projectUser.service');
+const workspace = require('./workspace.service');
 
 // Indirection so tests can stub external effects without touching the DB layer.
 const deps = {
@@ -32,7 +32,7 @@ async function investigate(project, conv, prompt, opts = {}) {
       agent: conv.agent || undefined,
       command: opts.command,
       files: opts.files,
-      configPath: opts.admin ? path.join(ws, 'opencode.admin.json') : undefined,
+      configPath: opts.admin ? workspace.adminConfigPathFor(ws) : undefined,
       cancelKey: conv.id,
       onEvent: opts.onEvent,
     });

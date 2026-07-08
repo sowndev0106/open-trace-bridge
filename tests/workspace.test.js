@@ -1,7 +1,12 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
+const fs = require('fs');
+const path = require('path');
 process.env.OTB_DB_PATH = ':memory:';
-const { buildAgentsMd, buildOpencodeConfig, repoDirName } = require('../services/workspace.service');
+const {
+  buildAgentsMd, buildOpencodeConfig, repoDirName,
+  buildOpencodeAdminConfig, adminConfigPathFor, writeWorkspaceFiles,
+} = require('../services/workspace.service');
 
 const project = { id: 1, slug: 'payment', name: 'Payment', keyword: 'payment-bot',
   system_prompt: 'You are an incident investigator.', teams_webhook_url: '' };
@@ -70,4 +75,20 @@ test('buildOpencodeConfig denies edit/bash/webfetch and wires mcp', () => {
 test('repoDirName from url', () => {
   assert.strictEqual(repoDirName('https://github.com/org/my-repo.git'), 'my-repo');
   assert.strictEqual(repoDirName('git@github.com:org/other.git'), 'other');
+});
+
+test('admin config allows all tools but keeps the same MCP wiring', () => {
+  const project = { slug: 'adm', name: 'Adm', system_prompt: '' };
+  const cfg = buildOpencodeAdminConfig(project);
+  assert.deepStrictEqual(cfg.permission, { edit: 'allow', bash: 'allow', webfetch: 'allow' });
+  assert.strictEqual(cfg.mcp.otb.environment.OTB_PROJECT_SLUG, 'adm');
+});
+
+test('writeWorkspaceFiles writes opencode.admin.json next to opencode.json', () => {
+  const project = { slug: 'adm2', name: 'Adm2', system_prompt: '' };
+  const ws = writeWorkspaceFiles(project, []);
+  assert.ok(fs.existsSync(path.join(ws, 'opencode.admin.json')));
+  assert.strictEqual(adminConfigPathFor(ws), path.join(ws, 'opencode.admin.json'));
+  const parsed = JSON.parse(fs.readFileSync(path.join(ws, 'opencode.admin.json'), 'utf8'));
+  assert.strictEqual(parsed.permission.bash, 'allow');
 });
