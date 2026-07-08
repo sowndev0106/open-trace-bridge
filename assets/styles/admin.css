@@ -3,79 +3,64 @@
 @source "../../views/**/*.ejs";
 
 /* ============================================================
-   DESIGN TOKENS
+   DESIGN TOKENS — Bureau Ledger
    ============================================================ */
 :root {
-  --font-sans: Outfit, Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif: 'Newsreader', serif;
+  --font-sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace;
+  --radius: 2px;
 
-  /* Canvas & Surface */
-  --color-canvas:     #f0f4ff;
-  --color-panel:      #ffffff;
-  --color-panel-alt:  #f5f7ff;
-  --color-panel-raised: #ffffff;
+  /* Paper light (default when .dark is absent) */
+  --color-canvas:       #F2EEE3;
+  --color-panel:        #F2EEE3;
+  --color-panel-alt:     #FBF8F0;
+  --color-panel-raised:  #FBF8F0;
 
-  /* Border */
-  --color-border:     rgba(0, 20, 80, 0.10);
-  --color-border-strong: rgba(0, 20, 80, 0.18);
+  --color-border:        #D8D2C2;
+  --color-border-strong:  #C8C2B2;
 
-  /* Ink (text) */
-  --color-ink-950:    #0a0f2e;
-  --color-ink-700:    #2a3460;
-  --color-ink-500:    #6272a0;
-  --color-ink-300:    #9aaad0;
+  --color-ink-950:  #201C15;
+  --color-ink-700:  #332E24;
+  --color-ink-500:  #5F594A;
+  --color-ink-300:  #98917E;
 
-  /* Brand */
-  --color-brand:      #4f6ef7;
-  --color-brand-dark: #3b5cf5;
-  --color-brand-2:    #7c3aed;
-  --color-brand-glow: rgba(79, 110, 247, 0.25);
-
-  /* Semantic */
-  --color-success:    #059669;
-  --color-warning:    #d97706;
-  --color-danger:     #dc2626;
-
-  /* Gradients */
-  --grad-brand: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 100%);
-  --grad-canvas: linear-gradient(160deg, #f0f4ff 0%, #e8edff 100%);
+  --color-brand:      #BC4A2E; /* oxide accent */
+  --color-brand-dark: #A5401F;
+  --color-ok:         #5B8452;
+  --color-success:    #5B8452;
+  --color-warning:    #A87A24;
+  --color-amber:      #A87A24;
+  --color-danger:     #BC4A2E;
 }
 
 .dark {
-  /* Canvas & Surface */
-  --color-canvas:     #080c1a;
-  --color-panel:      #0e1528;
-  --color-panel-alt:  #111827;
-  --color-panel-raised: #141d35;
+  /* Ink dark (default theme — see layout-head.ejs anti-flicker script) */
+  --color-canvas:       #141210;
+  --color-panel:        #141210;
+  --color-panel-alt:     #1B1815;
+  --color-panel-raised:  #1B1815;
 
-  /* Border */
-  --color-border:     rgba(255, 255, 255, 0.07);
-  --color-border-strong: rgba(255, 255, 255, 0.13);
+  --color-border:        #2E2921;
+  --color-border-strong:  #3A342B;
 
-  /* Ink */
-  --color-ink-950:    #e8eeff;
-  --color-ink-700:    #b0bfe8;
-  --color-ink-500:    #6b7fa8;
-  --color-ink-300:    #3a4870;
+  --color-ink-950:  #EAE3D4;
+  --color-ink-700:  #DCD5C4;
+  --color-ink-500:  #A79E8B;
+  --color-ink-300:  #6E6657;
 
-  /* Brand */
-  --color-brand:      #6080ff;
-  --color-brand-dark: #4f6ef7;
-  --color-brand-2:    #9060f8;
-  --color-brand-glow: rgba(96, 128, 255, 0.20);
-
-  /* Semantic */
-  --color-success:    #10b981;
-  --color-warning:    #f59e0b;
-  --color-danger:     #ef4444;
-
-  /* Gradients */
-  --grad-brand: linear-gradient(135deg, #6080ff 0%, #9060f8 100%);
-  --grad-canvas: linear-gradient(160deg, #080c1a 0%, #0a1030 100%);
+  --color-brand:      #D65A3C; /* oxide accent */
+  --color-brand-dark: #C24A2E;
+  --color-ok:         #8CB878;
+  --color-success:    #8CB878;
+  --color-warning:    #D9A644;
+  --color-amber:      #D9A644;
+  --color-danger:     #D65A3C;
 }
 
 /* Tailwind theme bridge */
 @theme {
+  --font-serif: var(--font-serif);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --color-canvas:    var(--color-canvas);
@@ -86,7 +71,6 @@
   --color-ink-700:   var(--color-ink-700);
   --color-ink-500:   var(--color-ink-500);
   --color-brand:     var(--color-brand);
-  --color-brand-dark: var(--color-brand-dark);
   --color-success:   var(--color-success);
   --color-danger:    var(--color-danger);
   /* legacy aliases so existing EJS classes still compile */
