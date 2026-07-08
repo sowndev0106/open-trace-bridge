@@ -189,6 +189,18 @@ test('project edit form preserves workflows inside redesigned panels', async () 
   assert.match(response.text, /panel-body/);
 });
 
+test('repo row renders auth type as a segmented radio control, not a select', async () => {
+  const project = seedProject();
+  repos.create({ project_id: project.id, git_url: 'https://github.com/acme/payment.git', auth_type: 'https-token', branch: 'main' });
+
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.strictEqual($('select[name="repos[0][auth_type]"]').length, 0);
+  assert.strictEqual($('input[name="repos[0][auth_type]"][type="radio"]').length, 3);
+  assert.strictEqual($('input[name="repos[0][auth_type]"][value="https-token"]').attr('checked'), 'checked');
+});
+
 test('project create validation shows all field errors and preserves input', async () => {
   const response = await agent
     .post('/admin/projects')

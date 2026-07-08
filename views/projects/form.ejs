@@ -252,11 +252,11 @@
 
   // Repo auth field toggle — show/hide instead of just disable
   function updateAuthFields(rowEl) {
-    var select   = rowEl.querySelector('[data-auth-type-select]');
+    var checked  = rowEl.querySelector('[data-auth-type-group] input:checked');
     var tokenWrap = rowEl.querySelector('[data-token-wrap]');
     var sshWrap   = rowEl.querySelector('[data-ssh-wrap]');
-    if (!select) return;
-    var v = select.value;
+    if (!checked) return;
+    var v = checked.value;
     if (tokenWrap) tokenWrap.style.display = (v === 'https-token') ? '' : 'none';
     if (sshWrap)   sshWrap.style.display   = (v === 'ssh')         ? '' : 'none';
     var tokenInput = rowEl.querySelector('[data-token-input]');
@@ -268,7 +268,7 @@
   document.querySelectorAll('[data-rows="repos"] > [data-row]').forEach(updateAuthFields);
 
   document.addEventListener('change', function(e) {
-    if (e.target.matches('[data-auth-type-select]')) {
+    if (e.target.matches('[data-auth-type-group] input')) {
       var row = e.target.closest('[data-row]');
       if (row) updateAuthFields(row);
     }

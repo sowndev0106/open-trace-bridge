@@ -9,11 +9,23 @@
     </div>
     <div>
       <label>Auth type</label>
-      <select name="repos[<%= i %>][auth_type]" data-auth-type-select>
-        <option value="none"         <%= r.auth_type === 'none' || !r.auth_type ? 'selected' : '' %>>None (public)</option>
-        <option value="https-token"  <%= r.auth_type === 'https-token' ? 'selected' : '' %>>HTTPS token</option>
-        <option value="ssh"          <%= r.auth_type === 'ssh' ? 'selected' : '' %>>SSH key</option>
-      </select>
+      <div class="segmented" data-auth-type-group>
+        <label class="segmented-option">
+          <input type="radio" name="repos[<%= i %>][auth_type]" value="none"
+                 <%= r.auth_type === 'none' || !r.auth_type ? 'checked' : '' %>>
+          <span>None</span>
+        </label>
+        <label class="segmented-option">
+          <input type="radio" name="repos[<%= i %>][auth_type]" value="https-token"
+                 <%= r.auth_type === 'https-token' ? 'checked' : '' %>>
+          <span>Token</span>
+        </label>
+        <label class="segmented-option">
+          <input type="radio" name="repos[<%= i %>][auth_type]" value="ssh"
+                 <%= r.auth_type === 'ssh' ? 'checked' : '' %>>
+          <span>SSH</span>
+        </label>
+      </div>
     </div>
     <div>
       <label>Branch</label>
