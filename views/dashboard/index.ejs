@@ -78,16 +78,14 @@
 </section>
 
 <!-- Chart -->
-<section class="panel panel-body" style="margin-bottom:1.5rem">
+<section style="margin-bottom:1.5rem;
+padding-top:1.375rem;border-top:1px solid var(--color-border)">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;gap:1rem;flex-wrap:wrap">
     <div>
       <p style="font-size:0.9375rem;font-weight:700;color:var(--color-ink-950);letter-spacing:-0.01em">Questions per day</p>
       <p style="font-size:0.75rem;color:var(--color-ink-500);margin-top:0.25rem">Timeline of incoming questions over the selected range</p>
     </div>
-    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:var(--color-ink-500)">
-      <span style="display:inline-block;width:0.75rem;height:0.1875rem;border-radius:9999px;background:linear-gradient(90deg,#4f6ef7,#7c3aed)"></span>
-      Questions / day
-    </div>
+    <div class="kicker">Peak <%= chart.length ? Math.max(...chart.map(r=>r.count)) : 0 %></div>
   </div>
 
   <% if (!chart.length) { %>
@@ -149,19 +147,6 @@
 
     <svg id="chart-svg" viewBox="0 0 <%= W %> <%= H %>" style="width:100%;height:auto;overflow:visible;display:block;cursor:crosshair">
       <defs>
-        <linearGradient id="strokeGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%"   stop-color="#4f6ef7"/>
-          <stop offset="100%" stop-color="#7c3aed"/>
-        </linearGradient>
-        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#4f6ef7" stop-opacity="0.18"/>
-          <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
-        </linearGradient>
-        <filter id="glow" x="-15%" y="-50%" width="130%" height="200%">
-          <feGaussianBlur stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <!-- Clip to chart area -->
         <clipPath id="chart-clip">
           <rect x="<%= PL %>" y="<%= PT %>" width="<%= CW %>" height="<%= CH %>"/>
         </clipPath>
@@ -180,14 +165,11 @@
               text-anchor="end" font-family="var(--font-mono)"><%= val %></text>
       <% }); %>
 
-      <!-- Area fill (clipped) -->
-      <path d="<%= areaD %>" fill="url(#areaGrad)" clip-path="url(#chart-clip)"/>
-
-      <!-- Smooth line with glow -->
+      <!-- Line, no fill, no glow -->
       <path d="<%= pathD %>" fill="none"
-            stroke="url(#strokeGrad)" stroke-width="2.5"
+            stroke="var(--color-ink-950)" stroke-width="1.5"
             stroke-linecap="round" stroke-linejoin="round"
-            filter="url(#glow)" clip-path="url(#chart-clip)"/>
+            clip-path="url(#chart-clip)"/>
 
       <!-- X-axis labels -->
       <% chart.forEach(function(row, idx) {
@@ -201,7 +183,8 @@
               text-anchor="middle" font-family="var(--font-sans)"><%= label %></text>
       <% }); %>
 
-      <!-- Invisible hit targets for hover tooltip -->
+      <!-- Points: small ink dots, one larger accent dot at the peak (also hover hit-targets) -->
+      <% var _peak = chart.length ? Math.max(...chart.map(r=>r.count)) : null; %>
       <% chart.forEach(function(row, idx) {
            const x = getX(idx), y = getY(row.count);
            const dateStr = new Date(row.day).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'});
@@ -210,9 +193,15 @@
            data-x="<%= x %>" data-y="<%= y %>"
            data-label="<%= dateStr %>: <%= row.count %> question<%= row.count !== 1 ? 's' : '' %>">
           <circle cx="<%= x %>" cy="<%= y %>" r="14" fill="transparent"/>
-          <circle class="chart-dot" cx="<%= x %>" cy="<%= y %>" r="3.5"
-                  fill="white" stroke="#4f6ef7" stroke-width="2"
-                  style="transition:r 0.15s"/>
+          <% if (row.count === _peak) { %>
+            <circle class="chart-dot" cx="<%= x %>" cy="<%= y %>" r="4"
+                    fill="var(--color-brand)" style="transition:r 0.15s"/>
+            <text x="<%= x %>" y="<%= y - 12 %>" text-anchor="middle" font-family="Spline Sans Mono" font-size="10" fill="var(--color-brand)"><%= row.count %></text>
+          <% } else { %>
+            <circle class="chart-dot" cx="<%= x %>" cy="<%= y %>" r="2.5"
+                    fill="var(--color-canvas)" stroke="var(--color-ink-950)" stroke-width="1.5"
+                    style="transition:r 0.15s"/>
+          <% } %>
         </g>
       <% }); %>
     </svg>
@@ -240,14 +229,14 @@
         tooltip.style.opacity = '1';
 
         dot.setAttribute('r', '5.5');
-        dot.setAttribute('fill', '#4f6ef7');
-        dot.setAttribute('stroke', 'white');
+        dot.setAttribute('fill', 'var(--color-brand)');
+        dot.setAttribute('stroke', 'var(--color-canvas)');
       });
       g.addEventListener('mouseleave', function() {
         tooltip.style.opacity = '0';
-        dot.setAttribute('r', '3.5');
-        dot.setAttribute('fill', 'white');
-        dot.setAttribute('stroke', '#4f6ef7');
+        dot.setAttribute('r', '2.5');
+        dot.setAttribute('fill', 'var(--color-canvas)');
+        dot.setAttribute('stroke', 'var(--color-ink-950)');
       });
     });
   })();
