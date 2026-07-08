@@ -194,7 +194,7 @@ padding-top:1.375rem;border-top:1px solid var(--color-border)">
            data-label="<%= dateStr %>: <%= row.count %> question<%= row.count !== 1 ? 's' : '' %>">
           <circle cx="<%= x %>" cy="<%= y %>" r="14" fill="transparent"/>
           <% if (row.count === _peak) { %>
-            <circle class="chart-dot" cx="<%= x %>" cy="<%= y %>" r="4"
+            <circle class="chart-dot" data-peak="true" cx="<%= x %>" cy="<%= y %>" r="4"
                     fill="var(--color-brand)" style="transition:r 0.15s"/>
             <text x="<%= x %>" y="<%= y - 12 %>" text-anchor="middle" font-family="Spline Sans Mono" font-size="10" fill="var(--color-brand)"><%= row.count %></text>
           <% } else { %>
@@ -234,9 +234,15 @@ padding-top:1.375rem;border-top:1px solid var(--color-border)">
       });
       g.addEventListener('mouseleave', function() {
         tooltip.style.opacity = '0';
-        dot.setAttribute('r', '2.5');
-        dot.setAttribute('fill', 'var(--color-canvas)');
-        dot.setAttribute('stroke', 'var(--color-ink-950)');
+        if (dot.dataset.peak === 'true') {
+          dot.setAttribute('r', '4');
+          dot.setAttribute('fill', 'var(--color-brand)');
+          dot.removeAttribute('stroke');
+        } else {
+          dot.setAttribute('r', '2.5');
+          dot.setAttribute('fill', 'var(--color-canvas)');
+          dot.setAttribute('stroke', 'var(--color-ink-950)');
+        }
       });
     });
   })();
