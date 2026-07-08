@@ -59,4 +59,25 @@ function statsForProject(project_id, cutoffIso) {
   };
 }
 
-module.exports = { add, listByProject, deleteOlderThan, statsForProject };
+function statsForConversation(conversation_id) {
+  return getDb().prepare(
+    `SELECT COUNT(*) AS runs, COALESCE(SUM(tokens_input),0) AS tokens_input,
+            COALESCE(SUM(tokens_output),0) AS tokens_output, COALESCE(SUM(cost_usd),0) AS cost_usd
+     FROM runs WHERE conversation_id = ?`
+  ).get(conversation_id);
+}
+// Named totalsForProject (not statsForProject) to avoid colliding with the existing
+// cutoff-windowed statsForProject(project_id, cutoffIso) above, which
+// controllers/dashboard.controller.js and tests/models.test.js already depend on.
+function totalsForProject(project_id) {
+  return getDb().prepare(
+    `SELECT COUNT(*) AS runs, COALESCE(SUM(tokens_input),0) AS tokens_input,
+            COALESCE(SUM(tokens_output),0) AS tokens_output, COALESCE(SUM(cost_usd),0) AS cost_usd
+     FROM runs WHERE project_id = ?`
+  ).get(project_id);
+}
+
+module.exports = {
+  add, listByProject, deleteOlderThan, statsForProject,
+  statsForConversation, totalsForProject,
+};
