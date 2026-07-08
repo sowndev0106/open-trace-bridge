@@ -170,7 +170,7 @@ git commit -m "feat: add discord schema and generalize conversation external_id"
   - `discordChannel.model`: `listByProject(project_id)`, `findByChannelId(channel_id)`, `replaceForProject(project_id, rows)` where rows = `[{ channel_id, mode }]`.
   - `discordUser.model`: `create({ discord_user_id, label = '', role = 'member', all_projects = 0 })`, `findById(id)`, `findByDiscordId(discord_user_id)`, `list()`, `update(id, fields)` (allowed: `label`, `role`, `all_projects`), `remove(id)`, `setProjects(dm_user_id, projectIds)`, `listProjectIds(dm_user_id)` → number[], `getSelection(dm_user_id, bot_id)` → project_id|null, `setSelection(dm_user_id, bot_id, project_id)`.
   - `setting.model`: `get(key)` → string|null, `set(key, value)`.
-  - `run.model`: `statsForConversation(conversation_id)` and `statsForProject(project_id)` → `{ runs, tokens_input, tokens_output, cost_usd }` (SUMs may be null when empty — coalesce to 0).
+  - `run.model`: `statsForConversation(conversation_id)` and `totalsForProject(project_id)` → `{ runs, tokens_input, tokens_output, cost_usd }` (SUMs may be null when empty — coalesce to 0). Note: named `totalsForProject` because a different `statsForProject(project_id, cutoffIso)` already exists for the dashboard — do not touch it.
 
 - [ ] **Step 1: Write the failing tests** — create `tests/discordModels.test.js`:
 
@@ -254,7 +254,7 @@ test('run stats aggregate per conversation and project', () => {
   assert.strictEqual(cs.runs, 2);
   assert.strictEqual(cs.tokens_input, 100);
   assert.strictEqual(cs.cost_usd, 0.5);
-  const ps = runs.statsForProject(p.id);
+  const ps = runs.totalsForProject(p.id);
   assert.strictEqual(ps.runs, 2);
 });
 ```
@@ -403,7 +403,7 @@ function statsForConversation(conversation_id) {
      FROM runs WHERE conversation_id = ?`
   ).get(conversation_id);
 }
-function statsForProject(project_id) {
+function totalsForProject(project_id) {
   return getDb().prepare(
     `SELECT COUNT(*) AS runs, COALESCE(SUM(tokens_input),0) AS tokens_input,
             COALESCE(SUM(tokens_output),0) AS tokens_output, COALESCE(SUM(cost_usd),0) AS cost_usd
@@ -1632,7 +1632,7 @@ git commit -m "feat: discord message router with channel modes, DM allowlist, at
 - Test: `tests/discordRouterCommands.test.js`
 
 **Interfaces:**
-- Consumes: everything from Task 9; `runs.statsForConversation/statsForProject` (Task 2); `opencode.cancel/isRunning` (Task 4); `info.allowedModels/listAgents/listSkills/listCommands/defaultModel` (Task 7); `repos.listByProject` for sync footer.
+- Consumes: everything from Task 9; `runs.statsForConversation/totalsForProject` (Task 2 — note `totalsForProject`, NOT the pre-existing dashboard `statsForProject(project_id, cutoffIso)`); `opencode.cancel/isRunning` (Task 4); `info.allowedModels/listAgents/listSkills/listCommands/defaultModel` (Task 7); `repos.listByProject` for sync footer.
 - Produces:
   - `handleInteraction(cmd, io)` → Promise<void>. **cmd shape:** `{ name, options: {…string values}, botId, channelId, isDM, userId, userName }`. **interaction io shape:** `{ respond(text), respondEmbed(embed), followUp(text), sendFile(name, content) }` (all after an already-sent defer).
   - `autocompleteOptions(cmd)` → Promise<`[{ name, value }]`> (≤25) for `cmd.focused` in `{ 'model', 'agent', 'slug' }` with `cmd.partial` prefix string.
@@ -1995,7 +1995,7 @@ async function handleInteraction(cmd, io) {
     case 'stats': {
       const active = convs.findActive(project.id, externalId);
       const conv = active ? runsModel.statsForConversation(active.id) : { runs: 0, tokens_input: 0, tokens_output: 0, cost_usd: 0 };
-      const proj = runsModel.statsForProject(project.id);
+      const proj = runsModel.totalsForProject(project.id);
       const fmtRow = (s) => `${s.runs} runs · in ${s.tokens_input} / out ${s.tokens_output} tokens · $${Number(s.cost_usd).toFixed(4)}`;
       return io.respondEmbed(fmt.statusEmbed({
         status: 'info', title: 'Usage stats',
