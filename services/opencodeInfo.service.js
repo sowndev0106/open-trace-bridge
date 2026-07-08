@@ -39,8 +39,22 @@ async function listAgents(dir) {
   return String(stdout).split('\n').map((l) => l.trim()).filter(Boolean);
 }
 
+// Split a markdown doc into { frontmatter, body }. Frontmatter is the block
+// between a leading '---' line and the next '---' line; absent = empty.
+function splitFrontmatter(md) {
+  const lines = String(md).split('\n');
+  if (lines[0] && lines[0].trim() === '---') {
+    const end = lines.findIndex((l, i) => i > 0 && l.trim() === '---');
+    if (end > 0) {
+      return { frontmatter: lines.slice(1, end).join('\n'), body: lines.slice(end + 1).join('\n') };
+    }
+  }
+  return { frontmatter: '', body: String(md) };
+}
+
 function frontmatterField(md, field) {
-  const m = String(md).match(new RegExp(`^${field}:\\s*(.+)$`, 'm'));
+  const { frontmatter } = splitFrontmatter(md);
+  const m = frontmatter.match(new RegExp(`^${field}:\\s*(.+)$`, 'm'));
   return m ? m[1].trim() : '';
 }
 
@@ -72,7 +86,7 @@ function listCommands(ws) {
   return entries.filter((f) => f.endsWith('.md')).map((f) => {
     const md = fs.readFileSync(path.join(dir, f), 'utf8');
     const desc = frontmatterField(md, 'description')
-      || md.split('\n').find((l) => l.trim() && !l.startsWith('---')) || '';
+      || splitFrontmatter(md).body.split('\n').find((l) => l.trim()) || '';
     return { name: f.replace(/\.md$/, ''), description: desc.trim() };
   });
 }

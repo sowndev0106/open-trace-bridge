@@ -47,3 +47,24 @@ test('listAgents parses CLI lines', async () => {
   info.proc.execFile = async () => ({ stdout: 'build\nplan\n' });
   assert.deepStrictEqual(await info.listAgents('/tmp/ws'), ['build', 'plan']);
 });
+
+test('listCommands description fallback skips frontmatter when description field is absent', () => {
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'otb-info-'));
+  fs.mkdirSync(path.join(ws, '.opencode', 'command'), { recursive: true });
+  fs.writeFileSync(path.join(ws, '.opencode', 'command', 'health.md'),
+    '---\nname: health\n---\nCheck service health');
+  assert.deepStrictEqual(info.listCommands(ws), [{ name: 'health', description: 'Check service health' }]);
+});
+
+test('listSkills only reads description from the frontmatter block, not the body', () => {
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'otb-info-'));
+  fs.mkdirSync(path.join(ws, '.opencode', 'skill', 'real'), { recursive: true });
+  fs.writeFileSync(path.join(ws, '.opencode', 'skill', 'real', 'SKILL.md'),
+    '---\nname: real\ndescription: Real desc\n---\nBody text\ndescription: fake');
+  fs.mkdirSync(path.join(ws, '.opencode', 'skill', 'nofield'), { recursive: true });
+  fs.writeFileSync(path.join(ws, '.opencode', 'skill', 'nofield', 'SKILL.md'),
+    '---\nname: nofield\n---\nBody text\ndescription: fake');
+  const skills = info.listSkills(ws);
+  assert.deepStrictEqual(skills.find((s) => s.name === 'real'), { name: 'real', description: 'Real desc' });
+  assert.deepStrictEqual(skills.find((s) => s.name === 'nofield'), { name: 'nofield', description: '' });
+});
