@@ -1,26 +1,49 @@
-<fieldset style="border-radius:var(--radius);border:1px solid var(--color-border);background:var(--color-panel-alt);padding:1rem" data-row>
+<fieldset style="border-radius:var(--radius);border:1px solid var(--color-border);background:var(--color-panel-alt);padding:1rem" data-row data-collapsed="<%= a.id ? 'true' : 'false' %>">
   <input type="hidden" name="apis[<%= i %>][id]" value="<%= a.id || '' %>">
-  <div>
-    <label>Name</label>
-    <input type="text" name="apis[<%= i %>][name]" value="<%= a.name || '' %>"
-           placeholder="transaction-api">
-    <p class="field-help">Optional. If left blank, OpenTraceBridge derives a name from the curl URL host.</p>
+
+  <div data-collapsed-summary style="display:none;justify-content:space-between;align-items:center;gap:1rem">
+    <div style="display:flex;gap:1.125rem;align-items:baseline;min-width:0">
+      <span class="kicker kicker-amber">API group</span>
+      <span style="font-family:var(--font-sans);font-size:0.8125rem;font-weight:600"><%= a.name || '(unnamed)' %></span>
+      <% if (a.base_url) { %>
+        <span class="kicker" style="color:var(--color-ink-300)"><%= a.base_url %> · <%= a.allowed_methods || 'GET' %></span>
+      <% } %>
+    </div>
+    <div style="display:flex;gap:0.5rem;flex-shrink:0">
+      <button type="button" class="btn btn-secondary" data-expand>Expand</button>
+      <button type="button" class="btn btn-danger" data-remove>Remove</button>
+    </div>
   </div>
-  <div style="margin-top:0.875rem">
-    <label>Curl command</label>
-    <textarea name="apis[<%= i %>][curl_command]" style="font-family:var(--font-mono);min-height:8rem"
-              placeholder='curl -H "Authorization: Bearer sk_live_xxx" "https://api.internal.example/v1/transactions/txn_123"'><%= a.curl_command || '' %></textarea>
-    <p class="field-help">Paste a working curl command. OpenTraceBridge extracts the base URL, method, auth header, and API key. For saved rows, leave blank to keep the current values or paste a new curl to replace them.</p>
-    <% if (a.id && a.base_url) { %>
-    <p class="field-help">Current: <code><%= a.allowed_methods || 'GET' %> <%= a.base_url %></code> &middot; auth header: <code><%= a.auth_header || 'Authorization' %></code></p>
-    <% } %>
-  </div>
-  <div style="margin-top:0.875rem" data-api-editor-container>
-    <label>Markdown description</label>
-    <textarea name="apis[<%= i %>][description_md]" class="hidden api-description-textarea" placeholder="Document endpoints, params, filters, and response fields for the agent"><%= a.description_md || '' %></textarea>
-    <div class="api-description-editor" style="margin-top:0.5rem;background:var(--color-panel-alt);border:1px solid var(--color-border-strong);border-radius:var(--radius)"></div>
-  </div>
-  <div style="margin-top:0.875rem;display:flex;justify-content:flex-end">
-    <button type="button" class="btn btn-danger" data-remove>Remove</button>
+
+  <div data-collapsed-body>
+    <div>
+      <label>Name</label>
+      <input type="text" name="apis[<%= i %>][name]" value="<%= a.name || '' %>"
+             placeholder="transaction-api">
+      <p class="field-help">Optional. If left blank, OpenTraceBridge derives a name from the curl URL host.</p>
+    </div>
+    <div style="margin-top:0.875rem">
+      <label>Curl command</label>
+      <textarea name="apis[<%= i %>][curl_command]" style="font-family:var(--font-mono);min-height:8rem"
+                placeholder='curl -H "Authorization: Bearer sk_live_xxx" "https://api.internal.example/v1/transactions/txn_123"'><%= a.curl_command || '' %></textarea>
+      <p class="field-help">Paste a working curl command. OpenTraceBridge extracts the base URL, method, auth header, and API key. For saved rows, leave blank to keep the current values or paste a new curl to replace them.</p>
+      <% if (a.id && a.base_url) { %>
+      <div style="display:flex;gap:1.375rem;margin-top:0.75rem;padding:0.625rem 0.875rem;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-mono);font-size:0.65625rem;color:var(--color-ink-500);flex-wrap:wrap">
+        <span style="color:var(--color-ok)">✓ Parsed</span>
+        <span>Base — <%= a.base_url %></span>
+        <span>Methods — <span style="color:var(--color-ink-950)"><%= a.allowed_methods || 'GET' %></span></span>
+        <span>Auth — <%= a.auth_header || 'Authorization' %></span>
+        <span>Key — stored server-side, never shown to agent</span>
+      </div>
+      <% } %>
+    </div>
+    <div style="margin-top:0.875rem" data-api-editor-container>
+      <label>Markdown description</label>
+      <textarea name="apis[<%= i %>][description_md]" class="hidden api-description-textarea" placeholder="Document endpoints, params, filters, and response fields for the agent"><%= a.description_md || '' %></textarea>
+      <div class="api-description-editor" style="margin-top:0.5rem;background:var(--color-panel-alt);border:1px solid var(--color-border-strong);border-radius:var(--radius)"></div>
+    </div>
+    <div style="margin-top:0.875rem;display:flex;justify-content:flex-end">
+      <button type="button" class="btn btn-danger" data-remove>Remove</button>
+    </div>
   </div>
 </fieldset>

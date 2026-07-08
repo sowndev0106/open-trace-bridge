@@ -381,8 +381,32 @@ test('api row form only offers name, curl, and description inputs plus a parsed 
   assert.strictEqual($('input[name="apis[0][auth_header]"]').length, 0);
   assert.strictEqual($('input[name="apis[0][allowed_methods]"]').length, 0);
   assert.strictEqual($('input[name="apis[0][api_key]"]').length, 0);
-  assert.match(response.text, /POST https:\/\/api\.internal\.example\/v1/);
+  assert.match(response.text, /Base .{1,3} https:\/\/api\.internal\.example\/v1/);
+  assert.match(response.text, /Methods .{1,3} <span[^>]*>POST</);
   assert.doesNotMatch(response.text, /sk_live_123/);
+});
+
+test('saved API groups render collapsed by default with a parsed-info bar; new rows start expanded', async () => {
+  const project = seedProject();
+  apis.create({
+    project_id: project.id, name: 'transaction-api',
+    base_url: 'https://api.internal.example/v1', api_key: 'Bearer sk_live_123',
+    auth_header: 'Authorization', allowed_methods: 'GET',
+    description_md: 'Read transactions.',
+  });
+
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  const row = $('[data-rows="apis"] > [data-row]').first();
+  assert.strictEqual(row.attr('data-collapsed'), 'true');
+  // Fields still present in the DOM despite the collapsed default.
+  assert.strictEqual(row.find('input[name="apis[0][name]"]').val(), 'transaction-api');
+  assert.match(row.text(), /Parsed/);
+  assert.match(row.text(), /api\.internal\.example\/v1/);
+
+  const template = $('template[data-template="apis"]').html();
+  assert.match(template, /data-collapsed="false"/);
 });
 
 test('existing API row keeps parsed fields when saved without a new curl command', async () => {
