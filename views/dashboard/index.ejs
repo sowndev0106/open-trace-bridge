@@ -252,12 +252,12 @@ padding-top:1.375rem;border-top:1px solid var(--color-border)">
 </section>
 
 <!-- Per-project table -->
-<section class="table-shell">
-  <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between">
-    <p style="font-size:0.9375rem;font-weight:700;color:var(--color-ink-950)">By project</p>
-    <p style="font-size:0.75rem;color:var(--color-ink-500)"><%= days %>-day window</p>
+<section>
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:0.75rem">
+    <p class="section-heading">By project</p>
+    <p class="kicker"><%= days %>-day window</p>
   </div>
-  <div class="table-scroll">
+  <div class="table-shell table-scroll">
     <table class="data-table">
       <thead>
         <tr>
@@ -278,14 +278,14 @@ padding-top:1.375rem;border-top:1px solid var(--color-border)">
         <tr>
           <td>
             <a href="/admin/projects/<%= row.project.id %>/conversations"
-               style="font-weight:600;color:var(--color-brand);text-decoration:none">
+               class="emphasis" style="text-decoration:none;color:var(--color-ink-950)">
               <%= row.project.name %>
             </a>
-            <div style="font-size:0.75rem;color:var(--color-ink-500);margin-top:0.125rem;font-family:var(--font-mono)"><%= row.project.slug %></div>
+            <div class="kicker" style="margin-top:0.125rem"><%= row.project.slug %></div>
           </td>
-          <td style="font-weight:600;color:var(--color-ink-950)"><%= row.questions.toLocaleString() %></td>
-          <td style="font-family:var(--font-mono);font-size:0.8125rem"><%= row.avgDurationMs != null ? Math.round(row.avgDurationMs).toLocaleString()+'ms' : 'n/a' %></td>
-          <td>
+          <td class="num" style="color:var(--color-ink-950)"><%= row.questions.toLocaleString() %></td>
+          <td class="num"><%= row.avgDurationMs != null ? Math.round(row.avgDurationMs).toLocaleString()+'ms' : 'n/a' %></td>
+          <td class="num">
             <% if (row.totalRuns) {
                  const errPct = 100 * row.errorRate;
             %>
@@ -293,14 +293,14 @@ padding-top:1.375rem;border-top:1px solid var(--color-border)">
                 <%= errPct.toFixed(1) %>%
               </span>
             <% } else { %>
-              <span style="color:var(--color-ink-500);font-size:0.8125rem">n/a</span>
+              <span style="color:var(--color-ink-300);font-size:0.8125rem">n/a</span>
             <% } %>
           </td>
-          <td style="font-family:var(--font-mono);font-size:0.8125rem"><%= row.apiCallCount.toLocaleString() %></td>
-          <td style="font-family:var(--font-mono);font-size:0.8125rem">
+          <td class="num"><%= row.apiCallCount.toLocaleString() %></td>
+          <td class="num">
             <%= (row.totalTokensInput != null && row.totalTokensOutput != null) ? (row.totalTokensInput+row.totalTokensOutput).toLocaleString() : 'n/a' %>
           </td>
-          <td style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--color-success);font-weight:600">
+          <td class="num" style="color:var(--color-ok);font-weight:600">
             <%= row.totalCostUsd != null ? '$'+row.totalCostUsd.toFixed(4) : 'n/a' %>
           </td>
         </tr>
