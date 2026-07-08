@@ -516,6 +516,9 @@ test('projects list shows a source sync badge per project', async () => {
   const $ = cheerio.load(res.text);
   assert.match($('thead').text(), /Source/);
   assert.strictEqual($('[data-project-sync]').first().text().trim(), 'success');
+  // Glyphs are CSS ::before content, not DOM text — the raw status string
+  // must still be the only text node inside the badge.
+  assert.strictEqual($('[data-project-sync]').first().find('*').length, 0);
 });
 
 test('project edit shows per-repo status, error detail, and a Sync now button', async () => {
