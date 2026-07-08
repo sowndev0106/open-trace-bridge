@@ -844,54 +844,72 @@
 } /* end chat @layer components */
 
 /* ============================================================
-   TOAST UI Editor Dark Mode
+   TOAST UI Editor — Bureau Ledger theming (both modes)
    ============================================================ */
-.dark .toastui-editor-defaultUI {
+.toastui-editor-defaultUI {
   border-color: var(--color-border) !important;
-  background-color: var(--color-panel) !important;
+  background-color: var(--color-panel-alt) !important;
+  border-radius: var(--radius) !important;
 }
-.dark .toastui-editor-toolbar {
+.toastui-editor-toolbar {
   background-color: var(--color-panel-alt) !important;
   border-bottom: 1px solid var(--color-border) !important;
 }
-.dark .toastui-editor-toolbar .toastui-editor-button {
-  color: var(--color-ink-700) !important;
+.toastui-editor-toolbar .toastui-editor-button {
+  color: var(--color-ink-500) !important;
   border-color: transparent !important;
 }
-.dark .toastui-editor-toolbar .toastui-editor-button:hover {
-  background-color: var(--color-panel-raised) !important;
+.toastui-editor-toolbar .toastui-editor-button:hover {
+  background-color: var(--color-border) !important;
 }
-.dark .toastui-editor-main {
-  background-color: var(--color-panel) !important;
+.toastui-editor-main {
+  background-color: var(--color-panel-alt) !important;
 }
-.dark .toastui-editor-main-tab {
+.toastui-editor-main-tab {
   background-color: var(--color-panel-alt) !important;
   border-bottom: 1px solid var(--color-border) !important;
 }
-.dark .toastui-editor-main-tab .toastui-editor-tabs .tab-item.active {
-  background-color: var(--color-panel) !important;
+.toastui-editor-main-tab .toastui-editor-tabs .tab-item.active {
+  background-color: var(--color-panel-alt) !important;
   border-color: var(--color-border) !important;
   color: var(--color-brand) !important;
 }
-.dark .toastui-editor-editor,
-.dark .toastui-editor-md-preview {
-  background-color: var(--color-panel) !important;
+.toastui-editor-editor,
+.toastui-editor-md-preview {
+  background-color: var(--color-panel-alt) !important;
   color: var(--color-ink-950) !important;
+  font-family: var(--font-mono) !important;
 }
-.dark .toastui-editor-contents { color: var(--color-ink-700) !important; }
-.dark .toastui-editor-contents p,
-.dark .toastui-editor-contents h1,
-.dark .toastui-editor-contents h2,
-.dark .toastui-editor-contents h3,
-.dark .toastui-editor-contents h4,
-.dark .toastui-editor-contents h5,
-.dark .toastui-editor-contents h6 { color: var(--color-ink-950) !important; }
-.dark .toastui-editor-ww-container,
-.dark .toastui-editor-md-container {
-  background-color: var(--color-panel) !important;
-}
-.dark .toastui-editor-md-tab-container,
-.dark .toastui-editor-ww-tab-container {
+.toastui-editor-contents { color: var(--color-ink-700) !important; }
+.toastui-editor-contents p,
+.toastui-editor-contents h1,
+.toastui-editor-contents h2,
+.toastui-editor-contents h3,
+.toastui-editor-contents h4,
+.toastui-editor-contents h5,
+.toastui-editor-contents h6 { color: var(--color-ink-950) !important; }
+.toastui-editor-ww-container,
+.toastui-editor-md-container {
   background-color: var(--color-panel-alt) !important;
 }
-.dark .ProseMirror { color: var(--color-ink-950) !important; }
+.toastui-editor-md-tab-container,
+.toastui-editor-ww-tab-container {
+  background-color: var(--color-panel-alt) !important;
+}
+.ProseMirror { color: var(--color-ink-950) !important; }
+
+/* ============================================================
+   Markdown-rendered code blocks (chat, conversation detail)
+   ============================================================ */
+.chat-bubble-agent pre,
+.msg-content pre {
+  overflow-x: auto;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  background: var(--color-panel-alt);
+  color: var(--color-ink-700);
+  margin: 0.5rem 0;
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
