@@ -152,3 +152,28 @@ test('run.model statsForProject returns nulls when there are no runs', () => {
   assert.strictEqual(stats.totalTokensInput, null);
   assert.strictEqual(stats.totalCostUsd, null);
 });
+
+test('conversations use external_id and store model/agent overrides', () => {
+  const p = projects.create({ slug: 'd1', name: 'D1', keyword: '', system_prompt: '', teams_webhook_url: '' });
+  const c = convs.create(p.id, 'discord:123');
+  assert.strictEqual(c.external_id, 'discord:123');
+  assert.strictEqual(convs.findActive(p.id, 'discord:123').id, c.id);
+  convs.setOverrides(c.id, { model: 'anthropic/claude-sonnet-5', agent: 'plan' });
+  const row = convs.findById(c.id);
+  assert.strictEqual(row.model, 'anthropic/claude-sonnet-5');
+  assert.strictEqual(row.agent, 'plan');
+  convs.setOverrides(c.id, { model: null, agent: null });
+  assert.strictEqual(convs.findById(c.id).model, null);
+});
+
+test('discord tables exist with expected columns', () => {
+  const { getDb } = require('../lib/db');
+  const cols = (t) => getDb().prepare(`PRAGMA table_info(${t})`).all().map((c) => c.name);
+  assert.ok(cols('discord_bots').includes('token'));
+  assert.ok(cols('discord_channels').includes('mode'));
+  assert.ok(cols('discord_dm_users').includes('role'));
+  assert.ok(cols('discord_dm_user_projects').includes('project_id'));
+  assert.ok(cols('discord_dm_selections').includes('bot_id'));
+  assert.ok(cols('settings').includes('value'));
+  assert.ok(cols('projects').includes('discord_bot_id'));
+});
