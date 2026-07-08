@@ -46,6 +46,14 @@ test('admin layout links the compiled Tailwind stylesheet and serves it', async 
   assert.match(css.text, /\.app-shell|\.btn|\.panel/);
 });
 
+test('layout defaults to the detail shell (no sidebar) until a page opts into index', async () => {
+  seedProject();
+  const page = await agent.get('/admin/projects').expect(200);
+  const $ = cheerio.load(page.text);
+  assert.strictEqual($('.sidebar-shell').length, 0);
+  assert.strictEqual($('.app-shell > .app-container').length, 1);
+});
+
 test('projects index renders modern project table actions and endpoint copy', async () => {
   const project = seedProject();
 
