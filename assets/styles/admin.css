@@ -685,17 +685,6 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   }
 
-  .chat-bubble-agent pre {
-    overflow-x: auto;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    background: #0d1424;
-    color: #c8d3f5;
-    margin: 0.5rem 0;
-    border: 1px solid rgba(255,255,255,0.06);
-    font-size: 0.8125rem;
-  }
-
   .chat-bubble-agent code {
     font-family: var(--font-mono);
     font-size: 0.8125rem;
