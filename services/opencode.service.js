@@ -113,7 +113,11 @@ function runPromptStream({ dir, sessionId, text, conversationId, onEvent, runAs,
 
     const entry = { child, stopped: false };
     if (cancelKey != null) running.set(cancelKey, entry);
-    const done = () => { if (cancelKey != null) running.delete(cancelKey); };
+    // Only remove the registry entry if it still points at this run's own
+    // entry: if a newer run has already registered under the same
+    // cancelKey, deleting unconditionally would make the live run
+    // invisible to isRunning()/cancel().
+    const done = () => { if (cancelKey != null && running.get(cancelKey) === entry) running.delete(cancelKey); };
 
     const parser = createStreamParser(onEvent);
     let stderr = '';

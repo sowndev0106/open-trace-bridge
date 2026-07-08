@@ -68,3 +68,26 @@ test('cancel kills the child and rejects with stopped error', async () => {
   assert.strictEqual(opencode.isRunning(77), false);
   assert.strictEqual(opencode.cancel(77), false);
 });
+
+test('a finishing run does not delete a newer run registered under the same cancelKey', async () => {
+  const childA = fakeChild();
+  const childB = fakeChild();
+  let call = 0;
+  opencode.proc.spawn = (cmd, args, opts) => {
+    spawnCalls.push({ cmd, args, opts });
+    call += 1;
+    return call === 1 ? childA : childB;
+  };
+  const pA = opencode.runPrompt({ dir: '/tmp/ws', text: 'first', cancelKey: 5 });
+  const pB = opencode.runPrompt({ dir: '/tmp/ws', text: 'second', cancelKey: 5 });
+  // Run A finishes (closes normally) while run B is still registered under
+  // the same cancelKey; A's cleanup must not clobber B's registry entry.
+  finish(childA, 'ses_a');
+  await pA;
+  assert.strictEqual(opencode.isRunning(5), true);
+  assert.strictEqual(opencode.cancel(5), true);
+  assert.strictEqual(childB.killed, true);
+  assert.strictEqual(childA.killed, false);
+  childB.emit('close', 137);
+  await assert.rejects(pB, (err) => err.stopped === true);
+});
