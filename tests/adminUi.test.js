@@ -49,8 +49,11 @@ test('admin layout links the compiled Tailwind stylesheet and serves it', async 
 });
 
 test('layout defaults to the detail shell (no sidebar) until a page opts into index', async () => {
-  seedProject();
-  const page = await agent.get('/admin/projects').expect(200);
+  // Dashboard (Task 8) and the Projects list (Task 11) have both opted into the
+  // index shell, so exercise a page that hasn't (the project edit form) to prove
+  // the default is still the breadcrumb-only detail shell.
+  const project = seedProject();
+  const page = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
   const $ = cheerio.load(page.text);
   assert.strictEqual($('.sidebar-shell').length, 0);
   assert.strictEqual($('.app-shell > .app-container').length, 1);
