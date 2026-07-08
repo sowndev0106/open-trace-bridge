@@ -6,19 +6,18 @@
   <title>OpenTraceBridge Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700;800&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/styles/admin.css">
   <!-- TOAST UI Editor Style -->
   <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor.min.css" />
   <script>
-    // Initialize theme before layout renders to avoid flicker
+    // Initialize theme before layout renders to avoid flicker.
+    // Ink (dark) is the default theme; Paper (light) only applies when
+    // explicitly stored or explicitly preferred by the OS AND never overridden.
     (function() {
       var stored = localStorage.getItem('color-theme');
-      if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      var dark = stored ? stored === 'dark' : true;
+      document.documentElement.classList.toggle('dark', dark);
     })();
   </script>
 </head>
