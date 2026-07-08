@@ -1,0 +1,5 @@
+<div class="tab-bar">
+  <a class="tab-item <%= active === 'chat' ? 'tab-item-active' : '' %>" href="/admin/projects/<%= project.id %>/chat">Chat</a>
+  <a class="tab-item <%= active === 'opencode' ? 'tab-item-active' : '' %>" href="/admin/projects/<%= project.id %>/opencode">OpenCode</a>
+  <a class="tab-item <%= active === 'audit' ? 'tab-item-active' : '' %>" href="/admin/projects/<%= project.id %>/conversations">Audit</a>
+</div>

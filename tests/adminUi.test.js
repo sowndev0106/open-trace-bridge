@@ -472,7 +472,8 @@ test('conversation audit list renders redesigned tables', async () => {
   const response = await agent.get(`/admin/projects/${project.id}/conversations`).expect(200);
   const $ = cheerio.load(response.text);
 
-  assert.strictEqual($('h1').text().trim(), 'Conversations');
+  assert.strictEqual($('h1').text().trim(), 'Payment');
+  assert.strictEqual($('.tab-item-active').text().trim(), 'Audit');
   assert.match(response.text, /Payment/);
   assert.strictEqual($(`a[href="/admin/conversations/${conversation.id}"]`).length, 1);
   assert.match(response.text, /ses_abc/);

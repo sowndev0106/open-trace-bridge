@@ -1,16 +1,11 @@
 <%- include('../layout-head') %>
 
-<section style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem">
-  <div>
-    <p class="page-kicker"><%= project.name %></p>
-    <h1 class="page-title">Conversations</h1>
-    <p class="page-subtitle">Teams conversation sessions and internal API call audit for this project.</p>
-  </div>
-  <a href="/admin/projects/<%= project.id %>/edit" class="btn btn-secondary">
-    <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd"/></svg>
-    Back to project
-  </a>
-</section>
+<div style="margin-bottom:0.5rem">
+  <p class="kicker"><a href="/admin/projects/<%= project.id %>/edit">← Projects</a> / Workspace</p>
+  <h1 class="page-title" style="font-size:1.75rem;margin-top:0.375rem"><%= project.name %></h1>
+</div>
+
+<%- include('../projects/_workspace-tabs', { project: project, active: 'audit' }) %>
 
 <!-- Conversation sessions -->
 <section id="chat-history" class="table-shell" style="margin-bottom:1.25rem">
