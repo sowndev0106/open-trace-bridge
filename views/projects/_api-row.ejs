@@ -1,28 +1,26 @@
-<fieldset class="mb-4 rounded-lg border border-line p-4" data-row>
+<fieldset style="border-radius:var(--radius);border:1px solid var(--color-border);background:var(--color-panel-alt);padding:1rem" data-row>
   <input type="hidden" name="apis[<%= i %>][id]" value="<%= a.id || '' %>">
-  <div class="mb-3">
+  <div>
     <label>Name</label>
-    <input type="text" name="apis[<%= i %>][name]" value="<%= a.name || '' %>" 
-           class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden"
+    <input type="text" name="apis[<%= i %>][name]" value="<%= a.name || '' %>"
            placeholder="transaction-api">
     <p class="field-help">Optional. If left blank, OpenTraceBridge derives a name from the curl URL host.</p>
   </div>
-  <div class="mb-3">
+  <div style="margin-top:0.875rem">
     <label>Curl command</label>
-    <textarea name="apis[<%= i %>][curl_command]" 
-              class="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-950 shadow-sm focus:border-brand focus:ring-brand focus:outline-hidden font-mono min-h-32"
+    <textarea name="apis[<%= i %>][curl_command]" style="font-family:var(--font-mono);min-height:8rem"
               placeholder='curl -H "Authorization: Bearer sk_live_xxx" "https://api.internal.example/v1/transactions/txn_123"'><%= a.curl_command || '' %></textarea>
     <p class="field-help">Paste a working curl command. OpenTraceBridge extracts the base URL, method, auth header, and API key. For saved rows, leave blank to keep the current values or paste a new curl to replace them.</p>
     <% if (a.id && a.base_url) { %>
     <p class="field-help">Current: <code><%= a.allowed_methods || 'GET' %> <%= a.base_url %></code> &middot; auth header: <code><%= a.auth_header || 'Authorization' %></code></p>
     <% } %>
   </div>
-  <div class="mt-3" data-api-editor-container>
+  <div style="margin-top:0.875rem" data-api-editor-container>
     <label>Markdown description</label>
     <textarea name="apis[<%= i %>][description_md]" class="hidden api-description-textarea" placeholder="Document endpoints, params, filters, and response fields for the agent"><%= a.description_md || '' %></textarea>
-    <div class="api-description-editor mt-2 bg-white rounded-lg border border-line"></div>
+    <div class="api-description-editor" style="margin-top:0.5rem;background:var(--color-panel-alt);border:1px solid var(--color-border-strong);border-radius:var(--radius)"></div>
   </div>
-  <div class="mt-3 flex justify-end">
+  <div style="margin-top:0.875rem;display:flex;justify-content:flex-end">
     <button type="button" class="btn btn-danger" data-remove>Remove</button>
   </div>
 </fieldset>
