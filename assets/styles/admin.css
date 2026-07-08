@@ -288,16 +288,9 @@
 
   /* ── Panels ── */
   .panel {
-    border-radius: 1rem;
+    border-radius: var(--radius);
     border: 1px solid var(--color-border);
     background: var(--color-panel);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-    transition: box-shadow 0.2s, border-color 0.2s;
-  }
-
-  .panel:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
-    border-color: var(--color-border-strong);
   }
 
   .panel-body {
@@ -306,27 +299,14 @@
 
   @media (min-width: 640px) { .panel-body { padding: 1.5rem; } }
 
-  /* Metric accent bars */
-  .accent-blue   { border-top: 3px solid #4f6ef7; }
-  .accent-purple { border-top: 3px solid #7c3aed; }
-  .accent-red    { border-top: 3px solid #ef4444; }
-  .accent-green  { border-top: 3px solid #10b981; }
-  .accent-orange { border-top: 3px solid #f97316; }
-  .accent-teal   { border-top: 3px solid #14b8a6; }
-
-  .panel-metric {
-    transition: transform 0.2s, box-shadow 0.2s;
-    cursor: default;
-  }
-  .panel-metric:hover { transform: translateY(-2px); }
+  .panel-metric { cursor: default; }
 
   /* ── Tables ── */
   .table-shell {
     overflow: hidden;
-    border-radius: 1rem;
+    border-radius: var(--radius);
     border: 1px solid var(--color-border);
     background: var(--color-panel);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
 
   .table-scroll { overflow-x: auto; }
@@ -334,26 +314,27 @@
   .data-table {
     min-width: 100%;
     text-align: left;
-    font-size: 0.875rem;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
     border-collapse: collapse;
   }
 
   .data-table thead {
-    background: var(--color-panel-alt);
     border-bottom: 1px solid var(--color-border);
   }
 
   .data-table thead th {
-    padding: 0.6875rem 1rem;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    padding: 0.625rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-ink-500);
+    color: var(--color-ink-300);
   }
 
   .data-table td {
-    padding: 0.875rem 1rem;
+    padding: 0.75rem 1rem;
     vertical-align: top;
     color: var(--color-ink-700);
     border-bottom: 1px solid var(--color-border);
@@ -361,13 +342,8 @@
 
   .data-table tbody tr:last-child td { border-bottom: none; }
 
-  .data-table tbody tr {
-    transition: background 0.12s;
-  }
-
-  .data-table tbody tr:hover {
-    background: color-mix(in srgb, var(--color-brand) 4%, transparent);
-  }
+  .data-table .num { text-align: right; font-family: var(--font-mono); }
+  .data-table .emphasis { font-family: var(--font-serif); font-size: 1rem; color: var(--color-ink-950); }
 
   /* ── Buttons ── */
   .btn {
@@ -442,22 +418,30 @@
 
   /* ── Alerts ── */
   .error {
-    border-radius: 0.75rem;
-    border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
-    background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+    border-radius: var(--radius);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 45%, transparent);
+    background: transparent;
     padding: 0.875rem 1rem;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    color: var(--color-ink-700);
+  }
+  .error > p:first-child {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--color-danger);
   }
 
   .error-list {
     margin-top: 0.5rem;
-    list-style: disc;
-    padding-left: 1.25rem;
+    list-style: none;
+    padding-left: 0;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
+  .error-list li::before { content: '\2014\0020'; color: var(--color-danger); } /* "— " */
 
   /* ── Status glyphs (no pill, no border — Bureau Ledger) ── */
   .status-badge {
@@ -509,8 +493,8 @@
 
   /* ── Empty state ── */
   .empty-state {
-    border-radius: 1rem;
-    border: 1.5px dashed var(--color-border-strong);
+    border-radius: var(--radius);
+    border: 1px dashed var(--color-border-strong);
     background: var(--color-panel);
     padding: 3.5rem 1.5rem;
     text-align: center;
