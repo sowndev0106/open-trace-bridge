@@ -708,6 +708,23 @@ test('Save button is at the top inside the single unified form', async () => {
   assert.strictEqual($('button[form="sync-form"]').length, 1);
 });
 
+test('project form renders Core/Repositories/API as tab panels with everything in the DOM', async () => {
+  const project = seedProject();
+  repos.create({ project_id: project.id, git_url: 'https://github.com/acme/payment.git', auth_type: 'none', branch: 'main' });
+
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.strictEqual($('.tab-bar [data-tab="core"]').length, 1);
+  assert.strictEqual($('.tab-bar [data-tab="repos"]').length, 1);
+  assert.strictEqual($('.tab-bar [data-tab="apis"]').length, 1);
+  assert.strictEqual($('[data-tab-panel="core"]').attr('hidden'), undefined);
+  assert.strictEqual($('[data-tab-panel="repos"]').attr('hidden'), 'hidden');
+  assert.strictEqual($('[data-tab-panel="apis"]').attr('hidden'), 'hidden');
+  // Fields inside hidden panels are still present and populated.
+  assert.strictEqual($('input[name="repos[0][git_url]"]').val(), 'https://github.com/acme/payment.git');
+});
+
 test('projects index links to the per-project chat page', async () => {
   const project = seedProject();
   const response = await agent.get('/admin/projects').expect(200);

@@ -16,9 +16,8 @@
   <!-- Page header -->
   <section style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;justify-content:space-between">
     <div>
-      <p class="page-kicker"><%= isEditing ? 'Project settings' : 'Project setup' %></p>
+      <p class="kicker"><a href="/admin/projects">← Projects</a> / <%= isEditing ? 'Edit entry no. ' + project.id : 'New entry' %></p>
       <h1 class="page-title"><%= isEditing ? project.name : 'New project' %></h1>
-      <p class="page-subtitle">Configure Teams events, agent context, repositories, and internal API groups. One Save writes everything.</p>
     </div>
     <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
       <a href="/admin/projects" class="btn btn-secondary">
@@ -60,6 +59,13 @@
     </section>
   <% } %>
 
+  <div class="tab-bar">
+    <button type="button" class="tab-item tab-item-active" data-tab="core">Core settings</button>
+    <button type="button" class="tab-item" data-tab="repos">Repositories<span class="tab-count">/<%= repos.length %></span></button>
+    <button type="button" class="tab-item" data-tab="apis">API endpoints<span class="tab-count">/<%= apis.length %></span></button>
+    <span class="tab-bar-note kicker">One save writes all tabs</span>
+  </div>
+
   <!-- Integration webhook (edit mode only) -->
   <% if (isEditing) { %>
     <section class="panel" style="margin-bottom:1.25rem">
@@ -84,6 +90,7 @@
   <% } %>
 
   <!-- Core settings -->
+  <div data-tab-panel="core">
   <section class="panel" style="margin-bottom:1.25rem">
     <div class="panel-body" style="display:flex;flex-direction:column;gap:1.25rem">
       <h2 class="section-heading">Core settings</h2>
@@ -133,8 +140,10 @@
       </div>
     </div>
   </section>
+  </div>
 
   <!-- Repositories -->
+  <div data-tab-panel="repos" hidden>
   <section class="panel" style="margin-bottom:1.25rem">
     <div class="panel-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:1rem;flex-wrap:wrap">
@@ -155,8 +164,10 @@
       <template data-template="repos"><%- include('_repo-row', { r: {}, i: '__I__', syncBadgeClass }) %></template>
     </div>
   </section>
+  </div>
 
   <!-- API Endpoints -->
+  <div data-tab-panel="apis" hidden>
   <section class="panel" style="margin-bottom:1.25rem">
     <div class="panel-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:1rem;flex-wrap:wrap">
@@ -177,9 +188,23 @@
       <template data-template="apis"><%- include('_api-row', { a: {}, i: '__I__' }) %></template>
     </div>
   </section>
+  </div>
 
 </form>
 
+<script>
+(function () {
+  var tabs = document.querySelectorAll('.tab-item[data-tab]');
+  var panels = document.querySelectorAll('[data-tab-panel]');
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var target = tab.dataset.tab;
+      tabs.forEach(function (t) { t.classList.toggle('tab-item-active', t === tab); });
+      panels.forEach(function (p) { p.hidden = p.dataset.tabPanel !== target; });
+    });
+  });
+})();
+</script>
 <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"></script>
 <script>
 (function () {
