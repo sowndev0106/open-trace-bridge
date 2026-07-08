@@ -551,7 +551,7 @@ test('conversation detail renders message timeline', async () => {
   const response = await agent.get(`/admin/conversations/${conversation.id}`).expect(200);
   const $ = cheerio.load(response.text);
 
-  assert.strictEqual($('h1').text().trim(), `Conversation #${conversation.id}`);
+  assert.strictEqual($('h1').text().trim(), `Conversation no. ${conversation.id}`);
   assert.match(response.text, /Payment/);
   assert.match(response.text, /ses_abc/);
   assert.match(response.text, /Son/);
