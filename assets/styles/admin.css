@@ -106,10 +106,12 @@
 
   label {
     display: block;
-    font-size: 0.8125rem;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
-    color: var(--color-ink-700);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-500);
   }
 
   /* Form controls */
@@ -119,16 +121,16 @@
   input[type="number"],
   textarea,
   select {
-    margin-top: 0.375rem;
+    margin-top: 0.5rem;
     width: 100%;
-    border-radius: 0.625rem;
+    border-radius: var(--radius);
     border: 1px solid var(--color-border-strong);
     background: var(--color-panel-alt);
     padding: 0.5625rem 0.75rem;
-    font-size: 0.875rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
     color: var(--color-ink-950);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s;
     outline: none;
   }
 
@@ -139,23 +141,22 @@
   textarea:focus,
   select:focus {
     border-color: var(--color-brand);
-    box-shadow: 0 0 0 3px var(--color-brand-glow), 0 1px 3px rgba(0,0,0,0.06);
   }
 
   textarea {
     min-height: 8rem;
-    font-family: var(--font-mono);
     line-height: 1.6;
     resize: vertical;
   }
 
   select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7fa8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2398917E' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.625rem center;
     background-size: 1.1em;
     padding-right: 2.25rem;
     appearance: none;
+    font-family: var(--font-sans);
   }
 }
 
@@ -513,6 +514,93 @@
     padding: 0.75rem;
     overflow: auto;
     color: var(--color-ink-700);
+  }
+
+  /* ── Tab bar (project-form tabs, workspace tabs) ── */
+  .tab-bar {
+    display: flex;
+    align-items: baseline;
+    gap: 1.75rem;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tab-item {
+    padding: 0.875rem 0 0.75rem;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    color: var(--color-ink-500);
+    text-decoration: none;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    cursor: pointer;
+  }
+
+  .tab-item-active {
+    border-bottom-color: var(--color-brand);
+    color: var(--color-ink-950);
+    font-weight: 600;
+  }
+
+  .tab-count {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--color-ink-300);
+    margin-left: 0.25rem;
+  }
+
+  .tab-bar-note {
+    margin-left: auto;
+    padding: 0.875rem 0 0.75rem;
+  }
+
+  /* ── Segmented control (radio-based, no JS required for styling) ── */
+  .segmented {
+    display: flex;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 0.5rem;
+  }
+
+  .segmented-option {
+    flex: 1;
+    position: relative;
+  }
+
+  .segmented-option input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .segmented-option span {
+    display: block;
+    text-align: center;
+    padding: 0.5625rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-500);
+    border-left: 1px solid var(--color-border-strong);
+  }
+  .segmented-option:first-child span { border-left: none; }
+
+  .segmented-option input:checked + span {
+    background: var(--color-border);
+    color: var(--color-ink-950);
+  }
+
+  .segmented-option input:focus-visible + span {
+    outline: 2px solid var(--color-brand);
+    outline-offset: -2px;
   }
 } /* end @layer components */
 
