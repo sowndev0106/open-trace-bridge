@@ -6,119 +6,114 @@
   <title>OpenTraceBridge Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700;800&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/styles/admin.css">
   <!-- TOAST UI Editor Style -->
   <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor.min.css" />
   <script>
-    // Initialize theme before layout renders to avoid flicker
+    // Initialize theme before layout renders to avoid flicker.
+    // Ink (dark) is the default theme; Paper (light) only applies when
+    // explicitly stored or explicitly preferred by the OS AND never overridden.
     (function() {
       var stored = localStorage.getItem('color-theme');
-      if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      var dark = stored ? stored === 'dark' : true;
+      document.documentElement.classList.toggle('dark', dark);
     })();
   </script>
 </head>
 <body>
 <div class="app-shell">
+<%
+  // Shell mode ('index' = sidebar, 'detail'/default = breadcrumb-only) is read from
+  // this partial's own local scope. A calling view MUST pass layoutShell (and, for
+  // 'index', sidebarProjects) as the explicit second argument to the include() call
+  // for this file, e.g.: include('../layout-head', { layoutShell: 'index', sidebarProjects: allProjects }).
+  // Declaring layoutShell as a plain JS const/var in the calling template's own body
+  // does NOT reach this file: EJS compiles each included .ejs to its own function, so
+  // a template-local var there is invisible here. The matching layout-foot include
+  // MUST receive the same layoutShell value or the sidebar-shell wrapper div opened
+  // below will never get its closing tag from layout-foot.ejs.
+%>
+<% var _shell = typeof layoutShell !== 'undefined' ? layoutShell : 'detail'; %>
+<% var _sidebarProjects = typeof sidebarProjects !== 'undefined' ? sidebarProjects : []; %>
 
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="topbar-inner">
+<% if (_shell === 'index') { %>
+  <div class="sidebar-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div style="font-family:var(--font-serif);font-size:1.1875rem;font-weight:500;line-height:1.1">
+          OpenTraceBridge<span style="color:var(--color-brand)">.</span>
+        </div>
+        <div class="kicker" style="margin-top:0.3125rem">Admin console — private</div>
+      </div>
 
-      <!-- Brand -->
-      <a href="/admin/projects" class="flex items-center gap-3" style="text-decoration:none">
-        <span class="brand-mark">OT</span>
-        <span>
-          <span style="display:block;font-size:0.875rem;font-weight:700;color:var(--color-ink-950);letter-spacing:-0.02em">OpenTraceBridge</span>
-          <span style="display:block;font-size:0.6875rem;color:var(--color-ink-500);margin-top:0.0625rem">Admin console</span>
-        </span>
-      </a>
-
-      <!-- Nav -->
-      <nav style="display:flex;align-items:center;gap:0.25rem" aria-label="Primary navigation">
-
-        <!-- Dashboard -->
-        <a class="nav-link" id="nav-dashboard" href="/admin/dashboard">
-          <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0">
-            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
-          </svg>
-          Dashboard
+      <nav class="sidebar-nav" aria-label="Primary navigation">
+        <a id="nav-dashboard" class="sidebar-nav-item" href="/admin/dashboard">
+          <span class="kicker" style="width:1.25rem">01</span><span>Dashboard</span>
         </a>
-
-        <!-- Projects -->
-        <a class="nav-link" id="nav-projects" href="/admin/projects">
-          <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0">
-            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
-          </svg>
-          Projects
+        <a id="nav-projects" class="sidebar-nav-item" href="/admin/projects">
+          <span class="kicker" style="width:1.25rem">02</span><span>Projects</span>
         </a>
-
-        <!-- Separator -->
-        <div style="width:1px;height:1.25rem;background:var(--color-border-strong);margin:0 0.25rem"></div>
-
-        <!-- Theme toggle -->
-        <button id="theme-toggle" class="nav-link" style="padding:0.4375rem;min-width:2rem;min-height:2rem" aria-label="Toggle theme" title="Toggle dark/light mode">
-          <!-- Sun icon -->
-          <svg id="icon-sun" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" style="display:none">
-            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" clip-rule="evenodd"/>
-          </svg>
-          <!-- Moon icon -->
-          <svg id="icon-moon" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" style="display:none">
-            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-          </svg>
-        </button>
-
-        <!-- Logout -->
-        <form method="post" action="/admin/logout" style="display:inline">
-          <button type="submit" class="nav-link" style="color:var(--color-danger);opacity:0.85" title="Sign out">
-            <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0">
-              <path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clip-rule="evenodd"/>
-              <path fill-rule="evenodd" d="M6 10a.75.75 0 01.75-.75h9.546l-1.048-.943a.75.75 0 111.004-1.114l2.5 2.25a.75.75 0 010 1.114l-2.5 2.25a.75.75 0 11-1.004-1.114l1.048-.943H6.75A.75.75 0 016 10z" clip-rule="evenodd"/>
-            </svg>
-            Logout
-          </button>
-        </form>
-
       </nav>
-    </div>
-  </header>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var sunIcon  = document.getElementById('icon-sun');
-      var moonIcon = document.getElementById('icon-moon');
-      var btn      = document.getElementById('theme-toggle');
-      var isDark   = document.documentElement.classList.contains('dark');
+      <% if (_sidebarProjects.length) { %>
+        <div class="kicker" style="padding:1.5rem 1.25rem 0.5rem">Register — <%= _sidebarProjects.length %></div>
+        <div class="sidebar-register">
+          <% _sidebarProjects.forEach(function(p) { %>
+            <div class="sidebar-register-item">
+              <span class="status-badge status-<%=
+                p.sync_status === 'success' ? 'active' :
+                p.sync_status === 'error' ? 'error' :
+                p.sync_status === 'syncing' || p.sync_status === 'pending' ? 'syncing' : 'muted'
+              %>"></span>
+              <span><%= p.slug %></span>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
 
-      function applyIcons(dark) {
-        if (dark) { sunIcon.style.display = 'block'; moonIcon.style.display = 'none'; }
-        else       { sunIcon.style.display = 'none';  moonIcon.style.display = 'block'; }
-      }
+      <div class="sidebar-foot">
+        <button id="theme-toggle" type="button">
+          <span id="theme-toggle-label">◐ Dark — switch to light</span>
+        </button>
+        <form method="post" action="/admin/logout">
+          <button type="submit">← Log out</button>
+        </form>
+      </div>
+    </aside>
 
-      applyIcons(isDark);
+    <main class="app-container">
+<% } else { %>
+    <main class="app-container">
+<% } %>
 
-      btn.addEventListener('click', function() {
-        isDark = !isDark;
-        document.documentElement.classList.toggle('dark', isDark);
-        localStorage.setItem('color-theme', isDark ? 'dark' : 'light');
-        applyIcons(isDark);
-      });
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          var isDark = document.documentElement.classList.contains('dark');
+          var btn = document.getElementById('theme-toggle');
+          var label = document.getElementById('theme-toggle-label');
 
-      // Active nav link detection
-      var path = window.location.pathname;
-      var navDashboard = document.getElementById('nav-dashboard');
-      var navProjects  = document.getElementById('nav-projects');
+          function applyLabel(dark) {
+            if (label) label.textContent = dark ? '◐ Dark — switch to light' : '◑ Light — switch to dark';
+          }
+          applyLabel(isDark);
 
-      if (path.startsWith('/admin/dashboard')) {
-        navDashboard.classList.add('nav-link-active');
-      } else if (path.startsWith('/admin/projects') || path.startsWith('/admin/conversations')) {
-        navProjects.classList.add('nav-link-active');
-      }
-    });
-  </script>
+          if (btn) {
+            btn.addEventListener('click', function() {
+              isDark = !isDark;
+              document.documentElement.classList.toggle('dark', isDark);
+              localStorage.setItem('color-theme', isDark ? 'dark' : 'light');
+              applyLabel(isDark);
+            });
+          }
 
-  <main class="app-container">
+          var path = window.location.pathname;
+          var navDashboard = document.getElementById('nav-dashboard');
+          var navProjects  = document.getElementById('nav-projects');
+          if (navDashboard && path.startsWith('/admin/dashboard')) {
+            navDashboard.classList.add('sidebar-nav-item-active');
+          } else if (navProjects && (path.startsWith('/admin/projects') || path.startsWith('/admin/conversations'))) {
+            navProjects.classList.add('sidebar-nav-item-active');
+          }
+        });
+      </script>

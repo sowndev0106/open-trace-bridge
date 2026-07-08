@@ -1,7 +1,9 @@
 const { test, beforeEach } = require('node:test');
 const assert = require('node:assert');
+const path = require('path');
 const request = require('supertest');
 const cheerio = require('cheerio');
+const ejs = require('ejs');
 
 process.env.OTB_DB_PATH = ':memory:';
 
@@ -44,6 +46,92 @@ test('admin layout links the compiled Tailwind stylesheet and serves it', async 
 
   const css = await agent.get('/assets/styles/admin.css').expect(200);
   assert.match(css.text, /\.app-shell|\.btn|\.panel/);
+});
+
+test('layout defaults to the detail shell (no sidebar) until a page opts into index', async () => {
+  // Dashboard (Task 8) and the Projects list (Task 11) have both opted into the
+  // index shell, so exercise a page that hasn't (the project edit form) to prove
+  // the default is still the breadcrumb-only detail shell.
+  const project = seedProject();
+  const page = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(page.text);
+  assert.strictEqual($('.sidebar-shell').length, 0);
+  assert.strictEqual($('.app-shell > .app-container').length, 1);
+});
+
+// --- layout-head.ejs / layout-foot.ejs shell-mode mechanism ------------------------
+//
+// No real page calls the index shell yet (Tasks 8/11 wire the Dashboard and Projects
+// list into it), so there is no full HTTP route to exercise it through supertest.
+// EJS compiles every include() to its own function, so a calling view's shell mode
+// only reaches layout-head.ejs/layout-foot.ejs if it is passed as the explicit second
+// argument to *both* include() calls — a bare `<% const layoutShell = 'index' %>` in
+// the calling template's own body is invisible to the included partials. These tests
+// render the two partials directly with ejs.render(), using a filename inside views/
+// so their own relative include()s resolve, to prove the include()-data convention
+// works and to guard the pitfall that produced this bug in the first place.
+const viewsDir = path.join(__dirname, '..', 'views');
+
+function renderShellProbe(templateBody, data) {
+  return ejs.render(templateBody, data, {
+    views: [viewsDir],
+    filename: path.join(viewsDir, '__shell-probe__.ejs'),
+  });
+}
+
+test('index shell renders correctly when layoutShell/sidebarProjects are passed as explicit include() data', () => {
+  const sidebarProjects = [{ slug: 'payment', sync_status: 'success' }];
+  const template = [
+    "<%- include('layout-head', { layoutShell: 'index', sidebarProjects: sidebarProjects }) %>",
+    '<div id="probe-content">page content</div>',
+    "<%- include('layout-foot', { layoutShell: 'index' }) %>",
+  ].join('\n');
+
+  const html = renderShellProbe(template, { sidebarProjects });
+  const $ = cheerio.load(html);
+
+  // Sidebar shell wraps a sidebar aside and the page's main container.
+  assert.strictEqual($('.sidebar-shell').length, 1);
+  assert.strictEqual($('.sidebar-shell > aside.sidebar').length, 1);
+  assert.strictEqual($('.sidebar-shell > main.app-container').length, 1);
+  assert.strictEqual($('#probe-content').length, 1, 'page content still renders inside the shell');
+  // sidebarProjects data reached layout-head.ejs through the include() call.
+  assert.match(html, /payment/);
+
+  // The HTML is well-formed: the sidebar-shell div layout-head.ejs opens is closed by
+  // layout-foot.ejs exactly once (this is the "malformed HTML" risk called out in the
+  // Task 7 review: layout-head opens a div that only layout-foot can close).
+  const openDivs = (html.match(/<div\b/g) || []).length;
+  const closeDivs = (html.match(/<\/div>/g) || []).length;
+  assert.strictEqual(openDivs, closeDivs, 'div tags are balanced');
+  const openAside = (html.match(/<aside\b/g) || []).length;
+  const closeAside = (html.match(/<\/aside>/g) || []).length;
+  assert.strictEqual(openAside, closeAside, 'aside tags are balanced');
+  const openMain = (html.match(/<main\b/g) || []).length;
+  const closeMain = (html.match(/<\/main>/g) || []).length;
+  assert.strictEqual(openMain, closeMain, 'main tags are balanced');
+});
+
+test('regression: a bare template-local layoutShell does not reach layout-head/layout-foot via include()', () => {
+  // Reproduces the exact bug the reviewer found: declaring layoutShell as a plain
+  // template-local before include()-ing layout-head/layout-foot (the old, incorrect
+  // documented convention) does not propagate, because include() only sees data
+  // explicitly passed as its second argument.
+  const template = [
+    "<% const layoutShell = 'index'; const sidebarProjects = [{ slug: 'payment', sync_status: 'success' }]; %>",
+    "<%- include('layout-head') %>",
+    '<div id="probe-content">page content</div>',
+    "<%- include('layout-foot') %>",
+  ].join('\n');
+
+  const html = renderShellProbe(template, {});
+  const $ = cheerio.load(html);
+
+  assert.strictEqual(
+    $('.sidebar-shell').length,
+    0,
+    'a bare template-local layoutShell must not leak into layout-head.ejs/layout-foot.ejs through include()'
+  );
 });
 
 test('projects index renders modern project table actions and endpoint copy', async () => {
@@ -99,6 +187,18 @@ test('project edit form preserves workflows inside redesigned panels', async () 
   assert.match(response.text, /\/api\/events\/payment/);
   assert.match(response.text, /webhook-endpoint-url/); // client-side host rewrite hook
   assert.match(response.text, /panel-body/);
+});
+
+test('repo row renders auth type as a segmented radio control, not a select', async () => {
+  const project = seedProject();
+  repos.create({ project_id: project.id, git_url: 'https://github.com/acme/payment.git', auth_type: 'https-token', branch: 'main' });
+
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.strictEqual($('select[name="repos[0][auth_type]"]').length, 0);
+  assert.strictEqual($('input[name="repos[0][auth_type]"][type="radio"]').length, 3);
+  assert.strictEqual($('input[name="repos[0][auth_type]"][value="https-token"]').attr('checked'), 'checked');
 });
 
 test('project create validation shows all field errors and preserves input', async () => {
@@ -281,8 +381,32 @@ test('api row form only offers name, curl, and description inputs plus a parsed 
   assert.strictEqual($('input[name="apis[0][auth_header]"]').length, 0);
   assert.strictEqual($('input[name="apis[0][allowed_methods]"]').length, 0);
   assert.strictEqual($('input[name="apis[0][api_key]"]').length, 0);
-  assert.match(response.text, /POST https:\/\/api\.internal\.example\/v1/);
+  assert.match(response.text, /Base .{1,3} https:\/\/api\.internal\.example\/v1/);
+  assert.match(response.text, /Methods .{1,3} <span[^>]*>POST</);
   assert.doesNotMatch(response.text, /sk_live_123/);
+});
+
+test('saved API groups render collapsed by default with a parsed-info bar; new rows start expanded', async () => {
+  const project = seedProject();
+  apis.create({
+    project_id: project.id, name: 'transaction-api',
+    base_url: 'https://api.internal.example/v1', api_key: 'Bearer sk_live_123',
+    auth_header: 'Authorization', allowed_methods: 'GET',
+    description_md: 'Read transactions.',
+  });
+
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  const row = $('[data-rows="apis"] > [data-row]').first();
+  assert.strictEqual(row.attr('data-collapsed'), 'true');
+  // Fields still present in the DOM despite the collapsed default.
+  assert.strictEqual(row.find('input[name="apis[0][name]"]').val(), 'transaction-api');
+  assert.match(row.text(), /Parsed/);
+  assert.match(row.text(), /api\.internal\.example\/v1/);
+
+  const template = $('template[data-template="apis"]').html();
+  assert.match(template, /data-collapsed="false"/);
 });
 
 test('existing API row keeps parsed fields when saved without a new curl command', async () => {
@@ -348,7 +472,8 @@ test('conversation audit list renders redesigned tables', async () => {
   const response = await agent.get(`/admin/projects/${project.id}/conversations`).expect(200);
   const $ = cheerio.load(response.text);
 
-  assert.strictEqual($('h1').text().trim(), 'Conversations');
+  assert.strictEqual($('h1').text().trim(), 'Payment');
+  assert.strictEqual($('.tab-item-active').text().trim(), 'Audit');
   assert.match(response.text, /Payment/);
   assert.strictEqual($(`a[href="/admin/conversations/${conversation.id}"]`).length, 1);
   assert.match(response.text, /ses_abc/);
@@ -426,7 +551,7 @@ test('conversation detail renders message timeline', async () => {
   const response = await agent.get(`/admin/conversations/${conversation.id}`).expect(200);
   const $ = cheerio.load(response.text);
 
-  assert.strictEqual($('h1').text().trim(), `Conversation #${conversation.id}`);
+  assert.strictEqual($('h1').text().trim(), `Conversation no. ${conversation.id}`);
   assert.match(response.text, /Payment/);
   assert.match(response.text, /ses_abc/);
   assert.match(response.text, /Son/);
@@ -516,6 +641,9 @@ test('projects list shows a source sync badge per project', async () => {
   const $ = cheerio.load(res.text);
   assert.match($('thead').text(), /Source/);
   assert.strictEqual($('[data-project-sync]').first().text().trim(), 'success');
+  // Glyphs are CSS ::before content, not DOM text — the raw status string
+  // must still be the only text node inside the badge.
+  assert.strictEqual($('[data-project-sync]').first().find('*').length, 0);
 });
 
 test('project edit shows per-repo status, error detail, and a Sync now button', async () => {
@@ -615,6 +743,23 @@ test('Save button is at the top inside the single unified form', async () => {
   // Sync now posts through the external sync form.
   assert.strictEqual($(`form#sync-form[action="/admin/projects/${project.id}/sync"]`).length, 1);
   assert.strictEqual($('button[form="sync-form"]').length, 1);
+});
+
+test('project form renders Core/Repositories/API as tab panels with everything in the DOM', async () => {
+  const project = seedProject();
+  repos.create({ project_id: project.id, git_url: 'https://github.com/acme/payment.git', auth_type: 'none', branch: 'main' });
+
+  const response = await agent.get(`/admin/projects/${project.id}/edit`).expect(200);
+  const $ = cheerio.load(response.text);
+
+  assert.strictEqual($('.tab-bar [data-tab="core"]').length, 1);
+  assert.strictEqual($('.tab-bar [data-tab="repos"]').length, 1);
+  assert.strictEqual($('.tab-bar [data-tab="apis"]').length, 1);
+  assert.strictEqual($('[data-tab-panel="core"]').attr('hidden'), undefined);
+  assert.strictEqual($('[data-tab-panel="repos"]').attr('hidden'), 'hidden');
+  assert.strictEqual($('[data-tab-panel="apis"]').attr('hidden'), 'hidden');
+  // Fields inside hidden panels are still present and populated.
+  assert.strictEqual($('input[name="repos[0][git_url]"]').val(), 'https://github.com/acme/payment.git');
 });
 
 test('projects index links to the per-project chat page', async () => {

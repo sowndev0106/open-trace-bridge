@@ -1,3 +1,18 @@
+<%
+  function methodColor(m) {
+    if (m === 'GET') return 'var(--color-ok)';
+    if (m === 'POST' || m === 'PUT' || m === 'PATCH') return 'var(--color-amber)';
+    if (m === 'DELETE') return 'var(--color-danger)';
+    return 'var(--color-ink-500)';
+  }
+  function statusColor(status, error) {
+    if (error) return 'var(--color-danger)';
+    if (status == null) return 'var(--color-ink-300)';
+    if (status >= 200 && status < 300) return 'var(--color-ok)';
+    if (status >= 400) return 'var(--color-danger)';
+    return 'var(--color-amber)';
+  }
+%>
 <div class="table-shell shadow-none">
   <div class="table-scroll">
     <table class="data-table">
@@ -20,33 +35,31 @@
           </td>
           <% } %>
           <td><%= a.group_name %></td>
-          <td><span class="status-badge status-muted"><%= a.method %></span></td>
-          <td class="max-w-xl truncate"><%= a.url %></td>
-          <td><%= a.status || (a.error ? 'error' : '-') %></td>
+          <td style="font-family:var(--font-mono);font-size:0.75rem;color:<%= methodColor(a.method) %>"><%= a.method %></td>
+          <td class="max-w-xl truncate">
+            <span style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--color-ink-500)"><%= a.url %></span>
+          </td>
+          <td style="font-family:var(--font-mono);font-size:0.75rem;color:<%= statusColor(a.status, a.error) %>"><%= a.status || (a.error ? 'error' : '-') %></td>
           <td>
             <% if (a.request_params || a.response_body || a.error) { %>
             <details>
-              <summary class="cursor-pointer text-sm font-medium text-brand">View</summary>
-              <div class="mt-2 space-y-2 text-xs">
-                <% if (a.duration_ms != null) { %>
-                <div><span class="font-semibold">Duration:</span> <%= a.duration_ms %> ms</div>
-                <% } %>
+              <summary style="cursor:pointer;font-family:var(--font-mono);font-size:0.75rem;color:var(--color-ink-500)">View</summary>
+              <div style="margin-top:0.625rem;display:grid;grid-template-columns:1fr 1fr;gap:0.875rem">
                 <% if (a.request_params) { %>
-                <div>
-                  <div class="font-semibold">Request params</div>
-                  <pre class="mt-1 max-h-48 max-w-xl overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2"><%= a.request_params %></pre>
-                </div>
-                <% } %>
-                <% if (a.response_body) { %>
-                <div>
-                  <div class="font-semibold">Response</div>
-                  <pre class="mt-1 max-h-64 max-w-xl overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2"><%= a.response_body %></pre>
+                <div style="border:1px solid var(--color-border);border-radius:var(--radius);padding:0.6875rem 0.875rem">
+                  <div class="kicker">Request<% if (a.duration_ms != null) { %> · <%= a.duration_ms %>ms<% } %></div>
+                  <pre style="margin-top:0.4375rem;max-height:12rem;overflow:auto;white-space:pre-wrap;background:none;border:none;padding:0;font-size:0.71875rem"><%= a.request_params %></pre>
                 </div>
                 <% } %>
                 <% if (a.error) { %>
-                <div>
-                  <div class="font-semibold text-red-600">Error</div>
-                  <pre class="mt-1 max-w-xl overflow-auto whitespace-pre-wrap rounded bg-red-50 p-2 text-red-700"><%= a.error %></pre>
+                <div style="border:1px solid color-mix(in srgb, var(--color-danger) 40%, transparent);border-radius:var(--radius);padding:0.6875rem 0.875rem">
+                  <div class="kicker" style="color:var(--color-danger)">Error</div>
+                  <pre style="margin-top:0.4375rem;max-height:16rem;overflow:auto;white-space:pre-wrap;background:none;border:none;padding:0;font-size:0.71875rem;color:var(--color-danger)"><%= a.error %></pre>
+                </div>
+                <% } else if (a.response_body) { %>
+                <div style="border:1px solid var(--color-border);border-radius:var(--radius);padding:0.6875rem 0.875rem">
+                  <div class="kicker">Response</div>
+                  <pre style="margin-top:0.4375rem;max-height:16rem;overflow:auto;white-space:pre-wrap;background:none;border:none;padding:0;font-size:0.71875rem"><%= a.response_body %></pre>
                 </div>
                 <% } %>
               </div>

@@ -59,3 +59,13 @@ test('dashboard shows n/a for projects with no runs yet', async () => {
   const page = await agent.get('/admin/dashboard').expect(200);
   assert.match(page.text, /n\/a/);
 });
+
+test('dashboard range picker renders as links, not a select', async () => {
+  seedProject();
+  const page = await agent.get('/admin/dashboard?days=30').expect(200);
+  const $ = cheerio.load(page.text);
+  assert.strictEqual($('select[name="days"]').length, 0);
+  assert.strictEqual($('a[href="?days=7"]').length, 1);
+  assert.strictEqual($('a[href="?days=30"]').length, 1);
+  assert.strictEqual($('a[href="?days=90"]').length, 1);
+});

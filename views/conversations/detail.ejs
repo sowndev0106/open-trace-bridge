@@ -1,67 +1,56 @@
 <%- include('../layout-head') %>
 
-<section style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem">
+<div style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--color-border);padding-bottom:1.125rem">
   <div>
-    <p class="page-kicker"><%= project.name %></p>
-    <h1 class="page-title">Conversation #<%= conv.id %></h1>
-    <p class="page-subtitle" style="display:flex;align-items:center;gap:0.625rem;flex-wrap:wrap">
-      Session <code style="font-size:0.75rem"><%= conv.opencode_session_id || '—' %></code>
+    <p class="kicker"><a href="/admin/projects/<%= project.id %>/conversations">← <%= project.name %> / Audit</a></p>
+    <div style="display:flex;align-items:baseline;gap:0.875rem;margin-top:0.375rem;flex-wrap:wrap">
+      <h1 class="page-title" style="font-size:2rem">Conversation <em style="font-style:italic;color:var(--color-brand)">no. <%= conv.id %></em></h1>
       <span class="status-badge <%= conv.status === 'active' ? 'status-active' : 'status-muted' %>"><%= conv.status %></span>
-    </p>
+      <span class="kicker">Session <code style="font-size:0.75rem"><%= conv.opencode_session_id || '—' %></code></span>
+    </div>
   </div>
-  <a href="/admin/projects/<%= project.id %>/conversations" class="btn btn-secondary">
-    <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd"/></svg>
-    Back to conversations
-  </a>
-</section>
+</div>
 
 <!-- Message timeline -->
-<section class="panel message-timeline" style="margin-bottom:1.25rem">
-  <div class="panel-body">
-    <% if (!messages.length) { %>
-      <div style="padding:2.5rem;text-align:center;color:var(--color-ink-500);font-size:0.875rem">No messages in this conversation.</div>
-    <% } else { %>
-    <div style="display:flex;flex-direction:column;gap:1rem">
-      <% for (const m of messages) { %>
-        <% const isIn = m.direction === 'in'; %>
-        <article style="display:flex;<%= isIn ? 'justify-content:flex-end' : 'justify-content:flex-start;align-items:flex-end;gap:0.5rem' %>">
-          <% if (!isIn) { %>
-            <div style="flex-shrink:0;width:1.875rem;height:1.875rem;border-radius:0.5rem;background:var(--grad-brand);display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:800;color:#fff;box-shadow:0 2px 8px var(--color-brand-glow)">OT</div>
-          <% } %>
-          <div style="max-width:42rem;border-radius:<%= isIn ? '1rem 1rem 0.25rem 1rem' : '0.25rem 1rem 1rem 1rem' %>;
-               padding:0.75rem 1rem;
-               background:<%= isIn ? 'var(--grad-brand)' : 'var(--color-panel-alt)' %>;
-               border:1px solid <%= isIn ? 'transparent' : 'var(--color-border)' %>;
-               box-shadow:<%= isIn ? '0 4px 16px var(--color-brand-glow)' : '0 1px 4px rgba(0,0,0,0.06)' %>">
-            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">
-              <span style="font-size:0.75rem;font-weight:700;color:<%= isIn ? 'rgba(255,255,255,0.85)' : 'var(--color-ink-950)' %>"><%= isIn ? (m.user_name || 'user') : 'agent' %></span>
-              <span style="font-size:0.6875rem;color:<%= isIn ? 'rgba(255,255,255,0.55)' : 'var(--color-ink-500)' %>"><%= m.created_at %></span>
-            </div>
+<section class="message-timeline" style="margin-bottom:1.5rem">
+  <% if (!messages.length) { %>
+    <div style="padding:2.5rem;text-align:center;color:var(--color-ink-500);font-size:0.875rem">No messages in this conversation.</div>
+  <% } else { %>
+  <div style="max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:1rem">
+    <% for (const m of messages) { %>
+      <% const isIn = m.direction === 'in'; %>
+      <article class="chat-row <%= isIn ? 'chat-row-user' : 'chat-row-agent' %>">
+        <% if (!isIn) { %>
+          <div class="chat-avatar">OT</div>
+        <% } %>
+        <div>
+          <div class="kicker" style="<%= isIn ? 'text-align:right' : '' %>;margin-bottom:0.3125rem">
+            <%= isIn ? (m.user_name || 'user') : 'agent' %> · <%= m.created_at %>
+          </div>
+          <div class="chat-bubble <%= isIn ? 'chat-bubble-user' : 'chat-bubble-agent' %>">
             <% if (isIn) { %>
-              <div style="font-size:0.875rem;line-height:1.65;color:#fff;white-space:pre-wrap"><%= m.content %></div>
+              <div style="white-space:pre-wrap"><%= m.content %></div>
             <% } else { %>
-              <div class="msg-content" style="font-size:0.875rem;line-height:1.65;color:var(--color-ink-950)" data-raw="<%= encodeURIComponent(m.content || '') %>"></div>
+              <div class="msg-content" data-raw="<%= encodeURIComponent(m.content || '') %>"></div>
             <% } %>
           </div>
-        </article>
-      <% } %>
-    </div>
+        </div>
+      </article>
     <% } %>
   </div>
+  <% } %>
 </section>
 
 <!-- API calls -->
-<section class="panel">
-  <div class="panel-body">
-    <h2 class="section-heading" style="margin-bottom:1rem">API calls</h2>
-    <% if (apiCalls && apiCalls.length) { %>
-      <%- include('_api-calls-table', { apiCalls, showConversation: false }) %>
-    <% } else { %>
-      <div style="border-radius:0.75rem;border:1px dashed var(--color-border-strong);background:var(--color-panel-alt);padding:1.5rem;text-align:center;font-size:0.875rem;color:var(--color-ink-500)">
-        No API calls were made during this conversation.
-      </div>
-    <% } %>
-  </div>
+<section>
+  <div class="kicker" style="margin-bottom:0.625rem">§ API calls in this conversation</div>
+  <% if (apiCalls && apiCalls.length) { %>
+    <%- include('_api-calls-table', { apiCalls, showConversation: false }) %>
+  <% } else { %>
+    <div style="border-radius:var(--radius);border:1px dashed var(--color-border-strong);background:var(--color-panel-alt);padding:1.5rem;text-align:center;font-size:0.875rem;color:var(--color-ink-500)">
+      No API calls were made during this conversation.
+    </div>
+  <% } %>
 </section>
 
 <!-- Render markdown for agent messages -->
@@ -73,7 +62,15 @@ document.querySelectorAll('.msg-content[data-raw]').forEach(function(el) {
   el.innerHTML = DOMPurify.sanitize(marked.parse(text));
   // Style inline code and pre in rendered markdown
   el.querySelectorAll('pre').forEach(function(pre) {
-    pre.style.cssText = 'background:#0d1424;color:#c8d3f5;border-radius:0.5rem;padding:0.75rem;overflow-x:auto;font-size:0.8125rem;margin:0.5rem 0;border:1px solid rgba(255,255,255,0.06)';
+    pre.style.cssText = '';
+    pre.style.background = 'var(--color-panel-alt)';
+    pre.style.color = 'var(--color-ink-700)';
+    pre.style.borderRadius = 'var(--radius)';
+    pre.style.padding = '0.75rem';
+    pre.style.overflowX = 'auto';
+    pre.style.fontSize = '0.8125rem';
+    pre.style.margin = '0.5rem 0';
+    pre.style.border = '1px solid var(--color-border)';
   });
 });
 </script>

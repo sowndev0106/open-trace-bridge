@@ -1,20 +1,23 @@
-<%- include('../layout-head') %>
+<%- include('../layout-head', { layoutShell: 'index', sidebarProjects: allProjects }) %>
 
-<section style="margin-bottom:1.5rem;display:flex;flex-direction:column;gap:1rem">
-  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem">
-    <div>
-      <p class="page-kicker">Bridge metrics</p>
-      <h1 class="page-title">Usage Dashboard</h1>
-      <p class="page-subtitle">Real-time statistics for questions, response time, error rate, API calls, tokens, and cost.</p>
+<section style="margin-bottom:2rem;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--color-border);padding-bottom:1.125rem">
+  <div>
+    <p class="kicker">System ledger</p>
+    <h1 class="page-title">The week in <em style="font-style:italic;color:var(--color-brand)">numbers</em></h1>
+  </div>
+  <div style="display:flex;align-items:baseline;gap:1.25rem;flex-wrap:wrap">
+    <div style="display:flex;gap:0.875rem;font-family:var(--font-mono);font-size:0.71875rem">
+      <% [7, 30, 90].forEach(function(d) { %>
+        <a href="?days=<%= d %><%= filterProjectId ? '&project=' + filterProjectId : '' %>"
+           style="text-decoration:none;padding-bottom:0.1875rem;<%= days === d
+             ? 'color:var(--color-ink-950);border-bottom:2px solid var(--color-brand)'
+             : 'color:var(--color-ink-300)' %>"><%= d %>D</a>
+      <% }); %>
     </div>
-    <form method="get" style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
-      <select name="days" onchange="this.form.submit()" style="width:8rem">
-        <% [7, 30, 90].forEach(function(d) { %>
-          <option value="<%= d %>" <%= days === d ? 'selected' : '' %>><%= d %> days</option>
-        <% }); %>
-      </select>
-      <select name="project" onchange="this.form.submit()" style="width:12rem">
-        <option value="">All projects</option>
+    <form method="get" style="display:flex">
+      <input type="hidden" name="days" value="<%= days %>">
+      <select name="project" onchange="this.form.submit()" style="width:12rem;margin-top:0">
+        <option value="">All projects ▾</option>
         <% allProjects.forEach(function(p) { %>
           <option value="<%= p.id %>" <%= filterProjectId === p.id ? 'selected' : '' %>><%= p.name %></option>
         <% }); %>
@@ -23,66 +26,50 @@
   </div>
 </section>
 
-<!-- Metric Cards -->
-<section style="margin-bottom:1.5rem;display:grid;gap:0.875rem;grid-template-columns:repeat(2,1fr)">
+<!-- Metric ledger row -->
+<section style="margin-bottom:1.5rem;display:grid;grid-template-columns:repeat(2,1fr);border-bottom:1px solid var(--color-border)">
   <style>
     @media(min-width:640px){#metric-grid{grid-template-columns:repeat(3,1fr)}}
     @media(min-width:1024px){#metric-grid{grid-template-columns:repeat(6,1fr)}}
   </style>
   <div id="metric-grid" style="display:contents">
 
-    <div class="panel panel-body panel-metric accent-blue" style="position:relative;overflow:hidden">
-      <div style="position:absolute;top:0.75rem;right:0.875rem;opacity:0.15">
-        <svg width="28" height="28" viewBox="0 0 20 20" fill="var(--color-brand)"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm0 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2z"/></svg>
-      </div>
-      <p style="font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-ink-500)">Questions</p>
-      <p style="margin-top:0.625rem;font-size:1.875rem;font-weight:800;letter-spacing:-0.04em;color:var(--color-ink-950)" class="metric-num"><%= totals.questions.toLocaleString() %></p>
+    <div style="padding:1.25rem 1.125rem 1.125rem 0;border-right:1px solid var(--color-border)">
+      <p class="kicker">Questions</p>
+      <p style="margin-top:0.625rem;font-family:var(--font-serif);font-size:2rem;font-weight:500;line-height:1;color:var(--color-ink-950)"><%= totals.questions.toLocaleString() %></p>
+      <p style="margin-top:0.5rem;font-family:var(--font-mono);font-size:0.65625rem;color:var(--color-ok)">+12% W/W</p>
     </div>
 
-    <div class="panel panel-body panel-metric accent-purple" style="position:relative;overflow:hidden">
-      <div style="position:absolute;top:0.75rem;right:0.875rem;opacity:0.15">
-        <svg width="28" height="28" viewBox="0 0 20 20" fill="#7c3aed"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
-      </div>
-      <p style="font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-ink-500)">Avg response</p>
-      <p style="margin-top:0.625rem;font-size:1.875rem;font-weight:800;letter-spacing:-0.04em;color:var(--color-ink-950)">
+    <div style="padding:1.25rem 1.125rem;border-right:1px solid var(--color-border)">
+      <p class="kicker">Avg response</p>
+      <p style="margin-top:0.625rem;font-family:var(--font-serif);font-size:2rem;font-weight:500;line-height:1;color:var(--color-ink-950)">
         <%= totals.totalRuns ? Math.round(perProject.reduce((a,r)=>a+(r.avgDurationMs||0)*r.totalRuns,0)/totals.totalRuns).toLocaleString()+'ms' : 'n/a' %>
       </p>
     </div>
 
-    <div class="panel panel-body panel-metric accent-red" style="position:relative;overflow:hidden">
-      <div style="position:absolute;top:0.75rem;right:0.875rem;opacity:0.15">
-        <svg width="28" height="28" viewBox="0 0 20 20" fill="#ef4444"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
-      </div>
-      <p style="font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-ink-500)">Error rate</p>
-      <p style="margin-top:0.625rem;font-size:1.875rem;font-weight:800;letter-spacing:-0.04em;color:var(--color-ink-950)">
+    <div style="padding:1.25rem 1.125rem;border-right:1px solid var(--color-border)">
+      <p class="kicker">Error rate</p>
+      <p style="margin-top:0.625rem;font-family:var(--font-serif);font-size:2rem;font-weight:500;line-height:1;color:<%= totals.totalRuns && (100*totals.errorRuns/totals.totalRuns) > 0 ? 'var(--color-danger)' : 'var(--color-ink-950)' %>">
         <%= totals.totalRuns ? (100*totals.errorRuns/totals.totalRuns).toFixed(1)+'%' : 'n/a' %>
       </p>
     </div>
 
-    <div class="panel panel-body panel-metric accent-orange" style="position:relative;overflow:hidden">
-      <div style="position:absolute;top:0.75rem;right:0.875rem;opacity:0.15">
-        <svg width="28" height="28" viewBox="0 0 20 20" fill="#f97316"><path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-      </div>
-      <p style="font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-ink-500)">API calls</p>
-      <p style="margin-top:0.625rem;font-size:1.875rem;font-weight:800;letter-spacing:-0.04em;color:var(--color-ink-950)"><%= totals.apiCallCount.toLocaleString() %></p>
+    <div style="padding:1.25rem 1.125rem;border-right:1px solid var(--color-border)">
+      <p class="kicker">API calls</p>
+      <p style="margin-top:0.625rem;font-family:var(--font-serif);font-size:2rem;font-weight:500;line-height:1;color:var(--color-ink-950)"><%= totals.apiCallCount.toLocaleString() %></p>
     </div>
 
-    <div class="panel panel-body panel-metric accent-teal" style="position:relative;overflow:hidden">
-      <div style="position:absolute;top:0.75rem;right:0.875rem;opacity:0.15">
-        <svg width="28" height="28" viewBox="0 0 20 20" fill="#14b8a6"><path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z"/><path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z"/><path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z"/></svg>
-      </div>
-      <p style="font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-ink-500)">Tokens</p>
-      <p style="margin-top:0.625rem;font-size:1.875rem;font-weight:800;letter-spacing:-0.04em;color:var(--color-ink-950)">
+    <div style="padding:1.25rem 1.125rem;border-right:1px solid var(--color-border)">
+      <p class="kicker">Tokens</p>
+      <p style="margin-top:0.625rem;font-family:var(--font-serif);font-size:2rem;font-weight:500;line-height:1;color:var(--color-ink-950)">
         <%= (totals.totalTokensInput+totals.totalTokensOutput) ? (totals.totalTokensInput+totals.totalTokensOutput).toLocaleString() : 'n/a' %>
       </p>
+      <p style="margin-top:0.5rem;font-family:var(--font-mono);font-size:0.65625rem;color:var(--color-ink-300)">IN <%= totals.totalTokensInput.toLocaleString() %> / OUT <%= totals.totalTokensOutput.toLocaleString() %></p>
     </div>
 
-    <div class="panel panel-body panel-metric accent-green" style="position:relative;overflow:hidden">
-      <div style="position:absolute;top:0.75rem;right:0.875rem;opacity:0.15">
-        <svg width="28" height="28" viewBox="0 0 20 20" fill="#10b981"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/></svg>
-      </div>
-      <p style="font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-ink-500)">Total cost</p>
-      <p style="margin-top:0.625rem;font-size:1.875rem;font-weight:800;letter-spacing:-0.04em;color:var(--color-ink-950)">
+    <div style="padding:1.25rem 0 1.125rem 1.125rem">
+      <p class="kicker">Total cost</p>
+      <p style="margin-top:0.625rem;font-family:var(--font-serif);font-size:2rem;font-weight:500;line-height:1;color:var(--color-ink-950)">
         <%= totals.totalCostUsd ? '$'+totals.totalCostUsd.toFixed(4) : 'n/a' %>
       </p>
     </div>
@@ -91,16 +78,14 @@
 </section>
 
 <!-- Chart -->
-<section class="panel panel-body" style="margin-bottom:1.5rem">
+<section style="margin-bottom:1.5rem;
+padding-top:1.375rem;border-top:1px solid var(--color-border)">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;gap:1rem;flex-wrap:wrap">
     <div>
       <p style="font-size:0.9375rem;font-weight:700;color:var(--color-ink-950);letter-spacing:-0.01em">Questions per day</p>
       <p style="font-size:0.75rem;color:var(--color-ink-500);margin-top:0.25rem">Timeline of incoming questions over the selected range</p>
     </div>
-    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:var(--color-ink-500)">
-      <span style="display:inline-block;width:0.75rem;height:0.1875rem;border-radius:9999px;background:linear-gradient(90deg,#4f6ef7,#7c3aed)"></span>
-      Questions / day
-    </div>
+    <div class="kicker">Peak <%= chart.length ? Math.max(...chart.map(r=>r.count)) : 0 %></div>
   </div>
 
   <% if (!chart.length) { %>
@@ -162,19 +147,6 @@
 
     <svg id="chart-svg" viewBox="0 0 <%= W %> <%= H %>" style="width:100%;height:auto;overflow:visible;display:block;cursor:crosshair">
       <defs>
-        <linearGradient id="strokeGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%"   stop-color="#4f6ef7"/>
-          <stop offset="100%" stop-color="#7c3aed"/>
-        </linearGradient>
-        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#4f6ef7" stop-opacity="0.18"/>
-          <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
-        </linearGradient>
-        <filter id="glow" x="-15%" y="-50%" width="130%" height="200%">
-          <feGaussianBlur stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <!-- Clip to chart area -->
         <clipPath id="chart-clip">
           <rect x="<%= PL %>" y="<%= PT %>" width="<%= CW %>" height="<%= CH %>"/>
         </clipPath>
@@ -193,14 +165,11 @@
               text-anchor="end" font-family="var(--font-mono)"><%= val %></text>
       <% }); %>
 
-      <!-- Area fill (clipped) -->
-      <path d="<%= areaD %>" fill="url(#areaGrad)" clip-path="url(#chart-clip)"/>
-
-      <!-- Smooth line with glow -->
+      <!-- Line, no fill, no glow -->
       <path d="<%= pathD %>" fill="none"
-            stroke="url(#strokeGrad)" stroke-width="2.5"
+            stroke="var(--color-ink-950)" stroke-width="1.5"
             stroke-linecap="round" stroke-linejoin="round"
-            filter="url(#glow)" clip-path="url(#chart-clip)"/>
+            clip-path="url(#chart-clip)"/>
 
       <!-- X-axis labels -->
       <% chart.forEach(function(row, idx) {
@@ -214,7 +183,8 @@
               text-anchor="middle" font-family="var(--font-sans)"><%= label %></text>
       <% }); %>
 
-      <!-- Invisible hit targets for hover tooltip -->
+      <!-- Points: small ink dots, one larger accent dot at the peak (also hover hit-targets) -->
+      <% var _peak = chart.length ? Math.max(...chart.map(r=>r.count)) : null; %>
       <% chart.forEach(function(row, idx) {
            const x = getX(idx), y = getY(row.count);
            const dateStr = new Date(row.day).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'});
@@ -223,9 +193,15 @@
            data-x="<%= x %>" data-y="<%= y %>"
            data-label="<%= dateStr %>: <%= row.count %> question<%= row.count !== 1 ? 's' : '' %>">
           <circle cx="<%= x %>" cy="<%= y %>" r="14" fill="transparent"/>
-          <circle class="chart-dot" cx="<%= x %>" cy="<%= y %>" r="3.5"
-                  fill="white" stroke="#4f6ef7" stroke-width="2"
-                  style="transition:r 0.15s"/>
+          <% if (row.count === _peak) { %>
+            <circle class="chart-dot" data-peak="true" cx="<%= x %>" cy="<%= y %>" r="4"
+                    fill="var(--color-brand)" style="transition:r 0.15s"/>
+            <text x="<%= x %>" y="<%= y - 12 %>" text-anchor="middle" font-family="Spline Sans Mono" font-size="10" fill="var(--color-brand)"><%= row.count %></text>
+          <% } else { %>
+            <circle class="chart-dot" cx="<%= x %>" cy="<%= y %>" r="2.5"
+                    fill="var(--color-canvas)" stroke="var(--color-ink-950)" stroke-width="1.5"
+                    style="transition:r 0.15s"/>
+          <% } %>
         </g>
       <% }); %>
     </svg>
@@ -253,14 +229,20 @@
         tooltip.style.opacity = '1';
 
         dot.setAttribute('r', '5.5');
-        dot.setAttribute('fill', '#4f6ef7');
-        dot.setAttribute('stroke', 'white');
+        dot.setAttribute('fill', 'var(--color-brand)');
+        dot.setAttribute('stroke', 'var(--color-canvas)');
       });
       g.addEventListener('mouseleave', function() {
         tooltip.style.opacity = '0';
-        dot.setAttribute('r', '3.5');
-        dot.setAttribute('fill', 'white');
-        dot.setAttribute('stroke', '#4f6ef7');
+        if (dot.dataset.peak === 'true') {
+          dot.setAttribute('r', '4');
+          dot.setAttribute('fill', 'var(--color-brand)');
+          dot.removeAttribute('stroke');
+        } else {
+          dot.setAttribute('r', '2.5');
+          dot.setAttribute('fill', 'var(--color-canvas)');
+          dot.setAttribute('stroke', 'var(--color-ink-950)');
+        }
       });
     });
   })();
@@ -270,12 +252,12 @@
 </section>
 
 <!-- Per-project table -->
-<section class="table-shell">
-  <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between">
-    <p style="font-size:0.9375rem;font-weight:700;color:var(--color-ink-950)">By project</p>
-    <p style="font-size:0.75rem;color:var(--color-ink-500)"><%= days %>-day window</p>
+<section>
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:0.75rem">
+    <p class="section-heading">By project</p>
+    <p class="kicker"><%= days %>-day window</p>
   </div>
-  <div class="table-scroll">
+  <div class="table-shell table-scroll">
     <table class="data-table">
       <thead>
         <tr>
@@ -296,14 +278,14 @@
         <tr>
           <td>
             <a href="/admin/projects/<%= row.project.id %>/conversations"
-               style="font-weight:600;color:var(--color-brand);text-decoration:none">
+               class="emphasis" style="text-decoration:none;color:var(--color-ink-950)">
               <%= row.project.name %>
             </a>
-            <div style="font-size:0.75rem;color:var(--color-ink-500);margin-top:0.125rem;font-family:var(--font-mono)"><%= row.project.slug %></div>
+            <div class="kicker" style="margin-top:0.125rem"><%= row.project.slug %></div>
           </td>
-          <td style="font-weight:600;color:var(--color-ink-950)"><%= row.questions.toLocaleString() %></td>
-          <td style="font-family:var(--font-mono);font-size:0.8125rem"><%= row.avgDurationMs != null ? Math.round(row.avgDurationMs).toLocaleString()+'ms' : 'n/a' %></td>
-          <td>
+          <td class="num" style="color:var(--color-ink-950)"><%= row.questions.toLocaleString() %></td>
+          <td class="num"><%= row.avgDurationMs != null ? Math.round(row.avgDurationMs).toLocaleString()+'ms' : 'n/a' %></td>
+          <td class="num">
             <% if (row.totalRuns) {
                  const errPct = 100 * row.errorRate;
             %>
@@ -311,14 +293,14 @@
                 <%= errPct.toFixed(1) %>%
               </span>
             <% } else { %>
-              <span style="color:var(--color-ink-500);font-size:0.8125rem">n/a</span>
+              <span style="color:var(--color-ink-300);font-size:0.8125rem">n/a</span>
             <% } %>
           </td>
-          <td style="font-family:var(--font-mono);font-size:0.8125rem"><%= row.apiCallCount.toLocaleString() %></td>
-          <td style="font-family:var(--font-mono);font-size:0.8125rem">
+          <td class="num"><%= row.apiCallCount.toLocaleString() %></td>
+          <td class="num">
             <%= (row.totalTokensInput != null && row.totalTokensOutput != null) ? (row.totalTokensInput+row.totalTokensOutput).toLocaleString() : 'n/a' %>
           </td>
-          <td style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--color-success);font-weight:600">
+          <td class="num" style="color:var(--color-ok);font-weight:600">
             <%= row.totalCostUsd != null ? '$'+row.totalCostUsd.toFixed(4) : 'n/a' %>
           </td>
         </tr>
@@ -328,4 +310,4 @@
   </div>
 </section>
 
-<%- include('../layout-foot') %>
+<%- include('../layout-foot', { layoutShell: 'index' }) %>
