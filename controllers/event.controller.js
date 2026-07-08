@@ -1,12 +1,10 @@
 const projects = require('../models/project.model');
 const convs = require('../models/conversation.model');
 const messages = require('../models/message.model');
-const runs = require('../models/run.model');
 const { extractPrompt, COMMANDS } = require('../lib/eventGateway');
 const sync = require('../services/sync.service');
-const opencode = require('../services/opencode.service');
 const webhook = require('../services/webhook.service');
-const projectUser = require('../services/projectUser.service');
+const investigation = require('../services/investigation.service');
 
 function eventFromRequest(req) {
   if (req.method === 'GET') {
@@ -22,34 +20,6 @@ function eventFromRequest(req) {
     userName: (b.user && b.user.name) || '',
     conversationId: (b.channel && b.channel.conversationId) || '',
   };
-}
-
-async function investigate(project, conv, prompt) {
-  const startedAt = Date.now();
-  try {
-    const ws = await sync.ensureReady(project);
-    const runAs = projectUser.ensureProjectUser(project.slug);
-    projectUser.ownWorkspace(ws, runAs);
-    const result = await opencode.runPrompt({ dir: ws, sessionId: conv.opencode_session_id, text: prompt, conversationId: conv.id, runAs });
-    if (!conv.opencode_session_id) convs.setSession(conv.id, result.sessionId);
-    const usage = result.usage || {};
-    runs.add({
-      project_id: project.id, conversation_id: conv.id, status: 'success',
-      duration_ms: Date.now() - startedAt,
-      tokens_input: usage.tokensInput ?? null, tokens_output: usage.tokensOutput ?? null,
-      tokens_reasoning: usage.tokensReasoning ?? null, cost_usd: usage.costUsd ?? null,
-    });
-    return result.text || '(agent returned no text)';
-  } catch (err) {
-    const isTimeout = /timeout|timed out/i.test(err.message);
-    runs.add({
-      project_id: project.id, conversation_id: conv.id,
-      status: isTimeout ? 'timeout' : 'error',
-      duration_ms: Date.now() - startedAt,
-      error: err.message.slice(0, 1000),
-    });
-    throw err;
-  }
 }
 
 function guideMarkdown(project) {
@@ -168,7 +138,7 @@ function handleEvent(req, res) {
   // Acknowledge only through the HTTP response. Do not send chat acknowledgements.
   res.json({ handled: true, action: 'investigating', conversationId: conv.id });
 
-  investigate(project, conv, prompt)
+  investigation.investigate(project, conv, prompt)
     .then((answer) => {
       messages.add({ conversation_id: conv.id, direction: 'out', content: answer });
       return webhook.sendTeamsMessage(project.teams_webhook_url, {
