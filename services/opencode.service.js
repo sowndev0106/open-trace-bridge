@@ -5,6 +5,18 @@ const TIMEOUT_MS = 300000;
 // Indirection over spawn so tests can stub opencode invocations.
 const proc = { spawn };
 
+// Running children keyed by cancelKey (conversation id) so /stop can kill them.
+const running = new Map();
+
+function cancel(cancelKey) {
+  const entry = running.get(cancelKey);
+  if (!entry) return false;
+  entry.stopped = true;
+  entry.child.kill('SIGKILL');
+  return true;
+}
+function isRunning(cancelKey) { return running.has(cancelKey); }
+
 function emptyUsage() {
   return { tokensInput: null, tokensOutput: null, tokensReasoning: null, costUsd: null };
 }
@@ -67,11 +79,16 @@ function parseRunOutput(stdout) {
   return parser.finish();
 }
 
-function runPromptStream({ dir, sessionId, text, conversationId, onEvent, runAs }) {
+function runPromptStream({ dir, sessionId, text, conversationId, onEvent, runAs, model, variant, agent, command, files, configPath, cancelKey }) {
   return new Promise((resolve, reject) => {
     const args = ['run', '--format', 'json'];
     if (sessionId) args.push('-s', sessionId);
-    args.push(text);
+    if (model) args.push('-m', model);
+    if (variant) args.push('--variant', variant);
+    if (agent) args.push('--agent', agent);
+    if (command) args.push('--command', command);
+    for (const f of files || []) args.push('-f', f);
+    if (text) args.push(text);
     // stdin must be ignored; an open pipe makes opencode wait for EOF until timeout.
     // PWD must match cwd: opencode prefers $PWD over process.cwd() when binding
     // the session directory, and spawn() does not update PWD to follow cwd.
@@ -80,6 +97,7 @@ function runPromptStream({ dir, sessionId, text, conversationId, onEvent, runAs 
     const env = { ...process.env, PWD: dir };
     if (conversationId != null) env.OTB_CONVERSATION_ID = String(conversationId);
     else delete env.OTB_CONVERSATION_ID;
+    if (configPath) env.OPENCODE_CONFIG = configPath;
     const spawnOpts = { cwd: dir, env, stdio: ['ignore', 'pipe', 'pipe'] };
     // Drop privileges to the per-project OS user so the kernel blocks reads
     // outside this project's workspace (see projectUser.service).
@@ -93,18 +111,29 @@ function runPromptStream({ dir, sessionId, text, conversationId, onEvent, runAs 
     }
     const child = proc.spawn('opencode', args, spawnOpts);
 
+    const entry = { child, stopped: false };
+    if (cancelKey != null) running.set(cancelKey, entry);
+    const done = () => { if (cancelKey != null) running.delete(cancelKey); };
+
     const parser = createStreamParser(onEvent);
     let stderr = '';
     const timer = setTimeout(() => {
+      done();
       child.kill('SIGKILL');
       reject(new Error(`opencode timed out after ${TIMEOUT_MS / 60000} minutes`));
     }, TIMEOUT_MS);
 
     child.stdout.on('data', (d) => parser.push(String(d)));
     child.stderr.on('data', (d) => { stderr += d; });
-    child.on('error', (err) => { clearTimeout(timer); reject(err); });
+    child.on('error', (err) => { done(); clearTimeout(timer); reject(err); });
     child.on('close', (code) => {
+      done();
       clearTimeout(timer);
+      if (entry.stopped) {
+        const err = new Error('stopped by user');
+        err.stopped = true;
+        return reject(err);
+      }
       if (code !== 0) return reject(new Error(`opencode exit ${code}: ${stderr.slice(0, 500)}`));
       const parsed = parser.finish();
       if (!parsed.sessionId) return reject(new Error(`Could not parse sessionID from opencode output`));
@@ -117,4 +146,4 @@ function runPrompt(opts) {
   return runPromptStream(opts);
 }
 
-module.exports = { parseRunOutput, runPrompt, runPromptStream, proc };
+module.exports = { parseRunOutput, runPrompt, runPromptStream, proc, cancel, isRunning };
