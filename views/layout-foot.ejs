@@ -1,4 +1,10 @@
   </main>
+  <%
+    // Must receive the SAME layoutShell value the matching layout-head include got,
+    // passed as the include's explicit second argument (see layout-head.ejs for why a
+    // bare template-local const does not work). Otherwise this stays 'detail' by
+    // default and the sidebar-shell div opened in layout-head.ejs never closes.
+  %>
   <% if (typeof layoutShell !== 'undefined' && layoutShell === 'index') { %></div><% } %>
 </div>
 </body>

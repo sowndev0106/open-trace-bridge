@@ -23,6 +23,17 @@
 </head>
 <body>
 <div class="app-shell">
+<%
+  // Shell mode ('index' = sidebar, 'detail'/default = breadcrumb-only) is read from
+  // this partial's own local scope. A calling view MUST pass layoutShell (and, for
+  // 'index', sidebarProjects) as the explicit second argument to the include() call
+  // for this file, e.g.: include('../layout-head', { layoutShell: 'index', sidebarProjects: allProjects }).
+  // Declaring layoutShell as a plain JS const/var in the calling template's own body
+  // does NOT reach this file: EJS compiles each included .ejs to its own function, so
+  // a template-local var there is invisible here. The matching layout-foot include
+  // MUST receive the same layoutShell value or the sidebar-shell wrapper div opened
+  // below will never get its closing tag from layout-foot.ejs.
+%>
 <% var _shell = typeof layoutShell !== 'undefined' ? layoutShell : 'detail'; %>
 <% var _sidebarProjects = typeof sidebarProjects !== 'undefined' ? sidebarProjects : []; %>
 

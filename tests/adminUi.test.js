@@ -1,7 +1,9 @@
 const { test, beforeEach } = require('node:test');
 const assert = require('node:assert');
+const path = require('path');
 const request = require('supertest');
 const cheerio = require('cheerio');
+const ejs = require('ejs');
 
 process.env.OTB_DB_PATH = ':memory:';
 
@@ -52,6 +54,81 @@ test('layout defaults to the detail shell (no sidebar) until a page opts into in
   const $ = cheerio.load(page.text);
   assert.strictEqual($('.sidebar-shell').length, 0);
   assert.strictEqual($('.app-shell > .app-container').length, 1);
+});
+
+// --- layout-head.ejs / layout-foot.ejs shell-mode mechanism ------------------------
+//
+// No real page calls the index shell yet (Tasks 8/11 wire the Dashboard and Projects
+// list into it), so there is no full HTTP route to exercise it through supertest.
+// EJS compiles every include() to its own function, so a calling view's shell mode
+// only reaches layout-head.ejs/layout-foot.ejs if it is passed as the explicit second
+// argument to *both* include() calls — a bare `<% const layoutShell = 'index' %>` in
+// the calling template's own body is invisible to the included partials. These tests
+// render the two partials directly with ejs.render(), using a filename inside views/
+// so their own relative include()s resolve, to prove the include()-data convention
+// works and to guard the pitfall that produced this bug in the first place.
+const viewsDir = path.join(__dirname, '..', 'views');
+
+function renderShellProbe(templateBody, data) {
+  return ejs.render(templateBody, data, {
+    views: [viewsDir],
+    filename: path.join(viewsDir, '__shell-probe__.ejs'),
+  });
+}
+
+test('index shell renders correctly when layoutShell/sidebarProjects are passed as explicit include() data', () => {
+  const sidebarProjects = [{ slug: 'payment', sync_status: 'success' }];
+  const template = [
+    "<%- include('layout-head', { layoutShell: 'index', sidebarProjects: sidebarProjects }) %>",
+    '<div id="probe-content">page content</div>',
+    "<%- include('layout-foot', { layoutShell: 'index' }) %>",
+  ].join('\n');
+
+  const html = renderShellProbe(template, { sidebarProjects });
+  const $ = cheerio.load(html);
+
+  // Sidebar shell wraps a sidebar aside and the page's main container.
+  assert.strictEqual($('.sidebar-shell').length, 1);
+  assert.strictEqual($('.sidebar-shell > aside.sidebar').length, 1);
+  assert.strictEqual($('.sidebar-shell > main.app-container').length, 1);
+  assert.strictEqual($('#probe-content').length, 1, 'page content still renders inside the shell');
+  // sidebarProjects data reached layout-head.ejs through the include() call.
+  assert.match(html, /payment/);
+
+  // The HTML is well-formed: the sidebar-shell div layout-head.ejs opens is closed by
+  // layout-foot.ejs exactly once (this is the "malformed HTML" risk called out in the
+  // Task 7 review: layout-head opens a div that only layout-foot can close).
+  const openDivs = (html.match(/<div\b/g) || []).length;
+  const closeDivs = (html.match(/<\/div>/g) || []).length;
+  assert.strictEqual(openDivs, closeDivs, 'div tags are balanced');
+  const openAside = (html.match(/<aside\b/g) || []).length;
+  const closeAside = (html.match(/<\/aside>/g) || []).length;
+  assert.strictEqual(openAside, closeAside, 'aside tags are balanced');
+  const openMain = (html.match(/<main\b/g) || []).length;
+  const closeMain = (html.match(/<\/main>/g) || []).length;
+  assert.strictEqual(openMain, closeMain, 'main tags are balanced');
+});
+
+test('regression: a bare template-local layoutShell does not reach layout-head/layout-foot via include()', () => {
+  // Reproduces the exact bug the reviewer found: declaring layoutShell as a plain
+  // template-local before include()-ing layout-head/layout-foot (the old, incorrect
+  // documented convention) does not propagate, because include() only sees data
+  // explicitly passed as its second argument.
+  const template = [
+    "<% const layoutShell = 'index'; const sidebarProjects = [{ slug: 'payment', sync_status: 'success' }]; %>",
+    "<%- include('layout-head') %>",
+    '<div id="probe-content">page content</div>',
+    "<%- include('layout-foot') %>",
+  ].join('\n');
+
+  const html = renderShellProbe(template, {});
+  const $ = cheerio.load(html);
+
+  assert.strictEqual(
+    $('.sidebar-shell').length,
+    0,
+    'a bare template-local layoutShell must not leak into layout-head.ejs/layout-foot.ejs through include()'
+  );
 });
 
 test('projects index renders modern project table actions and endpoint copy', async () => {
