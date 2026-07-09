@@ -1,0 +1,141 @@
+<%- include('../layout-head') %>
+
+<section style="margin-bottom:1.5rem">
+  <p class="page-kicker">Global integration</p>
+  <h1 class="page-title">Discord</h1>
+  <p class="page-subtitle">Bots, DM allowlist, and model policy. Bind bots to projects from each project's edit page.</p>
+</section>
+
+<% if (errors && errors.length) { %>
+  <section class="error" style="margin-bottom:1.25rem" role="alert">
+    <ul class="error-list"><% for (const e of errors) { %><li><%= e %></li><% } %></ul>
+  </section>
+<% } %>
+
+<!-- Bots -->
+<section class="panel" style="margin-bottom:1.25rem">
+  <div class="panel-body">
+    <h2 class="section-heading">Bots</h2>
+    <div class="table-scroll" style="margin-top:0.75rem">
+      <table class="data-table">
+        <thead><tr><th>Name</th><th>Status</th><th>Invite</th><th>Enabled</th><th>Token</th><th style="text-align:right">Actions</th></tr></thead>
+        <tbody>
+          <% for (const b of bots) { %>
+          <tr>
+            <form method="post" action="/admin/discord/bots/<%= b.id %>">
+              <td><input class="input" name="name" value="<%= b.name %>" required></td>
+              <td>
+                <span class="status-badge <%= b.live && b.live.status === 'connected' ? 'status-active' : (b.live && b.live.status === 'error' ? 'status-error' : 'status-muted') %>">
+                  <%= b.live ? b.live.status : 'unknown' %>
+                </span>
+                <% if (b.live && b.live.botUserTag) { %><div style="font-size:0.6875rem;color:var(--color-ink-500)"><%= b.live.botUserTag %></div><% } %>
+                <% if (b.live && b.live.lastError) { %><div style="font-size:0.6875rem;color:var(--color-danger)"><%= b.live.lastError %></div><% } %>
+              </td>
+              <td><% if (b.live && b.live.inviteUrl) { %><a href="<%= b.live.inviteUrl %>" target="_blank" rel="noopener">Invite link</a><% } else { %><span style="color:var(--color-ink-300)">—</span><% } %></td>
+              <td><input type="checkbox" name="enabled" value="1" <%= b.enabled ? 'checked' : '' %>></td>
+              <td><input class="input" name="token" type="password" placeholder="•••••• (blank keeps current)" autocomplete="new-password"></td>
+              <td style="text-align:right">
+                <button class="btn btn-primary" type="submit">Save</button>
+            </form>
+                <form class="inline-form" method="post" action="/admin/discord/bots/<%= b.id %>/delete"
+                      onsubmit="return confirm('Delete bot <%= b.name %>?')">
+                  <button class="btn btn-danger" type="submit">Delete</button>
+                </form>
+              </td>
+          </tr>
+          <% } %>
+          <tr>
+            <form method="post" action="/admin/discord/bots">
+              <td><input class="input" name="name" placeholder="New bot name" required></td>
+              <td colspan="2" style="color:var(--color-ink-500);font-size:0.8125rem">Create the application at discord.com/developers, enable the Message Content intent, paste the bot token here.</td>
+              <td></td>
+              <td><input class="input" name="token" type="password" placeholder="Bot token" required autocomplete="new-password"></td>
+              <td style="text-align:right"><button class="btn btn-primary" type="submit">Add bot</button></td>
+            </form>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- DM allowlist -->
+<section class="panel" style="margin-bottom:1.25rem">
+  <div class="panel-body">
+    <h2 class="section-heading">DM allowlist</h2>
+    <p style="font-size:0.8125rem;color:var(--color-ink-500);margin-top:0.25rem">Users allowed to chat with a bot in private DMs. Admins get every project and full agent tools (edit/bash/webfetch) — still sandboxed to the project OS user.</p>
+    <div class="table-scroll" style="margin-top:0.75rem">
+      <table class="data-table">
+        <thead><tr><th>Discord user id</th><th>Label</th><th>Role</th><th>Projects</th><th style="text-align:right">Actions</th></tr></thead>
+        <tbody>
+          <% for (const u of users) { %>
+          <tr>
+            <form method="post" action="/admin/discord/users/<%= u.id %>">
+              <td><code><%= u.discord_user_id %></code></td>
+              <td><input class="input" name="label" value="<%= u.label %>"></td>
+              <td>
+                <select class="input" name="role">
+                  <option value="member" <%= u.role === 'member' ? 'selected' : '' %>>member</option>
+                  <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>admin (full tools)</option>
+                </select>
+              </td>
+              <td>
+                <label style="display:block;font-size:0.8125rem"><input type="checkbox" name="all_projects" value="1" <%= u.all_projects ? 'checked' : '' %>> all projects</label>
+                <% for (const p of projects) { %>
+                  <label style="display:block;font-size:0.8125rem">
+                    <input type="checkbox" name="project_ids" value="<%= p.id %>" <%= u.project_ids.includes(p.id) ? 'checked' : '' %>> <%= p.slug %>
+                  </label>
+                <% } %>
+              </td>
+              <td style="text-align:right">
+                <button class="btn btn-primary" type="submit">Save</button>
+            </form>
+                <form class="inline-form" method="post" action="/admin/discord/users/<%= u.id %>/delete"
+                      onsubmit="return confirm('Remove this user from the allowlist?')">
+                  <button class="btn btn-danger" type="submit">Delete</button>
+                </form>
+              </td>
+          </tr>
+          <% } %>
+          <tr>
+            <form method="post" action="/admin/discord/users">
+              <td><input class="input" name="discord_user_id" placeholder="e.g. 236224983549280257" required></td>
+              <td><input class="input" name="label" placeholder="Who is this?"></td>
+              <td>
+                <select class="input" name="role">
+                  <option value="member">member</option>
+                  <option value="admin">admin (full tools)</option>
+                </select>
+              </td>
+              <td>
+                <label style="display:block;font-size:0.8125rem"><input type="checkbox" name="all_projects" value="1"> all projects</label>
+                <% for (const p of projects) { %>
+                  <label style="display:block;font-size:0.8125rem"><input type="checkbox" name="project_ids" value="<%= p.id %>"> <%= p.slug %></label>
+                <% } %>
+              </td>
+              <td style="text-align:right"><button class="btn btn-primary" type="submit">Add user</button></td>
+            </form>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Model policy -->
+<section class="panel">
+  <div class="panel-body">
+    <h2 class="section-heading">Models</h2>
+    <form method="post" action="/admin/discord/models" style="margin-top:0.75rem;display:grid;gap:0.75rem;max-width:32rem">
+      <label style="font-size:0.8125rem;font-weight:600">Allowed models (one provider/model per line; empty = all available)
+        <textarea class="input" name="allowed_models" rows="4" style="width:100%;font-family:var(--font-mono)"><%= allowedModels %></textarea>
+      </label>
+      <label style="font-size:0.8125rem;font-weight:600">Default model shown in /status (optional)
+        <input class="input" name="default_model" value="<%= defaultModel %>" placeholder="anthropic/claude-sonnet-5">
+      </label>
+      <div><button class="btn btn-primary" type="submit">Save models</button></div>
+    </form>
+  </div>
+</section>
+
+<%- include('../layout-foot') %>

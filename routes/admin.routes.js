@@ -24,4 +24,14 @@ router.get('/projects/:id/opencode', chat.opencodePage);
 router.post('/projects/:id/chat/messages', chat.postMessage);
 router.post('/projects/:id/chat/new', chat.newConversation);
 
+const discordAdmin = require('../controllers/discordAdmin.controller');
+router.get('/discord', discordAdmin.page);
+router.post('/discord/bots', discordAdmin.createBot);
+router.post('/discord/bots/:id', discordAdmin.updateBot);
+router.post('/discord/bots/:id/delete', discordAdmin.deleteBot);
+router.post('/discord/users', discordAdmin.createUser);
+router.post('/discord/users/:id', discordAdmin.updateUser);
+router.post('/discord/users/:id/delete', discordAdmin.deleteUser);
+router.post('/discord/models', discordAdmin.saveModels);
+
 module.exports = router;
