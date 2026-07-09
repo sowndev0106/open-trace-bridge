@@ -126,6 +126,32 @@ investigation prompts, `/new`, `/pull-source`, agent answers, and error
 messages. Configure **Chat retention days** on the project form to control
 automatic cleanup; `0` keeps history indefinitely.
 
+## Discord
+
+OpenTraceBridge can also host Discord bots (no Power Automate needed — each bot
+opens an outbound gateway WebSocket; no new public port).
+
+1. Create an application at <https://discord.com/developers/applications>, add a
+   Bot, enable the **Message Content** privileged intent, copy the bot token.
+2. Admin UI → **Discord** → add the bot (name + token). Use the invite link
+   shown next to the connected bot to add it to your server.
+3. On a project's edit page, pick the bot and add the designated channel ids
+   (Discord → right-click channel → Copy Channel ID, with developer mode on).
+   Mode `mention` answers only @bot messages; `all` answers everything.
+4. For private DMs, allowlist Discord user ids on the Discord page. `member`
+   users pick from their granted projects (`/projects`, `/project <slug>`);
+   `admin` users get every project and full agent tools (edit/bash/webfetch),
+   still sandboxed to the per-project OS user.
+
+Slash commands: `/ask`, `/new`, `/stop`, `/status`, `/model`, `/agent`,
+`/skills`, `/commands`, `/cmd`, `/stats`, `/sync`, `/guide`, and in DMs
+`/projects`, `/project`. Questions are plain messages (or `/ask`); the bot
+reacts 👀 while accepted, ✅/❌/⏱️/🛑 when done, keeps the typing indicator
+alive while running, splits answers at 2,000 chars without breaking code
+fences, and attaches `answer.md` when the answer exceeds
+`DISCORD_LONG_ANSWER_THRESHOLD`. Inbound images/text files are downloaded into
+`workspaces/<slug>/.otb-uploads/<conversation>/` and passed to the agent.
+
 ## Development
 
 Run the test suite with:
