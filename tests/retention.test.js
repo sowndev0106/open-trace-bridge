@@ -1,5 +1,8 @@
 const { test, beforeEach } = require('node:test');
 const assert = require('node:assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
 process.env.OTB_DB_PATH = ':memory:';
 
@@ -10,6 +13,7 @@ const messages = require('../models/message.model');
 const apicalls = require('../models/apicall.model');
 const runs = require('../models/run.model');
 const retention = require('../services/retention.service');
+const { runRetentionCleanup } = retention;
 
 beforeEach(() => resetDbForTest());
 
@@ -90,4 +94,19 @@ test('retention cleanup deletes expired sessions regardless of projects', () => 
   const result = retention.runRetentionCleanup();
   assert.strictEqual(result.sessionsDeleted, 1);
   assert.strictEqual(getDb().prepare('SELECT COUNT(*) AS c FROM sessions').get().c, 1);
+});
+
+test('retention removes discord upload dirs of deleted conversations', () => {
+  const tmpWs = fs.mkdtempSync(path.join(os.tmpdir(), 'otb-ret-'));
+  process.env.OTB_WORKSPACES_DIR = tmpWs;
+  const p = projects.create({ slug: 'ret-d', name: 'RetD', keyword: '', system_prompt: '', teams_webhook_url: '', chat_retention_days: 1 });
+  const c = convs.create(p.id, 'discord:1');
+  const uploadDir = path.join(tmpWs, 'ret-d', '.otb-uploads', String(c.id));
+  fs.mkdirSync(uploadDir, { recursive: true });
+  fs.writeFileSync(path.join(uploadDir, 'a.png'), 'x');
+  const { getDb } = require('../lib/db');
+  getDb().prepare(`UPDATE conversations SET updated_at = datetime('now', '-10 days') WHERE id = ?`).run(c.id);
+  runRetentionCleanup(new Date());
+  assert.strictEqual(fs.existsSync(uploadDir), false);
+  delete process.env.OTB_WORKSPACES_DIR;
 });

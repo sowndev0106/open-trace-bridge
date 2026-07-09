@@ -41,6 +41,11 @@ function deleteOlderThan(project_id, cutoff) {
   return info.changes;
 }
 function findById(id) { return getDb().prepare('SELECT * FROM conversations WHERE id = ?').get(id); }
+function listOlderThan(project_id, cutoff) {
+  return getDb().prepare(
+    `SELECT id FROM conversations WHERE project_id = ? AND updated_at < datetime(?)`
+  ).all(project_id, cutoff);
+}
 function setOverrides(id, { model = null, agent = null } = {}) {
   getDb().prepare(`UPDATE conversations SET model = ?, agent = ?, updated_at = datetime('now') WHERE id = ?`)
     .run(model, agent, id);
@@ -48,5 +53,5 @@ function setOverrides(id, { model = null, agent = null } = {}) {
 
 module.exports = {
   findActive, create, close, touch, autoCloseInactive, setSession, listByProject, deleteOlderThan,
-  findById, setOverrides,
+  findById, setOverrides, listOlderThan,
 };

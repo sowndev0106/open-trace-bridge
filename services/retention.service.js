@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const projects = require('../models/project.model');
 const convs = require('../models/conversation.model');
 const apicalls = require('../models/apicall.model');
@@ -26,6 +28,12 @@ function runRetentionCleanup(now = new Date()) {
     if (!Number.isInteger(days) || days <= 0) continue;
     projectsChecked += 1;
     const cutoff = cutoffFor(now, days);
+    // Remove per-conversation Discord upload dirs before their rows disappear.
+    const workspacesDir = process.env.OTB_WORKSPACES_DIR || 'workspaces';
+    for (const row of convs.listOlderThan(project.id, cutoff)) {
+      const dir = path.join(workspacesDir, project.slug, '.otb-uploads', String(row.id));
+      try { fs.rmSync(dir, { recursive: true, force: true }); } catch { /* best effort */ }
+    }
     conversationsDeleted += convs.deleteOlderThan(project.id, cutoff);
     apiCallsDeleted += apicalls.deleteOlderThan(project.id, cutoff);
     runsDeleted += runs.deleteOlderThan(project.id, cutoff);
