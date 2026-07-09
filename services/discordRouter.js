@@ -249,6 +249,7 @@ async function handleInteraction(cmd, io) {
       const active = convs.findActive(project.id, externalId);
       const model = (active && active.model) || deps.info.defaultModel() || '(opencode default)';
       const agent = (active && active.agent) || '(default)';
+      const variant = active && active.variant;
       const running = deps.opencode.isRunning(active && active.id);
       const repoRows = repos.listByProject(project.id);
       const lastSync = repoRows.map((r) => r.synced_at).filter(Boolean).sort().pop() || 'never';
@@ -258,6 +259,7 @@ async function handleInteraction(cmd, io) {
         `**Session**: ${active && active.opencode_session_id ? active.opencode_session_id : 'not started'}`,
         `**Model**: ${model}`,
         `**Agent**: ${agent}`,
+        `**Variant**: ${variant || '(default)'}`,
         `**State**: ${running ? 'running an investigation' : 'idle'}`,
         `**Last source sync**: ${lastSync}`,
       ];
@@ -279,8 +281,8 @@ async function handleInteraction(cmd, io) {
       if (!models.includes(name)) {
         return io.respondEmbed(fmt.statusEmbed({ status: 'warning', title: 'Model not allowed', description: `\`${name}\` is not in the allowed list. Use \`/model\` to see it.` }));
       }
-      convs.setOverrides(conv.id, { model: name, agent: conv.agent });
       const variant = String(cmd.options.variant || '').trim();
+      convs.setOverrides(conv.id, { model: name, agent: conv.agent, variant: variant || conv.variant });
       return io.respondEmbed(fmt.statusEmbed({
         status: 'success', title: 'Model set',
         description: `This conversation now uses \`${name}\`${variant ? ` (variant: ${variant})` : ''}. \`/new\` resets it.`,

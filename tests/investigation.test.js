@@ -34,6 +34,18 @@ test('investigate runs opencode with conversation overrides and records a succes
   assert.strictEqual(runsModel.statsForConversation(c.id).runs, 1);
 });
 
+test('investigate passes the conversation variant override to runPrompt', async () => {
+  const { p, c } = seed();
+  convs.setOverrides(c.id, { model: 'anthropic/claude-sonnet-5', agent: null, variant: 'thinking' });
+  const seen = {};
+  investigation.deps.ensureReady = async () => '/tmp/ws-inv';
+  investigation.deps.ensureProjectUser = () => null;
+  investigation.deps.ownWorkspace = () => {};
+  investigation.deps.runPrompt = async (opts) => { Object.assign(seen, opts); return { sessionId: 'ses_10', text: 'answer', usage: {} }; };
+  await investigation.investigate(p, convs.findById(c.id), 'why is it down?', {});
+  assert.strictEqual(seen.variant, 'thinking');
+});
+
 test('admin flag points opencode at the admin config in the workspace', async () => {
   const { p, c } = seed();
   const seen = {};

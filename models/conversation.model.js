@@ -46,9 +46,9 @@ function listOlderThan(project_id, cutoff) {
     `SELECT id FROM conversations WHERE project_id = ? AND updated_at < datetime(?)`
   ).all(project_id, cutoff);
 }
-function setOverrides(id, { model = null, agent = null } = {}) {
-  getDb().prepare(`UPDATE conversations SET model = ?, agent = ?, updated_at = datetime('now') WHERE id = ?`)
-    .run(model, agent, id);
+function setOverrides(id, { model = null, agent = null, variant = null } = {}) {
+  getDb().prepare(`UPDATE conversations SET model = ?, agent = ?, variant = ?, updated_at = datetime('now') WHERE id = ?`)
+    .run(model, agent, variant, id);
 }
 
 module.exports = {

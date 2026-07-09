@@ -5,6 +5,9 @@ const botsModel = require('../models/discordBot.model');
 const router = require('./discordRouter');
 const { createBotClient } = require('../lib/discordClient');
 
+// Indirection so tests can stub the gateway client without touching discord.js.
+const deps = { createBotClient: (opts) => createBotClient(opts) };
+
 const registry = new Map(); // botId -> { handle, status, botUserTag, applicationId, lastError }
 
 function startBot(row) {
@@ -12,7 +15,7 @@ function startBot(row) {
   const entry = { handle: null, status: 'connecting', botUserTag: null, applicationId: null, lastError: null };
   registry.set(row.id, entry);
   try {
-    entry.handle = createBotClient({
+    entry.handle = deps.createBotClient({
       botId: row.id,
       token: row.token,
       onMessage: (msg, io) => router.handleMessage(msg, io),
@@ -77,4 +80,4 @@ function statusAll() {
   });
 }
 
-module.exports = { startAll, startBot, stopBot, restartBot, statusAll };
+module.exports = { startAll, startBot, stopBot, restartBot, statusAll, deps };

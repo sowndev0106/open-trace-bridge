@@ -30,6 +30,7 @@ async function investigate(project, conv, prompt, opts = {}) {
       runAs,
       model: conv.model || undefined,
       agent: conv.agent || undefined,
+      variant: conv.variant || undefined,
       command: opts.command,
       files: opts.files,
       configPath: opts.admin ? workspace.adminConfigPathFor(ws) : undefined,

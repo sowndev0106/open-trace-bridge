@@ -61,6 +61,19 @@ test('/model with no args lists allowed models; with arg sets the override', asy
   assert.match(io3.calls.embeds[0].description, /not in the allowed list/i);
 });
 
+test('/model with a variant persists it and /status reflects it', async () => {
+  router.deps.info = { ...router.deps.info, allowedModels: async () => ['a/m1', 'b/m2'], defaultModel: () => null };
+  const io1 = fakeIo();
+  await router.handleInteraction(cmd('model', { name: 'a/m1', variant: 'thinking' }), io1);
+  assert.match(io1.calls.embeds[0].description, /variant: thinking/i);
+  const conv = convs.findActive(project.id, 'discord:111');
+  assert.strictEqual(conv.model, 'a/m1');
+  assert.strictEqual(conv.variant, 'thinking');
+  const io2 = fakeIo();
+  await router.handleInteraction(cmd('status'), io2);
+  assert.match(io2.calls.embeds[0].description, /\*\*Variant\*\*: thinking/);
+});
+
 test('/status reports project, session, model, and running state', async () => {
   router.deps.info = { ...router.deps.info, defaultModel: () => 'a/m1' };
   router.deps.opencode = { ...router.deps.opencode, isRunning: () => true };

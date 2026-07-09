@@ -166,6 +166,18 @@ test('conversations use external_id and store model/agent overrides', () => {
   assert.strictEqual(convs.findById(c.id).model, null);
 });
 
+test('conversations store and read back variant overrides', () => {
+  const p = projects.create({ slug: 'd2', name: 'D2', keyword: '', system_prompt: '', teams_webhook_url: '' });
+  const c = convs.create(p.id, 'discord:456');
+  convs.setOverrides(c.id, { model: 'anthropic/claude-sonnet-5', agent: 'plan', variant: 'thinking' });
+  const row = convs.findById(c.id);
+  assert.strictEqual(row.model, 'anthropic/claude-sonnet-5');
+  assert.strictEqual(row.agent, 'plan');
+  assert.strictEqual(row.variant, 'thinking');
+  convs.setOverrides(c.id, { model: 'anthropic/claude-sonnet-5', agent: 'plan' });
+  assert.strictEqual(convs.findById(c.id).variant, null);
+});
+
 test('discord tables exist with expected columns', () => {
   const { getDb } = require('../lib/db');
   const cols = (t) => getDb().prepare(`PRAGMA table_info(${t})`).all().map((c) => c.name);
