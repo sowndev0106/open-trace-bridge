@@ -40,6 +40,7 @@ function ensureConversation(project, ev) {
 
 function recordInboundAndReply(conv, ev, res, action) {
   messages.add({ conversation_id: conv.id, direction: 'in', user_id: ev.userId, user_name: ev.userName, content: ev.text });
+  convs.touch(conv.id);
   res.json({ handled: true, action, conversationId: conv.id });
 }
 

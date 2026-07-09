@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Sora:wght@400;500;600;700&amp;family=Fira+Code:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&amp;family=Archivo:wght@400;500;600;700;800&amp;family=Spline+Sans+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f0eee9;font-family:system-ui,sans-serif}
+a{color:#5b54c9}a:hover{color:#443dad}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}
+.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t4">
+<div class="dv-thd"><a class="dv-tid" href="#t4">4</a><span class="dv-tname">Bureau Ledger — design system foundation · dark ink + paper light</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="4a">
+<div class="dv-olabel"><a class="dv-oid" href="#4a">4a</a>Tokens, typography &amp; components — both themes</div>
+<div class="dv-card" style="width:1380px">
+<div style="display:flex;font-family:'Archivo',sans-serif">
+
+  <!-- ===== DARK INK ===== -->
+  <div style="flex:1;min-width:0;background:#141210;color:#EAE3D4;padding:30px 34px 38px">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:14px;margin-bottom:24px">
+      <div style="font-family:'Newsreader',serif;font-size:22px;font-weight:500">Bureau Ledger <span style="font-style:italic;color:#D65A3C">· Ink</span></div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#6E6657">DEFAULT THEME</div>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin-bottom:10px">§ 01 — COLOR</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px">
+      <div><div style="height:42px;border:1px solid #3A342B;background:#141210"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:5px">ink bg · 141210</div></div>
+      <div><div style="height:42px;border:1px solid #3A342B;background:#1B1815"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:5px">field · 1B1815</div></div>
+      <div><div style="height:42px;border:1px solid #3A342B;background:#2E2921"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:5px">rule · 2E2921</div></div>
+      <div><div style="height:42px;border:1px solid #3A342B;background:#EAE3D4"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:5px">paper · EAE3D4</div></div>
+      <div><div style="height:42px;background:#D65A3C"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:5px">oxide · D65A3C</div></div>
+      <div><div style="height:42px;background:#8CB878"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:5px">ok · 8CB878</div></div>
+      <div><div style="height:42px;background:#D9A644"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:5px">amber · D9A644</div></div>
+      <div><div style="height:42px;background:#A79E8B"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:5px">muted · A79E8B</div></div>
+    </div>
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657;margin-bottom:22px">ONE ACCENT ONLY — OXIDE. NO GRADIENTS, NO GLOW.</div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin-bottom:10px">§ 02 — TYPE</div>
+    <div style="border:1px solid #2E2921;padding:16px 18px;display:flex;flex-direction:column;gap:9px;margin-bottom:22px">
+      <div style="font-family:'Newsreader',serif;font-size:30px;font-weight:500;letter-spacing:-.01em">Newsreader 500 — titles &amp; <span style="font-style:italic;color:#D65A3C">numerals</span></div>
+      <div style="font-size:13.5px;font-weight:600">Archivo 600 — section heads, buttons, UI labels</div>
+      <div style="font-size:13px;color:#A79E8B;line-height:1.6">Archivo 400 — body copy and supporting descriptions across the console.</div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#C9C1AE">Spline Sans Mono — data, slugs, URLs, timestamps, code</div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#6E6657">KICKER — MONO 10 / TRACKED CAPS</div>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin-bottom:10px">§ 03 — ACTIONS</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px">
+      <span style="background:#EAE3D4;color:#141210;padding:9px 18px;border-radius:2px;font-size:12px;font-weight:700;letter-spacing:.04em">SAVE PROJECT</span>
+      <span style="border:1px solid #3A342B;padding:9px 16px;border-radius:2px;font-size:11.5px;color:#A79E8B">⟳ SYNC NOW</span>
+      <span style="border:1px solid rgba(214,90,60,.4);padding:9px 16px;border-radius:2px;font-size:11.5px;color:#D65A3C">✕ DELETE</span>
+      <span style="color:#D65A3C;border-bottom:1px solid rgba(214,90,60,.4);font-size:12.5px;padding-bottom:1px">Inline link</span>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin-bottom:10px">§ 04 — STATUS GLYPHS</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;font-family:'Spline Sans Mono',monospace;font-size:11.5px;margin-bottom:22px">
+      <span style="color:#8CB878">● active / synced</span>
+      <span style="color:#D9A644">◆ syncing / pending</span>
+      <span style="color:#D65A3C">✕ error</span>
+      <span style="color:#6E6657">○ closed / muted</span>
+      <span style="color:#8CB878">GET</span>
+      <span style="color:#D9A644">POST</span>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin-bottom:10px">§ 05 — FORM</div>
+    <div style="max-width:340px;margin-bottom:22px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Slug <span style="color:#D65A3C">*</span></div>
+      <div style="background:#1B1815;border:1px solid #D65A3C;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px">payments-api<span style="display:inline-block;width:1px;height:14px;background:#D65A3C;margin-left:2px;vertical-align:-2px"></span></div>
+      <div style="font-size:11px;color:#6E6657;margin-top:6px">Lowercase letters, numbers, dashes.</div>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin-bottom:10px">§ 06 — TABS</div>
+    <div style="display:flex;gap:26px;border-bottom:1px solid #2E2921;margin-bottom:22px">
+      <span style="padding:0 0 10px;border-bottom:2px solid #D65A3C;margin-bottom:-1px;font-size:13px;font-weight:600">Core settings</span>
+      <span style="padding:0 0 10px;font-size:13px;color:#A79E8B">Repositories <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/2</span></span>
+      <span style="padding:0 0 10px;font-size:13px;color:#A79E8B">API endpoints <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/3</span></span>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin-bottom:10px">§ 07 — CHAT (UNIFIED)</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:flex-end"><div style="max-width:75%;background:#EAE3D4;color:#141210;border-radius:2px;padding:10px 14px;font-size:13px">What's the status of order #48210?</div></div>
+      <div style="display:flex;gap:11px">
+        <div style="width:26px;height:26px;flex:none;border:1px solid #3A342B;border-radius:2px;display:grid;place-items:center;font-family:'Newsreader',serif;font-size:10px;color:#D65A3C">OT</div>
+        <div style="max-width:78%">
+          <div style="border-left:2px solid #2E2921;padding:2px 0 2px 14px;font-size:13px;line-height:1.6;color:#DCD5C4">Order <span style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#D9A644">#48210</span> shipped Jul 6, in transit.</div>
+          <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657;margin-top:6px;padding-left:14px">2.1S · 1,842 TOK · $0.038</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:11px">
+        <div style="width:26px;height:26px;flex:none;border:1px solid #3A342B;border-radius:2px;display:grid;place-items:center;font-family:'Newsreader',serif;font-size:10px;color:#D65A3C">OT</div>
+        <div style="display:flex;align-items:center;gap:8px;border-left:2px solid rgba(214,90,60,.5);padding:4px 0 4px 14px;font-family:'Spline Sans Mono',monospace;font-size:11px;color:#D9A644"><span style="width:6px;height:6px;background:#D9A644;border-radius:50%"></span>call_api — GET /orders/48210 · running…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAPER LIGHT ===== -->
+  <div style="flex:1;min-width:0;background:#F2EEE3;color:#201C15;padding:30px 34px 38px;border-left:1px solid rgba(0,0,0,.08)">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid #D8D2C2;padding-bottom:14px;margin-bottom:24px">
+      <div style="font-family:'Newsreader',serif;font-size:22px;font-weight:500">Bureau Ledger <span style="font-style:italic;color:#BC4A2E">· Paper</span></div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#98917E">PREFERS-COLOR-SCHEME</div>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#A87A24;margin-bottom:10px">§ 01 — COLOR</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px">
+      <div><div style="height:42px;border:1px solid #D8D2C2;background:#F2EEE3"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#98917E;margin-top:5px">paper bg · F2EEE3</div></div>
+      <div><div style="height:42px;border:1px solid #D8D2C2;background:#FBF8F0"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#98917E;margin-top:5px">field · FBF8F0</div></div>
+      <div><div style="height:42px;border:1px solid #C8C2B2;background:#D8D2C2"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#98917E;margin-top:5px">rule · D8D2C2</div></div>
+      <div><div style="height:42px;background:#201C15"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#98917E;margin-top:5px">ink · 201C15</div></div>
+      <div><div style="height:42px;background:#BC4A2E"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#98917E;margin-top:5px">oxide · BC4A2E</div></div>
+      <div><div style="height:42px;background:#5B8452"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#98917E;margin-top:5px">ok · 5B8452</div></div>
+      <div><div style="height:42px;background:#A87A24"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#98917E;margin-top:5px">amber · A87A24</div></div>
+      <div><div style="height:42px;background:#98917E"></div><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#98917E;margin-top:5px">muted · 98917E</div></div>
+    </div>
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#98917E;margin-bottom:22px">SAME STRUCTURE — INK &amp; PAPER SWAP ROLES.</div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#A87A24;margin-bottom:10px">§ 02 — TYPE</div>
+    <div style="border:1px solid #D8D2C2;padding:16px 18px;display:flex;flex-direction:column;gap:9px;margin-bottom:22px;background:#FBF8F0">
+      <div style="font-family:'Newsreader',serif;font-size:30px;font-weight:500;letter-spacing:-.01em">Newsreader 500 — titles &amp; <span style="font-style:italic;color:#BC4A2E">numerals</span></div>
+      <div style="font-size:13.5px;font-weight:600">Archivo 600 — section heads, buttons, UI labels</div>
+      <div style="font-size:13px;color:#5F594A;line-height:1.6">Archivo 400 — body copy and supporting descriptions across the console.</div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#4A4438">Spline Sans Mono — data, slugs, URLs, timestamps, code</div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#98917E">KICKER — MONO 10 / TRACKED CAPS</div>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#A87A24;margin-bottom:10px">§ 03 — ACTIONS</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px">
+      <span style="background:#201C15;color:#F2EEE3;padding:9px 18px;border-radius:2px;font-size:12px;font-weight:700;letter-spacing:.04em">SAVE PROJECT</span>
+      <span style="border:1px solid #C8C2B2;padding:9px 16px;border-radius:2px;font-size:11.5px;color:#5F594A;background:#FBF8F0">⟳ SYNC NOW</span>
+      <span style="border:1px solid rgba(188,74,46,.45);padding:9px 16px;border-radius:2px;font-size:11.5px;color:#BC4A2E">✕ DELETE</span>
+      <span style="color:#BC4A2E;border-bottom:1px solid rgba(188,74,46,.45);font-size:12.5px;padding-bottom:1px">Inline link</span>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#A87A24;margin-bottom:10px">§ 04 — STATUS GLYPHS</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;font-family:'Spline Sans Mono',monospace;font-size:11.5px;margin-bottom:22px">
+      <span style="color:#5B8452">● active / synced</span>
+      <span style="color:#A87A24">◆ syncing / pending</span>
+      <span style="color:#BC4A2E">✕ error</span>
+      <span style="color:#98917E">○ closed / muted</span>
+      <span style="color:#5B8452">GET</span>
+      <span style="color:#A87A24">POST</span>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#A87A24;margin-bottom:10px">§ 05 — FORM</div>
+    <div style="max-width:340px;margin-bottom:22px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#5F594A;text-transform:uppercase;margin-bottom:8px">Slug <span style="color:#BC4A2E">*</span></div>
+      <div style="background:#FBF8F0;border:1px solid #BC4A2E;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px">payments-api<span style="display:inline-block;width:1px;height:14px;background:#BC4A2E;margin-left:2px;vertical-align:-2px"></span></div>
+      <div style="font-size:11px;color:#98917E;margin-top:6px">Lowercase letters, numbers, dashes.</div>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#A87A24;margin-bottom:10px">§ 06 — TABS</div>
+    <div style="display:flex;gap:26px;border-bottom:1px solid #D8D2C2;margin-bottom:22px">
+      <span style="padding:0 0 10px;border-bottom:2px solid #BC4A2E;margin-bottom:-1px;font-size:13px;font-weight:600">Core settings</span>
+      <span style="padding:0 0 10px;font-size:13px;color:#5F594A">Repositories <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#98917E">/2</span></span>
+      <span style="padding:0 0 10px;font-size:13px;color:#5F594A">API endpoints <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#98917E">/3</span></span>
+    </div>
+
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#A87A24;margin-bottom:10px">§ 07 — CHAT (UNIFIED)</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:flex-end"><div style="max-width:75%;background:#201C15;color:#F2EEE3;border-radius:2px;padding:10px 14px;font-size:13px">What's the status of order #48210?</div></div>
+      <div style="display:flex;gap:11px">
+        <div style="width:26px;height:26px;flex:none;border:1px solid #C8C2B2;border-radius:2px;display:grid;place-items:center;font-family:'Newsreader',serif;font-size:10px;color:#BC4A2E;background:#FBF8F0">OT</div>
+        <div style="max-width:78%">
+          <div style="border-left:2px solid #D8D2C2;padding:2px 0 2px 14px;font-size:13px;line-height:1.6;color:#332E24">Order <span style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#A87A24">#48210</span> shipped Jul 6, in transit.</div>
+          <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#98917E;margin-top:6px;padding-left:14px">2.1S · 1,842 TOK · $0.038</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:11px">
+        <div style="width:26px;height:26px;flex:none;border:1px solid #C8C2B2;border-radius:2px;display:grid;place-items:center;font-family:'Newsreader',serif;font-size:10px;color:#BC4A2E;background:#FBF8F0">OT</div>
+        <div style="display:flex;align-items:center;gap:8px;border-left:2px solid rgba(188,74,46,.5);padding:4px 0 4px 14px;font-family:'Spline Sans Mono',monospace;font-size:11px;color:#A87A24"><span style="width:6px;height:6px;background:#A87A24;border-radius:50%"></span>call_api — GET /orders/48210 · running…</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Hệ nền của các trang <a href="#3a">3a</a>–<a href="#3k">3k</a> bên dưới. Turn 1–2 (hướng cũ) đã xóa.</p>
+</section>
+
+<section class="dv-turn" id="t3">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Bureau Ledger — full refactor, all 8 page groups · warm ink dark + paper light · Newsreader / Archivo / Spline Sans Mono · single oxide accent, no gradients</span></div>
+<div class="dv-opts">
+
+<!-- ============ 3a LOGIN ============ -->
+<div class="dv-opt" id="3a">
+<div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Login — brand moment</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:flex;min-height:720px;background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;background-image:repeating-linear-gradient(0deg,rgba(234,227,212,.028) 0,rgba(234,227,212,.028) 1px,transparent 1px,transparent 56px)">
+  <div style="flex:1.15;display:flex;flex-direction:column;justify-content:space-between;padding:52px 64px;border-right:1px solid #2E2921">
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.22em;color:#6E6657;text-transform:uppercase">Est. 2026 · Internal instrument</div>
+    <div>
+      <div style="width:34px;height:2px;background:#D65A3C;margin-bottom:26px"></div>
+      <div style="font-family:'Newsreader',serif;font-size:64px;font-weight:500;line-height:1.04;letter-spacing:-.015em">OpenTrace<br>Bridge<span style="color:#D65A3C">.</span></div>
+      <div style="font-family:'Newsreader',serif;font-style:italic;font-size:20px;color:#A79E8B;margin-top:18px">The ledger between Teams, agents &amp; your APIs.</div>
+    </div>
+    <div style="display:flex;gap:36px;font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657">
+      <span>5 PROJECTS REGISTERED</span><span>1,284 QUESTIONS THIS WEEK</span><span>AUDIT: COMPLETE</span>
+    </div>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:52px">
+    <div style="width:360px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #2E2921;padding-bottom:12px;margin-bottom:26px">
+        <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#A79E8B;text-transform:uppercase">Private access</span>
+        <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">FORM NO. 001</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Username</div>
+          <div style="border:1px solid #3A342B;border-radius:2px;background:#1B1815;padding:11px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px;color:#EAE3D4">admin<span style="display:inline-block;width:1px;height:14px;background:#D65A3C;margin-left:2px;vertical-align:-2px"></span></div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Password</div>
+          <div style="border:1px solid #3A342B;border-radius:2px;background:#1B1815;padding:11px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px;color:#EAE3D4;letter-spacing:.28em">••••••••••••</div>
+        </div>
+        <div style="background:#EAE3D4;color:#141210;text-align:center;padding:12px;border-radius:2px;font-size:13px;font-weight:700;letter-spacing:.04em">SIGN IN →</div>
+        <div style="display:flex;align-items:flex-start;gap:9px;border:1px solid rgba(217,166,68,.35);border-radius:2px;padding:10px 12px">
+          <span style="color:#D9A644;font-size:12px;line-height:1.4">▲</span>
+          <span style="font-size:11.5px;color:#A79E8B;line-height:1.5">5 attempts per 15 minutes per IP. Credentials are set via <span style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#D9A644">ADMIN_USERNAME</span> / <span style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#D9A644">ADMIN_PASSWORD</span>.</span>
+        </div>
+      </div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#4A4438;margin-top:26px;text-align:center">SESSION VALID 7 DAYS · SLIDING</div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3b DASHBOARD ============ -->
+<div class="dv-opt" id="3b">
+<div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a>Dashboard — system ledger</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:flex;background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;min-height:840px">
+  <!-- sidebar -->
+  <div style="width:216px;flex:none;border-right:1px solid #2E2921;display:flex;flex-direction:column;padding:24px 0 16px">
+    <div style="padding:0 20px 22px;border-bottom:1px solid #2E2921">
+      <div style="font-family:'Newsreader',serif;font-size:19px;font-weight:500;line-height:1.1">OpenTraceBridge<span style="color:#D65A3C">.</span></div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.2em;color:#6E6657;margin-top:5px">ADMIN CONSOLE — PRIVATE</div>
+    </div>
+    <div style="padding:16px 0 0">
+      <div style="display:flex;align-items:center;gap:12px;padding:9px 20px;border-left:2px solid #D65A3C;background:rgba(214,90,60,.06)"><span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#D65A3C">01</span><span style="font-size:13px;font-weight:600">Dashboard</span></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:9px 20px;border-left:2px solid transparent"><span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">02</span><span style="font-size:13px;color:#A79E8B">Projects</span></div>
+    </div>
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.2em;color:#6E6657;padding:24px 20px 8px">REGISTER — 5</div>
+    <div style="display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 20px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#A79E8B"><span style="color:#8CB878;font-size:8px">●</span>payments-api</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 20px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#A79E8B"><span style="color:#8CB878;font-size:8px">●</span>hr-assistant</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 20px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#A79E8B"><span style="color:#D9A644;font-size:8px">◆</span>warehouse-ops</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 20px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#A79E8B"><span style="color:#D65A3C;font-size:9px">✕</span>crm-sync</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 20px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#A79E8B"><span style="color:#8CB878;font-size:8px">●</span>devops-helper</div>
+    </div>
+    <div style="margin-top:auto;border-top:1px solid #2E2921;padding:12px 20px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:12px;color:#A79E8B">◐ Dark — switch to light</div>
+      <div style="font-size:12px;color:#A79E8B">← Log out</div>
+    </div>
+  </div>
+  <!-- main -->
+  <div style="flex:1;min-width:0;padding:30px 38px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+      <div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">System ledger · Week 27 · Jun 30 — Jul 6, 2026</div>
+        <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500;letter-spacing:-.01em">The week in <span style="font-style:italic;color:#D65A3C">numbers</span></div>
+      </div>
+      <div style="display:flex;gap:20px;align-items:baseline">
+        <div style="display:flex;gap:14px;font-family:'Spline Sans Mono',monospace;font-size:11.5px">
+          <span style="color:#EAE3D4;border-bottom:2px solid #D65A3C;padding-bottom:3px">7D</span>
+          <span style="color:#6E6657">30D</span>
+          <span style="color:#6E6657">90D</span>
+        </div>
+        <div style="border:1px solid #3A342B;border-radius:2px;padding:7px 12px;font-size:12px;color:#EAE3D4">All projects ▾</div>
+      </div>
+    </div>
+    <!-- metric ledger row -->
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid #2E2921">
+      <div style="padding:20px 18px 18px 0;border-right:1px solid #2E2921">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#6E6657;text-transform:uppercase;margin-bottom:10px">Questions</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">1,284</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#8CB878;margin-top:8px">+12% W/W</div>
+      </div>
+      <div style="padding:20px 18px;border-right:1px solid #2E2921">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#6E6657;text-transform:uppercase;margin-bottom:10px">Avg response</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">2.84<span style="font-size:17px;color:#A79E8B">s</span></div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#8CB878;margin-top:8px">−8% W/W</div>
+      </div>
+      <div style="padding:20px 18px;border-right:1px solid #2E2921">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#6E6657;text-transform:uppercase;margin-bottom:10px">Error rate</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1;color:#D65A3C">1.8<span style="font-size:17px">%</span></div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#D65A3C;margin-top:8px">+0.4 PT</div>
+      </div>
+      <div style="padding:20px 18px;border-right:1px solid #2E2921">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#6E6657;text-transform:uppercase;margin-bottom:10px">API calls</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">3,921</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#8CB878;margin-top:8px">+19% W/W</div>
+      </div>
+      <div style="padding:20px 18px;border-right:1px solid #2E2921">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#6E6657;text-transform:uppercase;margin-bottom:10px">Tokens</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">6.4<span style="font-size:17px;color:#A79E8B">M</span></div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657;margin-top:8px">IN 4.1 / OUT 2.3</div>
+      </div>
+      <div style="padding:20px 0 18px 18px">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#6E6657;text-transform:uppercase;margin-bottom:10px">Total cost</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">$54.20</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657;margin-top:8px">$7.74 / DAY</div>
+      </div>
+    </div>
+    <!-- chart -->
+    <div style="padding:22px 0 4px;border-bottom:1px solid #2E2921">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:600;letter-spacing:.02em">Questions per day</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">PEAK 236 · JUL 5</div>
+      </div>
+      <svg width="100%" height="170" viewBox="0 0 1000 170" preserveAspectRatio="none">
+        <path d="M0 130 H1000 M0 90 H1000 M0 50 H1000 M0 10 H1000" stroke="#241F1A" stroke-width="1"></path>
+        <path d="M0 112 L166 92 L333 104 L500 46 L666 66 L833 22 L1000 38" fill="none" stroke="#EAE3D4" stroke-width="1.5"></path>
+        <circle cx="0" cy="112" r="2.5" fill="#141210" stroke="#EAE3D4" stroke-width="1.5"></circle>
+        <circle cx="166" cy="92" r="2.5" fill="#141210" stroke="#EAE3D4" stroke-width="1.5"></circle>
+        <circle cx="333" cy="104" r="2.5" fill="#141210" stroke="#EAE3D4" stroke-width="1.5"></circle>
+        <circle cx="500" cy="46" r="2.5" fill="#141210" stroke="#EAE3D4" stroke-width="1.5"></circle>
+        <circle cx="666" cy="66" r="2.5" fill="#141210" stroke="#EAE3D4" stroke-width="1.5"></circle>
+        <circle cx="833" cy="22" r="4" fill="#D65A3C"></circle>
+        <circle cx="1000" cy="38" r="2.5" fill="#141210" stroke="#EAE3D4" stroke-width="1.5"></circle>
+        <text x="833" y="10" text-anchor="middle" font-family="Spline Sans Mono" font-size="10" fill="#D65A3C">236</text>
+      </svg>
+      <div style="display:flex;justify-content:space-between;font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;padding:8px 0 10px">
+        <span>MON 30</span><span>TUE 01</span><span>WED 02</span><span>THU 03</span><span>FRI 04</span><span>SAT 05</span><span>SUN 06</span>
+      </div>
+    </div>
+    <!-- ledger table -->
+    <div style="padding-top:22px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">By project</div>
+      <div style="display:grid;grid-template-columns:2.1fr 1fr 1fr .9fr 1fr 1fr .9fr;padding:0 0 8px;font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#6E6657;text-transform:uppercase;border-bottom:1px solid #2E2921">
+        <span>Project</span><span style="text-align:right">Questions</span><span style="text-align:right">Avg dur</span><span style="text-align:right">Err %</span><span style="text-align:right">API calls</span><span style="text-align:right">Tokens</span><span style="text-align:right">Cost</span>
+      </div>
+      <div style="display:grid;grid-template-columns:2.1fr 1fr 1fr .9fr 1fr 1fr .9fr;padding:11px 0;border-bottom:1px solid #241F1A;align-items:baseline;font-family:'Spline Sans Mono',monospace;font-size:12.5px">
+        <span style="font-family:'Newsreader',serif;font-size:15.5px;color:#EAE3D4">payments-api</span><span style="text-align:right">482</span><span style="text-align:right">2.4s</span><span style="text-align:right;color:#8CB878">0.8</span><span style="text-align:right">1,204</span><span style="text-align:right">2.1M</span><span style="text-align:right">18.42</span>
+      </div>
+      <div style="display:grid;grid-template-columns:2.1fr 1fr 1fr .9fr 1fr 1fr .9fr;padding:11px 0;border-bottom:1px solid #241F1A;align-items:baseline;font-family:'Spline Sans Mono',monospace;font-size:12.5px">
+        <span style="font-family:'Newsreader',serif;font-size:15.5px;color:#EAE3D4">hr-assistant</span><span style="text-align:right">356</span><span style="text-align:right">3.1s</span><span style="text-align:right;color:#8CB878">1.1</span><span style="text-align:right">862</span><span style="text-align:right">1.6M</span><span style="text-align:right">12.90</span>
+      </div>
+      <div style="display:grid;grid-template-columns:2.1fr 1fr 1fr .9fr 1fr 1fr .9fr;padding:11px 0;border-bottom:1px solid #241F1A;align-items:baseline;font-family:'Spline Sans Mono',monospace;font-size:12.5px">
+        <span style="font-family:'Newsreader',serif;font-size:15.5px;color:#EAE3D4">warehouse-ops</span><span style="text-align:right">241</span><span style="text-align:right">4.0s</span><span style="text-align:right;color:#D9A644">3.2</span><span style="text-align:right">640</span><span style="text-align:right">1.2M</span><span style="text-align:right">10.08</span>
+      </div>
+      <div style="display:grid;grid-template-columns:2.1fr 1fr 1fr .9fr 1fr 1fr .9fr;padding:11px 0;border-bottom:1px solid #241F1A;align-items:baseline;font-family:'Spline Sans Mono',monospace;font-size:12.5px">
+        <span style="font-family:'Newsreader',serif;font-size:15.5px;color:#EAE3D4">crm-sync</span><span style="text-align:right">205</span><span style="text-align:right">2.9s</span><span style="text-align:right;color:#D65A3C">6.9</span><span style="text-align:right">1,215</span><span style="text-align:right">1.5M</span><span style="text-align:right">12.80</span>
+      </div>
+      <div style="display:grid;grid-template-columns:2.1fr 1fr 1fr .9fr 1fr 1fr .9fr;padding:12px 0 0;border-top:2px solid #EAE3D4;margin-top:-1px;align-items:baseline;font-family:'Spline Sans Mono',monospace;font-size:12.5px;font-weight:600">
+        <span style="font-family:'Archivo',sans-serif;font-size:11px;letter-spacing:.14em;color:#A79E8B">TOTAL</span><span style="text-align:right">1,284</span><span style="text-align:right">2.8s</span><span style="text-align:right">1.8</span><span style="text-align:right">3,921</span><span style="text-align:right">6.4M</span><span style="text-align:right;color:#EAE3D4">$54.20</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3c PROJECTS LIST ============ -->
+<div class="dv-opt" id="3c">
+<div class="dv-olabel"><a class="dv-oid" href="#3c">3c</a>Projects — register</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:flex;background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;min-height:760px">
+  <div style="width:216px;flex:none;border-right:1px solid #2E2921;display:flex;flex-direction:column;padding:24px 0 16px">
+    <div style="padding:0 20px 22px;border-bottom:1px solid #2E2921">
+      <div style="font-family:'Newsreader',serif;font-size:19px;font-weight:500;line-height:1.1">OpenTraceBridge<span style="color:#D65A3C">.</span></div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.2em;color:#6E6657;margin-top:5px">ADMIN CONSOLE — PRIVATE</div>
+    </div>
+    <div style="padding:16px 0 0">
+      <div style="display:flex;align-items:center;gap:12px;padding:9px 20px;border-left:2px solid transparent"><span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">01</span><span style="font-size:13px;color:#A79E8B">Dashboard</span></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:9px 20px;border-left:2px solid #D65A3C;background:rgba(214,90,60,.06)"><span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#D65A3C">02</span><span style="font-size:13px;font-weight:600">Projects</span></div>
+    </div>
+    <div style="margin-top:auto;border-top:1px solid #2E2921;padding:12px 20px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:12px;color:#A79E8B">◐ Dark — switch to light</div>
+      <div style="font-size:12px;color:#A79E8B">← Log out</div>
+    </div>
+  </div>
+  <div style="flex:1;min-width:0;padding:30px 38px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+      <div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">Register · 5 entries</div>
+        <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">Projects</div>
+      </div>
+      <div style="background:#EAE3D4;color:#141210;padding:10px 18px;border-radius:2px;font-size:12.5px;font-weight:700;letter-spacing:.04em">+ NEW PROJECT</div>
+    </div>
+    <div style="display:flex;gap:36px;padding:16px 0;border-bottom:1px solid #2E2921;font-family:'Spline Sans Mono',monospace;font-size:11px;color:#6E6657">
+      <span>EVENT ENDPOINT — <span style="color:#A79E8B">/api/events/:slug</span></span>
+      <span>SCOPE — <span style="color:#A79E8B">single admin</span></span>
+      <span>STORAGE — <span style="color:#A79E8B">sqlite</span></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1.7fr .8fr 2fr 1.3fr 1.9fr;padding:14px 0 8px;font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#6E6657;text-transform:uppercase;border-bottom:1px solid #2E2921">
+      <span>Project</span><span>Keyword</span><span>Event URL</span><span>Source sync</span><span style="text-align:right">Actions</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1.7fr .8fr 2fr 1.3fr 1.9fr;padding:14px 0;border-bottom:1px solid #241F1A;align-items:center">
+      <div><div style="font-family:'Newsreader',serif;font-size:16px">Payments API</div><div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657;margin-top:2px">payments-api</div></div>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#D9A644">[pay]</span>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#A79E8B">/api/events/payments-api</span>
+      <div><span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#8CB878">● synced</span><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:2px">18 min ago</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end">
+        <span style="background:#EAE3D4;color:#141210;padding:6px 13px;border-radius:2px;font-size:11px;font-weight:700">CHAT</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">CODE</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">LOGS</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">EDIT</span>
+        <span style="border:1px solid rgba(214,90,60,.4);padding:6px 9px;border-radius:2px;font-size:11px;color:#D65A3C">✕</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.7fr .8fr 2fr 1.3fr 1.9fr;padding:14px 0;border-bottom:1px solid #241F1A;align-items:center">
+      <div><div style="font-family:'Newsreader',serif;font-size:16px">HR Assistant</div><div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657;margin-top:2px">hr-assistant</div></div>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#D9A644">[hr]</span>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#A79E8B">/api/events/hr-assistant</span>
+      <div><span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#8CB878">● synced</span><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:2px">2 h ago</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end">
+        <span style="background:#EAE3D4;color:#141210;padding:6px 13px;border-radius:2px;font-size:11px;font-weight:700">CHAT</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">CODE</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">LOGS</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">EDIT</span>
+        <span style="border:1px solid rgba(214,90,60,.4);padding:6px 9px;border-radius:2px;font-size:11px;color:#D65A3C">✕</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.7fr .8fr 2fr 1.3fr 1.9fr;padding:14px 0;border-bottom:1px solid #241F1A;align-items:center">
+      <div><div style="font-family:'Newsreader',serif;font-size:16px">Warehouse Ops</div><div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657;margin-top:2px">warehouse-ops</div></div>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#D9A644">[wh]</span>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#A79E8B">/api/events/warehouse-ops</span>
+      <div><span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#D9A644">◆ syncing…</span><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:2px">started 40 s ago</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end">
+        <span style="background:#EAE3D4;color:#141210;padding:6px 13px;border-radius:2px;font-size:11px;font-weight:700">CHAT</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">CODE</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">LOGS</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">EDIT</span>
+        <span style="border:1px solid rgba(214,90,60,.4);padding:6px 9px;border-radius:2px;font-size:11px;color:#D65A3C">✕</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.7fr .8fr 2fr 1.3fr 1.9fr;padding:14px 0;border-bottom:1px solid #241F1A;align-items:center">
+      <div><div style="font-family:'Newsreader',serif;font-size:16px">CRM Sync</div><div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657;margin-top:2px">crm-sync</div></div>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#6E6657">—</span>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#A79E8B">/api/events/crm-sync</span>
+      <div><span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#D65A3C">✕ auth failed</span><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:2px">3 h ago</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end">
+        <span style="background:#EAE3D4;color:#141210;padding:6px 13px;border-radius:2px;font-size:11px;font-weight:700">CHAT</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">CODE</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">LOGS</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">EDIT</span>
+        <span style="border:1px solid rgba(214,90,60,.4);padding:6px 9px;border-radius:2px;font-size:11px;color:#D65A3C">✕</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.7fr .8fr 2fr 1.3fr 1.9fr;padding:14px 0;align-items:center">
+      <div><div style="font-family:'Newsreader',serif;font-size:16px">DevOps Helper</div><div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657;margin-top:2px">devops-helper</div></div>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#D9A644">[ops]</span>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#A79E8B">/api/events/devops-helper</span>
+      <div><span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#8CB878">● synced</span><div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-top:2px">55 min ago</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end">
+        <span style="background:#EAE3D4;color:#141210;padding:6px 13px;border-radius:2px;font-size:11px;font-weight:700">CHAT</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">CODE</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">LOGS</span>
+        <span style="border:1px solid #3A342B;padding:6px 10px;border-radius:2px;font-size:11px;color:#A79E8B">EDIT</span>
+        <span style="border:1px solid rgba(214,90,60,.4);padding:6px 9px;border-radius:2px;font-size:11px;color:#D65A3C">✕</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3d PROJECT FORM — CORE ============ -->
+<div class="dv-opt" id="3d">
+<div class="dv-olabel"><a class="dv-oid" href="#3d">3d</a>Project form — Core tab (single Save writes project + repos + APIs)</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;min-height:880px;padding:30px 46px">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+    <div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">← Projects / Edit entry no. 01</div>
+      <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">Payments API</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="border:1px solid #3A342B;padding:8px 14px;border-radius:2px;font-size:11.5px;color:#A79E8B">CHAT</span>
+      <span style="border:1px solid #3A342B;padding:8px 14px;border-radius:2px;font-size:11.5px;color:#A79E8B">OPENCODE</span>
+      <span style="border:1px solid #3A342B;padding:8px 14px;border-radius:2px;font-size:11.5px;color:#A79E8B">AUDIT</span>
+      <span style="border:1px solid #3A342B;padding:8px 14px;border-radius:2px;font-size:11.5px;color:#A79E8B">⟳ SYNC NOW</span>
+      <span style="background:#EAE3D4;color:#141210;padding:9px 20px;border-radius:2px;font-size:12px;font-weight:700;letter-spacing:.04em">SAVE PROJECT</span>
+    </div>
+  </div>
+  <!-- tabs -->
+  <div style="display:flex;gap:28px;border-bottom:1px solid #2E2921;margin-bottom:26px">
+    <div style="padding:14px 0 12px;border-bottom:2px solid #D65A3C;margin-bottom:-1px;font-size:13px;font-weight:600">Core settings</div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Repositories <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/2</span></div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">API endpoints <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/3</span></div>
+    <div style="margin-left:auto;padding:14px 0 12px;font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">ONE SAVE WRITES ALL TABS</div>
+  </div>
+  <!-- integration -->
+  <div style="border:1px solid #2E2921;border-radius:2px;padding:18px 22px;margin-bottom:28px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;text-transform:uppercase">§ Integration — Power Automate</span>
+      <span style="display:flex;gap:16px;font-size:11.5px"><span style="color:#D65A3C;border-bottom:1px solid rgba(214,90,60,.4)">Chat history</span><span style="color:#D65A3C;border-bottom:1px solid rgba(214,90,60,.4)">API calls</span></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1;background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:12px;color:#EAE3D4">https://bridge.internal.corp:8443/api/events/payments-api</div>
+      <span style="border:1px solid #3A342B;padding:9px 14px;border-radius:2px;font-size:11px;color:#A79E8B">COPY</span>
+    </div>
+    <div style="font-size:11.5px;color:#6E6657;margin-top:10px">No premium license? Use the OneDrive action in Power Automate to relay events.</div>
+  </div>
+  <!-- fields -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px 32px;margin-bottom:26px">
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Slug <span style="color:#D65A3C">*</span></div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px">payments-api</div>
+      <div style="font-size:11px;color:#6E6657;margin-top:6px">Lowercase letters, numbers, dashes.</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Display name <span style="color:#D65A3C">*</span></div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-size:13px">Payments API</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Teams keyword</div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px;color:#D9A644">pay</div>
+      <div style="font-size:11px;color:#6E6657;margin-top:6px">Users prefix questions: <span style="font-family:'Spline Sans Mono',monospace">pay how do refunds work?</span></div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Teams webhook URL</div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:12px;color:#A79E8B">https://prod-114.westus.logic.azure.com/workflows/…</div>
+    </div>
+  </div>
+  <!-- system prompt -->
+  <div style="margin-bottom:26px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase">System prompt</span>
+      <span style="display:flex;gap:2px;font-family:'Spline Sans Mono',monospace;font-size:10.5px"><span style="padding:4px 12px;background:#2E2921;color:#EAE3D4;border-radius:2px">MARKDOWN</span><span style="padding:4px 12px;color:#6E6657">PREVIEW</span></span>
+    </div>
+    <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px">
+      <div style="display:flex;gap:14px;padding:9px 13px;border-bottom:1px solid #2E2921;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#6E6657"><span style="font-weight:700;color:#A79E8B">B</span><span style="font-style:italic">I</span><span>H2</span><span>``</span><span>[]</span><span>• list</span></div>
+      <div style="padding:14px 16px;font-family:'Spline Sans Mono',monospace;font-size:12px;line-height:1.7;color:#C9C1AE;min-height:130px"># Role<br>You are the Payments support agent. Answer strictly from the synced repos<br>and approved API groups. Never guess amounts.<br><br>## Rules<br>- Cite the endpoint you used<br>- Refunds &gt; $500 → tell the user to contact finance</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px 32px">
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Max message length</div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px;width:140px">20000</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Chat retention (days)</div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px;width:140px">90</div>
+      <div style="font-size:11px;color:#6E6657;margin-top:6px">0 = keep forever.</div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3e FORM — REPOSITORIES ============ -->
+<div class="dv-opt" id="3e">
+<div class="dv-olabel"><a class="dv-oid" href="#3e">3e</a>Project form — Repositories tab (dynamic rows, auto-poll sync)</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;padding:30px 46px 40px">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+    <div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">← Projects / Edit entry no. 01</div>
+      <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">Payments API</div>
+    </div>
+    <span style="background:#EAE3D4;color:#141210;padding:9px 20px;border-radius:2px;font-size:12px;font-weight:700;letter-spacing:.04em">SAVE PROJECT</span>
+  </div>
+  <div style="display:flex;gap:28px;border-bottom:1px solid #2E2921;margin-bottom:26px">
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Core settings</div>
+    <div style="padding:14px 0 12px;border-bottom:2px solid #D65A3C;margin-bottom:-1px;font-size:13px;font-weight:600">Repositories <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/2</span></div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">API endpoints <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/3</span></div>
+    <div style="margin-left:auto;padding:14px 0 12px;font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">POLLING SYNC STATUS EVERY 3S</div>
+  </div>
+  <!-- repo entry 01 -->
+  <div style="border:1px solid #2E2921;border-radius:2px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid #2E2921">
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644">REPO NO. 01</span>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#8CB878">● synced · 18 min ago</span>
+        <span style="border:1px solid rgba(214,90,60,.4);padding:5px 12px;border-radius:2px;font-size:10.5px;color:#D65A3C">REMOVE</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:2.2fr 1fr .7fr;gap:18px;padding:18px 20px">
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Git URL</div>
+        <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:12px"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="afc8c6dbefc8c6dbc7dacd81ccc0c2">[email&#160;protected]</a>:acme/payments-core.git</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Auth type</div>
+        <div style="display:flex;font-family:'Spline Sans Mono',monospace;font-size:10.5px;border:1px solid #3A342B;border-radius:2px;overflow:hidden">
+          <span style="flex:1;text-align:center;padding:10px 0;color:#6E6657">NONE</span>
+          <span style="flex:1;text-align:center;padding:10px 0;color:#6E6657;border-left:1px solid #3A342B">TOKEN</span>
+          <span style="flex:1;text-align:center;padding:10px 0;background:#2E2921;color:#EAE3D4;border-left:1px solid #3A342B">SSH</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Branch</div>
+        <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:12px">main</div>
+      </div>
+    </div>
+    <div style="padding:0 20px 18px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">SSH private key</div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#6E6657">•••••••• stored — leave blank to keep current key</div>
+    </div>
+  </div>
+  <!-- repo entry 02 with error -->
+  <div style="border:1px solid rgba(214,90,60,.35);border-radius:2px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid #2E2921">
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644">REPO NO. 02</span>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#D65A3C">✕ error · 3 h ago</span>
+        <span style="border:1px solid rgba(214,90,60,.4);padding:5px 12px;border-radius:2px;font-size:10.5px;color:#D65A3C">REMOVE</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:2.2fr 1fr .7fr;gap:18px;padding:18px 20px">
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Git URL</div>
+        <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:12px">https://github.com/acme/payments-docs.git</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Auth type</div>
+        <div style="display:flex;font-family:'Spline Sans Mono',monospace;font-size:10.5px;border:1px solid #3A342B;border-radius:2px;overflow:hidden">
+          <span style="flex:1;text-align:center;padding:10px 0;color:#6E6657">NONE</span>
+          <span style="flex:1;text-align:center;padding:10px 0;background:#2E2921;color:#EAE3D4;border-left:1px solid #3A342B">TOKEN</span>
+          <span style="flex:1;text-align:center;padding:10px 0;color:#6E6657;border-left:1px solid #3A342B">SSH</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Branch</div>
+        <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:12px">main</div>
+      </div>
+    </div>
+    <div style="padding:0 20px 16px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Personal access token</div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#6E6657">•••••••• stored — leave blank to keep current token</div>
+    </div>
+    <div style="display:flex;gap:9px;margin:0 20px 18px;border:1px solid rgba(214,90,60,.35);border-radius:2px;padding:10px 13px;align-items:flex-start">
+      <span style="color:#D65A3C;font-size:12px">✕</span>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#D65A3C;line-height:1.5">fatal: Authentication failed for 'https://github.com/acme/payments-docs.git' — token expired or revoked.</span>
+    </div>
+  </div>
+  <div style="border:1px dashed #3A342B;border-radius:2px;padding:14px;text-align:center;font-size:12px;color:#A79E8B">+ Add repository</div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3f FORM — API ENDPOINTS ============ -->
+<div class="dv-opt" id="3f">
+<div class="dv-olabel"><a class="dv-oid" href="#3f">3f</a>Project form — API endpoints tab (curl → parsed, secrets server-side)</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;padding:30px 46px 40px">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+    <div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">← Projects / Edit entry no. 01</div>
+      <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">Payments API</div>
+    </div>
+    <span style="background:#EAE3D4;color:#141210;padding:9px 20px;border-radius:2px;font-size:12px;font-weight:700;letter-spacing:.04em">SAVE PROJECT</span>
+  </div>
+  <div style="display:flex;gap:28px;border-bottom:1px solid #2E2921;margin-bottom:26px">
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Core settings</div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Repositories <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/2</span></div>
+    <div style="padding:14px 0 12px;border-bottom:2px solid #D65A3C;margin-bottom:-1px;font-size:13px;font-weight:600">API endpoints <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/3</span></div>
+    <div style="margin-left:auto;padding:14px 0 12px;font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">AGENT CALLS VIA call_api — NEVER SEES KEYS</div>
+  </div>
+  <!-- api group 01 -->
+  <div style="border:1px solid #2E2921;border-radius:2px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid #2E2921">
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644">API GROUP NO. 01</span>
+      <span style="border:1px solid rgba(214,90,60,.4);padding:5px 12px;border-radius:2px;font-size:10.5px;color:#D65A3C">REMOVE</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 2.4fr;gap:18px;padding:18px 20px 0">
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Name</div>
+        <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-size:12.5px">Orders service</div>
+        <div style="font-size:11px;color:#6E6657;margin-top:6px">Blank → derived from curl host.</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Curl command</div>
+        <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:11px 13px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;line-height:1.65;color:#C9C1AE">curl -X GET "https://orders.internal.acme.com/v2/orders/{id}" \<br>&nbsp;&nbsp;-H "Authorization: Bearer sk_live_••••••••"</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:22px;margin:14px 20px;padding:10px 14px;border:1px solid #2E2921;border-radius:2px;font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#A79E8B;flex-wrap:wrap">
+      <span style="color:#8CB878">✓ PARSED</span>
+      <span>BASE — orders.internal.acme.com</span>
+      <span>METHODS — <span style="color:#EAE3D4">GET</span></span>
+      <span>AUTH — Authorization: Bearer</span>
+      <span>KEY — stored server-side, never shown to agent</span>
+    </div>
+    <div style="padding:0 20px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+        <span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase">Description for agent</span>
+        <span style="display:flex;gap:2px;font-family:'Spline Sans Mono',monospace;font-size:10px"><span style="padding:3px 10px;background:#2E2921;color:#EAE3D4;border-radius:2px">MD</span><span style="padding:3px 10px;color:#6E6657">PREVIEW</span></span>
+      </div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:12px 14px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;line-height:1.65;color:#C9C1AE">Look up a single order by id. Returns status, items, refund history.<br>Use when the user asks about a specific order number.</div>
+    </div>
+  </div>
+  <!-- api group 02, collapsed -->
+  <div style="border:1px solid #2E2921;border-radius:2px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;padding:12px 20px">
+    <div style="display:flex;gap:18px;align-items:baseline">
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644">API GROUP NO. 02</span>
+      <span style="font-size:13px;font-weight:600">Refunds service</span>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657">refunds.internal.acme.com · GET POST</span>
+    </div>
+    <div style="display:flex;gap:8px"><span style="border:1px solid #3A342B;padding:5px 12px;border-radius:2px;font-size:10.5px;color:#A79E8B">EXPAND</span><span style="border:1px solid rgba(214,90,60,.4);padding:5px 12px;border-radius:2px;font-size:10.5px;color:#D65A3C">REMOVE</span></div>
+  </div>
+  <div style="border:1px solid #2E2921;border-radius:2px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;padding:12px 20px">
+    <div style="display:flex;gap:18px;align-items:baseline">
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644">API GROUP NO. 03</span>
+      <span style="font-size:13px;font-weight:600">Customer lookup</span>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657">crm.internal.acme.com · GET</span>
+    </div>
+    <div style="display:flex;gap:8px"><span style="border:1px solid #3A342B;padding:5px 12px;border-radius:2px;font-size:10.5px;color:#A79E8B">EXPAND</span><span style="border:1px solid rgba(214,90,60,.4);padding:5px 12px;border-radius:2px;font-size:10.5px;color:#D65A3C">REMOVE</span></div>
+  </div>
+  <div style="border:1px dashed #3A342B;border-radius:2px;padding:14px;text-align:center;font-size:12px;color:#A79E8B">+ Add API group</div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3g WORKSPACE — CHAT ============ -->
+<div class="dv-opt" id="3g">
+<div class="dv-olabel"><a class="dv-oid" href="#3g">3g</a>Project workspace — Chat tab (SSE streaming, tool status, usage meta)</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;min-height:820px;display:flex;flex-direction:column;padding:30px 46px 0">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+    <div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">← Projects / Workspace</div>
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">Payments API</div>
+        <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#8CB878">● agent ready</span>
+      </div>
+    </div>
+    <span style="border:1px solid #3A342B;padding:8px 14px;border-radius:2px;font-size:11.5px;color:#A79E8B">+ NEW CONVERSATION</span>
+  </div>
+  <div style="display:flex;gap:28px;border-bottom:1px solid #2E2921">
+    <div style="padding:14px 0 12px;border-bottom:2px solid #D65A3C;margin-bottom:-1px;font-size:13px;font-weight:600">Chat</div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">OpenCode</div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Audit</div>
+    <div style="margin-left:auto;padding:14px 0 12px;font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">SESSION oc_9f2e11 · SAVED AS admin-ui</div>
+  </div>
+  <!-- transcript -->
+  <div style="flex:1;padding:26px 0;display:flex;flex-direction:column;gap:18px;max-width:860px;margin:0 auto;width:100%">
+    <div style="text-align:center;font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#4A4438">— TUESDAY, JUL 7 · 09:41 —</div>
+    <div style="display:flex;justify-content:flex-end">
+      <div style="max-width:70%;background:#EAE3D4;color:#141210;border-radius:2px;padding:12px 16px;font-size:13.5px;line-height:1.55">Why did refund #R-2231 fail yesterday?</div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div style="width:28px;height:28px;flex:none;border:1px solid #3A342B;border-radius:2px;display:grid;place-items:center;font-family:'Newsreader',serif;font-size:11px;color:#D65A3C">OT</div>
+      <div style="max-width:74%">
+        <div style="border-left:2px solid #2E2921;padding:2px 0 2px 16px;font-size:13.5px;line-height:1.65;color:#DCD5C4">
+          Refund <span style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#D9A644">#R-2231</span> failed with <span style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#D65A3C">card_expired</span> from the processor. The original card ending 4402 expired 06/26.
+          <br><br>Per <span style="font-family:'Spline Sans Mono',monospace;font-size:12px">refunds-service/README.md</span>, expired-card refunds fall back to bank transfer after 48h — that job is scheduled for tomorrow 02:00.
+        </div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657;margin-top:8px;padding-left:16px">4.2s · 2,318 TOK · $0.046 · 2 API CALLS</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <div style="max-width:70%;background:#EAE3D4;color:#141210;border-radius:2px;padding:12px 16px;font-size:13.5px;line-height:1.55">Can you check if the customer was notified?</div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div style="width:28px;height:28px;flex:none;border:1px solid #3A342B;border-radius:2px;display:grid;place-items:center;font-family:'Newsreader',serif;font-size:11px;color:#D65A3C">OT</div>
+      <div style="max-width:74%">
+        <div style="display:flex;flex-direction:column;gap:6px;border-left:2px solid rgba(214,90,60,.5);padding:4px 0 4px 16px">
+          <div style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#8CB878">✓ call_api — GET /v2/refunds/R-2231 · 200 · 412ms</div>
+          <div style="display:flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:11px;color:#D9A644"><span style="width:6px;height:6px;background:#D9A644;border-radius:50%"></span>call_api — GET /v2/notifications?ref=R-2231 · running…</div>
+          <div style="font-size:13.5px;color:#A79E8B;line-height:1.6">Checking the notification log for that refund<span style="display:inline-block;width:7px;height:13px;background:#D65A3C;vertical-align:-2px;margin-left:2px"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- composer -->
+  <div style="border-top:1px solid #2E2921;padding:18px 0 26px;max-width:860px;margin:0 auto;width:100%">
+    <div style="display:flex;align-items:flex-end;gap:12px;border:1px solid #3A342B;border-radius:2px;background:#1B1815;padding:13px 16px">
+      <div style="flex:1;font-size:13.5px;color:#6E6657">Ask the Payments agent…</div>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#4A4438">ENTER ↵ SEND · SHIFT+ENTER NEWLINE</span>
+      <span style="background:#EAE3D4;color:#141210;padding:7px 15px;border-radius:2px;font-size:11px;font-weight:700">SEND</span>
+    </div>
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#4A4438;margin-top:9px">ONE RUN PER PROJECT AT A TIME — CONCURRENT SENDS RETURN 409</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3h WORKSPACE — OPENCODE ============ -->
+<div class="dv-opt" id="3h">
+<div class="dv-olabel"><a class="dv-oid" href="#3h">3h</a>Project workspace — OpenCode tab (embedded via reverse proxy)</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;min-height:700px;display:flex;flex-direction:column;padding:30px 46px 46px">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+    <div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">← Projects / Workspace</div>
+      <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">Payments API</div>
+    </div>
+    <span style="border:1px solid #3A342B;padding:8px 14px;border-radius:2px;font-size:11.5px;color:#A79E8B">OPEN IN NEW TAB ↗</span>
+  </div>
+  <div style="display:flex;gap:28px;border-bottom:1px solid #2E2921">
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Chat</div>
+    <div style="padding:14px 0 12px;border-bottom:2px solid #D65A3C;margin-bottom:-1px;font-size:13px;font-weight:600">OpenCode</div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Audit</div>
+    <div style="margin-left:auto;padding:14px 0 12px;font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">PROXY · workspaces/payments-api · SCOPED BY opencode.json</div>
+  </div>
+  <!-- iframe -->
+  <div style="flex:1;margin-top:20px;border:1px solid #2E2921;border-radius:2px;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid #2E2921;background:#1B1815">
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">⛶ EMBEDDED — https://127.0.0.1:4097/payments-api/ · basic-auth injected</span>
+    </div>
+    <div style="flex:1;display:flex;background:#0E0D0B;min-height:420px">
+      <div style="width:200px;border-right:1px solid #221E19;padding:14px;font-family:'Spline Sans Mono',monospace;font-size:11px;color:#6E6657;line-height:2">
+        <div style="color:#A79E8B">workspaces/payments-api</div>
+        <div>▸ payments-core/</div>
+        <div>▸ payments-docs/</div>
+        <div style="color:#D9A644">&nbsp;&nbsp;opencode.json</div>
+        <div>&nbsp;&nbsp;AGENTS.md</div>
+      </div>
+      <div style="flex:1;padding:14px 18px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;line-height:1.9;color:#A79E8B">
+        <div><span style="color:#8CB878">opencode</span> v1.4.2 — session <span style="color:#D9A644">oc_9f2e11</span></div>
+        <div style="color:#6E6657">restricted: fs=workspace, net=call_api only</div>
+        <div style="margin-top:10px">&gt; explain the refund fallback logic in refunds-service<span style="display:inline-block;width:7px;height:12px;background:#8CB878;vertical-align:-2px"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3i WORKSPACE — AUDIT ============ -->
+<div class="dv-opt" id="3i">
+<div class="dv-olabel"><a class="dv-oid" href="#3i">3i</a>Project workspace — Audit tab (sessions + API call log w/ expanded detail)</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;padding:30px 46px 40px">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+    <div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">← Projects / Workspace</div>
+      <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">Payments API</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:28px;border-bottom:1px solid #2E2921;margin-bottom:24px">
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Chat</div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">OpenCode</div>
+    <div style="padding:14px 0 12px;border-bottom:2px solid #D65A3C;margin-bottom:-1px;font-size:13px;font-weight:600">Audit</div>
+    <div style="margin-left:auto;padding:14px 0 12px;font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">FULL LEDGER — EVERY MESSAGE, CALL &amp; RUN</div>
+  </div>
+  <!-- sessions -->
+  <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin-bottom:10px">§ CONVERSATION SESSIONS</div>
+  <div style="display:grid;grid-template-columns:.4fr 2fr 1.6fr .9fr 1fr;padding:0 0 8px;font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#6E6657;text-transform:uppercase;border-bottom:1px solid #2E2921">
+    <span>#</span><span>Teams conversation</span><span>OpenCode session</span><span>Status</span><span style="text-align:right">Updated</span>
+  </div>
+  <div style="display:grid;grid-template-columns:.4fr 2fr 1.6fr .9fr 1fr;padding:11px 0;border-bottom:1px solid #241F1A;font-family:'Spline Sans Mono',monospace;font-size:12px;align-items:baseline">
+    <span style="color:#6E6657">214</span><span style="color:#D65A3C;border-bottom:1px solid rgba(214,90,60,.3);width:fit-content">19:meeting_MjM4…@thread.v2</span><span style="color:#A79E8B">oc_9f2e11</span><span style="color:#8CB878">● open</span><span style="text-align:right;color:#A79E8B">09:44</span>
+  </div>
+  <div style="display:grid;grid-template-columns:.4fr 2fr 1.6fr .9fr 1fr;padding:11px 0;border-bottom:1px solid #241F1A;font-family:'Spline Sans Mono',monospace;font-size:12px;align-items:baseline">
+    <span style="color:#6E6657">213</span><span style="color:#D65A3C;border-bottom:1px solid rgba(214,90,60,.3);width:fit-content">admin-ui</span><span style="color:#A79E8B">oc_8a1c04</span><span style="color:#6E6657">○ closed</span><span style="text-align:right;color:#A79E8B">Jul 6 · 17:20</span>
+  </div>
+  <div style="display:grid;grid-template-columns:.4fr 2fr 1.6fr .9fr 1fr;padding:11px 0;border-bottom:1px solid #241F1A;font-family:'Spline Sans Mono',monospace;font-size:12px;align-items:baseline">
+    <span style="color:#6E6657">212</span><span style="color:#D65A3C;border-bottom:1px solid rgba(214,90,60,.3);width:fit-content">19:chat_NDg2…@thread.v2</span><span style="color:#A79E8B">oc_77b2f9</span><span style="color:#6E6657">○ closed</span><span style="text-align:right;color:#A79E8B">Jul 6 · 11:03</span>
+  </div>
+  <!-- api calls -->
+  <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin:28px 0 10px">§ LATEST API CALLS</div>
+  <div style="display:grid;grid-template-columns:.9fr 1fr 1.2fr .6fr 2.4fr .6fr .7fr;padding:0 0 8px;font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#6E6657;text-transform:uppercase;border-bottom:1px solid #2E2921">
+    <span>Time</span><span>Conv.</span><span>Group</span><span>Method</span><span>URL</span><span>Status</span><span style="text-align:right">Detail</span>
+  </div>
+  <div style="display:grid;grid-template-columns:.9fr 1fr 1.2fr .6fr 2.4fr .6fr .7fr;padding:10px 0;border-bottom:1px solid #241F1A;font-family:'Spline Sans Mono',monospace;font-size:11.5px;align-items:baseline">
+    <span style="color:#A79E8B">09:43:12</span><span style="color:#D65A3C">#214</span><span>Refunds service</span><span style="color:#8CB878">GET</span><span style="color:#A79E8B">/v2/refunds/R-2231</span><span style="color:#8CB878">200</span><span style="text-align:right;color:#6E6657">▸</span>
+  </div>
+  <!-- expanded row -->
+  <div style="border-bottom:1px solid #241F1A">
+    <div style="display:grid;grid-template-columns:.9fr 1fr 1.2fr .6fr 2.4fr .6fr .7fr;padding:10px 0;font-family:'Spline Sans Mono',monospace;font-size:11.5px;align-items:baseline;background:rgba(234,227,212,.02)">
+      <span style="color:#A79E8B">09:40:07</span><span style="color:#D65A3C">#214</span><span>Customer lookup</span><span style="color:#8CB878">GET</span><span style="color:#A79E8B">/v2/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="45262a2b31242631367a2028242c29782f6b212a2005242628206b262a28">[email&#160;protected]</a></span><span style="color:#D65A3C">504</span><span style="text-align:right;color:#EAE3D4">▾</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:4px 0 16px;background:rgba(234,227,212,.02)">
+      <div style="border:1px solid #2E2921;border-radius:2px;padding:11px 14px">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.16em;color:#6E6657;margin-bottom:7px">REQUEST · DURATION 30,004 MS (TIMEOUT)</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:11px;line-height:1.7;color:#C9C1AE">{ "email": "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0a60246e656f4a6b69676f24696567">[email&#160;protected]</a>", "limit": 1 }</div>
+      </div>
+      <div style="border:1px solid rgba(214,90,60,.35);border-radius:2px;padding:11px 14px">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.16em;color:#D65A3C;margin-bottom:7px">ERROR</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:11px;line-height:1.7;color:#D65A3C">upstream timeout after 30s — crm.internal.acme.com did not respond</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:.9fr 1fr 1.2fr .6fr 2.4fr .6fr .7fr;padding:10px 0;border-bottom:1px solid #241F1A;font-family:'Spline Sans Mono',monospace;font-size:11.5px;align-items:baseline">
+    <span style="color:#A79E8B">09:38:51</span><span style="color:#D65A3C">#214</span><span>Orders service</span><span style="color:#8CB878">GET</span><span style="color:#A79E8B">/v2/orders/48210</span><span style="color:#8CB878">200</span><span style="text-align:right;color:#6E6657">▸</span>
+  </div>
+  <div style="display:grid;grid-template-columns:.9fr 1fr 1.2fr .6fr 2.4fr .6fr .7fr;padding:10px 0;font-family:'Spline Sans Mono',monospace;font-size:11.5px;align-items:baseline">
+    <span style="color:#A79E8B">Jul 6 · 17:18</span><span style="color:#D65A3C">#213</span><span>Refunds service</span><span style="color:#D9A644">POST</span><span style="color:#A79E8B">/v2/refunds/R-2231/retry</span><span style="color:#8CB878">201</span><span style="text-align:right;color:#6E6657">▸</span>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3j CONVERSATION DETAIL ============ -->
+<div class="dv-opt" id="3j">
+<div class="dv-olabel"><a class="dv-oid" href="#3j">3j</a>Conversation detail — timeline + its API calls</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;padding:30px 46px 40px">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px;margin-bottom:26px">
+    <div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">← Payments API / Audit</div>
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">Conversation <span style="font-style:italic;color:#D65A3C">no. 214</span></div>
+        <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#8CB878">● open</span>
+      </div>
+    </div>
+    <span style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#6E6657">oc_9f2e11 · 19:meeting_MjM4…@thread.v2</span>
+  </div>
+  <div style="max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;justify-content:flex-end">
+      <div style="max-width:70%">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;text-align:right;margin-bottom:5px">LINH TRAN · TEAMS · 09:38</div>
+        <div style="background:#EAE3D4;color:#141210;border-radius:2px;padding:12px 16px;font-size:13.5px;line-height:1.55">pay what's the status of order 48210?</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div style="width:28px;height:28px;flex:none;border:1px solid #3A342B;border-radius:2px;display:grid;place-items:center;font-family:'Newsreader',serif;font-size:11px;color:#D65A3C">OT</div>
+      <div style="max-width:74%">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-bottom:5px;padding-left:16px">AGENT · 09:38</div>
+        <div style="border-left:2px solid #2E2921;padding:2px 0 2px 16px;font-size:13.5px;line-height:1.65;color:#DCD5C4">Order <span style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#D9A644">#48210</span> shipped Jul 6 via DHL, currently in transit — ETA Jul 9. Payment settled, no open disputes.</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <div style="max-width:70%">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;text-align:right;margin-bottom:5px">LINH TRAN · TEAMS · 09:40</div>
+        <div style="background:#EAE3D4;color:#141210;border-radius:2px;padding:12px 16px;font-size:13.5px;line-height:1.55">pay why did refund R-2231 fail?</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div style="width:28px;height:28px;flex:none;border:1px solid #3A342B;border-radius:2px;display:grid;place-items:center;font-family:'Newsreader',serif;font-size:11px;color:#D65A3C">OT</div>
+      <div style="max-width:74%">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#6E6657;margin-bottom:5px;padding-left:16px">AGENT · 09:41</div>
+        <div style="border-left:2px solid #2E2921;padding:2px 0 2px 16px;font-size:13.5px;line-height:1.65;color:#DCD5C4">The refund failed with <span style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#D65A3C">card_expired</span>. Bank-transfer fallback is scheduled for tomorrow 02:00.</div>
+      </div>
+    </div>
+  </div>
+  <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D9A644;margin:30px 0 10px">§ API CALLS IN THIS CONVERSATION</div>
+  <div style="display:grid;grid-template-columns:.9fr 1.2fr .6fr 2.6fr .6fr .9fr;padding:0 0 8px;font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#6E6657;text-transform:uppercase;border-bottom:1px solid #2E2921">
+    <span>Time</span><span>Group</span><span>Method</span><span>URL</span><span>Status</span><span style="text-align:right">Duration</span>
+  </div>
+  <div style="display:grid;grid-template-columns:.9fr 1.2fr .6fr 2.6fr .6fr .9fr;padding:10px 0;border-bottom:1px solid #241F1A;font-family:'Spline Sans Mono',monospace;font-size:11.5px">
+    <span style="color:#A79E8B">09:38:51</span><span>Orders service</span><span style="color:#8CB878">GET</span><span style="color:#A79E8B">/v2/orders/48210</span><span style="color:#8CB878">200</span><span style="text-align:right;color:#A79E8B">318 ms</span>
+  </div>
+  <div style="display:grid;grid-template-columns:.9fr 1.2fr .6fr 2.6fr .6fr .9fr;padding:10px 0;border-bottom:1px solid #241F1A;font-family:'Spline Sans Mono',monospace;font-size:11.5px">
+    <span style="color:#A79E8B">09:40:07</span><span>Customer lookup</span><span style="color:#8CB878">GET</span><span style="color:#A79E8B">/v2/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a6c5c9c8d2c7c5d2d599c3cbc7cfca9bcc88c2c9c3e6c7c5cbc388c5c9cb">[email&#160;protected]</a></span><span style="color:#D65A3C">504</span><span style="text-align:right;color:#D65A3C">30,004 ms</span>
+  </div>
+  <div style="display:grid;grid-template-columns:.9fr 1.2fr .6fr 2.6fr .6fr .9fr;padding:10px 0;font-family:'Spline Sans Mono',monospace;font-size:11.5px">
+    <span style="color:#A79E8B">09:43:12</span><span>Refunds service</span><span style="color:#8CB878">GET</span><span style="color:#A79E8B">/v2/refunds/R-2231</span><span style="color:#8CB878">200</span><span style="text-align:right;color:#A79E8B">412 ms</span>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3l NEW PROJECT + VALIDATION ============ -->
+<div class="dv-opt" id="3l">
+<div class="dv-olabel"><a class="dv-oid" href="#3l">3l</a>New project — create mode, validation errors</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;padding:30px 46px 40px">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+    <div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">← Projects / New entry</div>
+      <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">New <span style="font-style:italic;color:#D65A3C">project</span></div>
+    </div>
+    <span style="background:#EAE3D4;color:#141210;padding:9px 20px;border-radius:2px;font-size:12px;font-weight:700;letter-spacing:.04em">SAVE PROJECT</span>
+  </div>
+  <div style="display:flex;gap:28px;border-bottom:1px solid #2E2921;margin-bottom:22px">
+    <div style="padding:14px 0 12px;border-bottom:2px solid #D65A3C;margin-bottom:-1px;font-size:13px;font-weight:600">Core settings</div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Repositories <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/0</span></div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">API endpoints <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">/0</span></div>
+    <div style="margin-left:auto;padding:14px 0 12px;font-family:'Spline Sans Mono',monospace;font-size:10px;color:#6E6657">INTEGRATION URL APPEARS AFTER FIRST SAVE</div>
+  </div>
+  <!-- validation -->
+  <div style="border:1px solid rgba(214,90,60,.4);border-radius:2px;padding:14px 18px;margin-bottom:24px">
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.18em;color:#D65A3C;margin-bottom:8px">✕ 2 ERRORS — NOTHING WAS SAVED</div>
+    <div style="font-size:12.5px;color:#DCD5C4;line-height:1.8">— Slug is required and may only contain lowercase letters, numbers, dashes.<br>— Repository no. 01: Git URL is not a valid git address.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px 32px">
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#D65A3C;text-transform:uppercase;margin-bottom:8px">Slug <span>*</span></div>
+      <div style="background:#1B1815;border:1px solid #D65A3C;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px;color:#D65A3C">Inventory Bot!</div>
+      <div style="font-size:11px;color:#D65A3C;margin-top:6px">✕ Invalid — try <span style="font-family:'Spline Sans Mono',monospace">inventory-bot</span></div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Display name <span style="color:#D65A3C">*</span></div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-size:13px">Inventory Bot</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Teams keyword</div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:13px;color:#6E6657">optional prefix, e.g. inv</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#A79E8B;text-transform:uppercase;margin-bottom:8px">Teams webhook URL</div>
+      <div style="background:#1B1815;border:1px solid #3A342B;border-radius:2px;padding:10px 13px;font-family:'Spline Sans Mono',monospace;font-size:12px;color:#6E6657">https://…logic.azure.com/workflows/…</div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3m CHAT EMPTY + BUSY ============ -->
+<div class="dv-opt" id="3m">
+<div class="dv-olabel"><a class="dv-oid" href="#3m">3m</a>Chat — empty state (quick prompts) + agent-busy banner</div>
+<div class="dv-card" style="width:1280px">
+<div style="background:#141210;color:#EAE3D4;font-family:'Archivo',sans-serif;min-height:680px;display:flex;flex-direction:column;padding:30px 46px 0">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #2E2921;padding-bottom:18px">
+    <div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#6E6657;text-transform:uppercase;margin-bottom:8px">← Projects / Workspace</div>
+      <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">HR Assistant</div>
+    </div>
+    <span style="border:1px solid #3A342B;padding:8px 14px;border-radius:2px;font-size:11.5px;color:#A79E8B">+ NEW CONVERSATION</span>
+  </div>
+  <div style="display:flex;gap:28px;border-bottom:1px solid #2E2921">
+    <div style="padding:14px 0 12px;border-bottom:2px solid #D65A3C;margin-bottom:-1px;font-size:13px;font-weight:600">Chat</div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">OpenCode</div>
+    <div style="padding:14px 0 12px;font-size:13px;color:#A79E8B">Audit</div>
+  </div>
+  <!-- busy banner -->
+  <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(217,166,68,.4);border-radius:2px;padding:11px 16px;margin:20px auto 0;max-width:860px;width:100%">
+    <span style="width:7px;height:7px;background:#D9A644;border-radius:50%;flex:none"></span>
+    <span style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#D9A644">AGENT BUSY — a Teams question is being answered. Sends return 409 until it finishes.</span>
+  </div>
+  <!-- empty state -->
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;max-width:860px;margin:0 auto;width:100%">
+    <div style="width:52px;height:52px;border:1px solid #3A342B;border-radius:2px;display:grid;place-items:center;font-family:'Newsreader',serif;font-size:20px;color:#D65A3C">OT</div>
+    <div style="font-family:'Newsreader',serif;font-size:22px;font-weight:500">Open the ledger with a <span style="font-style:italic;color:#D65A3C">question</span></div>
+    <div style="font-size:12.5px;color:#A79E8B">Same agent your team reaches in Teams — with the same repos, prompts and API access.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <span style="border:1px solid #3A342B;border-radius:2px;padding:9px 15px;font-size:12px;color:#A79E8B">Summarize this week's leave requests</span>
+      <span style="border:1px solid #3A342B;border-radius:2px;padding:9px 15px;font-size:12px;color:#A79E8B">What changed in the onboarding repo?</span>
+      <span style="border:1px solid #3A342B;border-radius:2px;padding:9px 15px;font-size:12px;color:#A79E8B">Which policies mention probation?</span>
+      <span style="border:1px solid #3A342B;border-radius:2px;padding:9px 15px;font-size:12px;color:#A79E8B">Test the payroll API connection</span>
+    </div>
+  </div>
+  <div style="border-top:1px solid #2E2921;padding:18px 0 26px;max-width:860px;margin:0 auto;width:100%">
+    <div style="display:flex;align-items:flex-end;gap:12px;border:1px solid #3A342B;border-radius:2px;background:#1B1815;padding:13px 16px;opacity:.6">
+      <div style="flex:1;font-size:13.5px;color:#6E6657">Waiting for the current run to finish…</div>
+      <span style="border:1px solid #3A342B;color:#6E6657;padding:7px 15px;border-radius:2px;font-size:11px;font-weight:700">SEND</span>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ 3k LIGHT MODE ============ -->
+<div class="dv-opt" id="3k">
+<div class="dv-olabel"><a class="dv-oid" href="#3k">3k</a>Paper light mode — same ledger, daylight</div>
+<div class="dv-card" style="width:1280px">
+<div style="display:flex;background:#F2EEE3;color:#201C15;font-family:'Archivo',sans-serif;min-height:560px">
+  <div style="width:216px;flex:none;border-right:1px solid #D8D2C2;display:flex;flex-direction:column;padding:24px 0 16px">
+    <div style="padding:0 20px 22px;border-bottom:1px solid #D8D2C2">
+      <div style="font-family:'Newsreader',serif;font-size:19px;font-weight:500;line-height:1.1">OpenTraceBridge<span style="color:#BC4A2E">.</span></div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.2em;color:#98917E;margin-top:5px">ADMIN CONSOLE — PRIVATE</div>
+    </div>
+    <div style="padding:16px 0 0">
+      <div style="display:flex;align-items:center;gap:12px;padding:9px 20px;border-left:2px solid #BC4A2E;background:rgba(188,74,46,.05)"><span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#BC4A2E">01</span><span style="font-size:13px;font-weight:600">Dashboard</span></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:9px 20px;border-left:2px solid transparent"><span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#98917E">02</span><span style="font-size:13px;color:#5F594A">Projects</span></div>
+    </div>
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.2em;color:#98917E;padding:24px 20px 8px">REGISTER — 5</div>
+    <div style="display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 20px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#5F594A"><span style="color:#5B8452;font-size:8px">●</span>payments-api</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 20px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#5F594A"><span style="color:#5B8452;font-size:8px">●</span>hr-assistant</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 20px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#5F594A"><span style="color:#A87A24;font-size:8px">◆</span>warehouse-ops</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 20px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#5F594A"><span style="color:#BC4A2E;font-size:9px">✕</span>crm-sync</div>
+    </div>
+    <div style="margin-top:auto;border-top:1px solid #D8D2C2;padding:12px 20px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:12px;color:#5F594A">◑ Light — switch to dark</div>
+      <div style="font-size:12px;color:#5F594A">← Log out</div>
+    </div>
+  </div>
+  <div style="flex:1;min-width:0;padding:30px 38px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #D8D2C2;padding-bottom:18px">
+      <div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.2em;color:#98917E;text-transform:uppercase;margin-bottom:8px">System ledger · Week 27 · Jun 30 — Jul 6, 2026</div>
+        <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500">The week in <span style="font-style:italic;color:#BC4A2E">numbers</span></div>
+      </div>
+      <div style="display:flex;gap:14px;font-family:'Spline Sans Mono',monospace;font-size:11.5px">
+        <span style="color:#201C15;border-bottom:2px solid #BC4A2E;padding-bottom:3px">7D</span>
+        <span style="color:#98917E">30D</span>
+        <span style="color:#98917E">90D</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid #D8D2C2">
+      <div style="padding:20px 18px 18px 0;border-right:1px solid #D8D2C2">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#98917E;text-transform:uppercase;margin-bottom:10px">Questions</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">1,284</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#5B8452;margin-top:8px">+12% W/W</div>
+      </div>
+      <div style="padding:20px 18px;border-right:1px solid #D8D2C2">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#98917E;text-transform:uppercase;margin-bottom:10px">Avg response</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">2.84<span style="font-size:17px;color:#98917E">s</span></div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#5B8452;margin-top:8px">−8% W/W</div>
+      </div>
+      <div style="padding:20px 18px;border-right:1px solid #D8D2C2">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#98917E;text-transform:uppercase;margin-bottom:10px">Error rate</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1;color:#BC4A2E">1.8<span style="font-size:17px">%</span></div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#BC4A2E;margin-top:8px">+0.4 PT</div>
+      </div>
+      <div style="padding:20px 18px;border-right:1px solid #D8D2C2">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#98917E;text-transform:uppercase;margin-bottom:10px">API calls</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">3,921</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#5B8452;margin-top:8px">+19% W/W</div>
+      </div>
+      <div style="padding:20px 18px;border-right:1px solid #D8D2C2">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#98917E;text-transform:uppercase;margin-bottom:10px">Tokens</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">6.4<span style="font-size:17px;color:#98917E">M</span></div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#98917E;margin-top:8px">IN 4.1 / OUT 2.3</div>
+      </div>
+      <div style="padding:20px 0 18px 18px">
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:#98917E;text-transform:uppercase;margin-bottom:10px">Total cost</div>
+        <div style="font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1">$54.20</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:#98917E;margin-top:8px">$7.74 / DAY</div>
+      </div>
+    </div>
+    <div style="padding:22px 0 4px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:600">Questions per day</div>
+        <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#98917E">PEAK 236 · JUL 5</div>
+      </div>
+      <svg width="100%" height="150" viewBox="0 0 1000 150" preserveAspectRatio="none">
+        <path d="M0 115 H1000 M0 80 H1000 M0 45 H1000 M0 10 H1000" stroke="#E2DCCC" stroke-width="1"></path>
+        <path d="M0 99 L166 81 L333 92 L500 41 L666 58 L833 19 L1000 34" fill="none" stroke="#201C15" stroke-width="1.5"></path>
+        <circle cx="833" cy="19" r="4" fill="#BC4A2E"></circle>
+      </svg>
+      <div style="display:flex;justify-content:space-between;font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:#98917E;padding:8px 0 10px">
+        <span>MON 30</span><span>TUE 01</span><span>WED 02</span><span>THU 03</span><span>FRI 04</span><span>SAT 05</span><span>SUN 06</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+
+
+
+
+</div>
+<p class="dv-next">Toàn bộ trang dùng hệ nền <a href="#4a">4a</a>. Mỗi trang là một "tờ" trong sổ: hairline rules, serif numerals, glyph trạng thái ● ◆ ✕ thay pill badge.</p>
+</section>
+
+
+
+</x-dc>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

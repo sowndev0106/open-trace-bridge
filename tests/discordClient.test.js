@@ -51,3 +51,83 @@ test('mapInteraction extracts name, options, and DM flag', () => {
     botId: 7, channelId: '111', isDM: true, userId: 'u1', userName: 'alice',
   });
 });
+
+test('createBotClient retries login without MessageContent intent if disallowed', async () => {
+  const mockClientInstances = [];
+  class MockClient {
+    constructor(options) {
+      this.options = options;
+      this.events = {};
+      mockClientInstances.push(this);
+      this.user = { tag: 'mockbot#1234' };
+      this.application = {
+        id: 'mock-app-id',
+        commands: {
+          set: async () => {}
+        }
+      };
+    }
+    on(event, handler) {
+      this.events[event] = handler;
+    }
+    async login(token) {
+      if (this.options.intents.includes('MessageContent')) {
+        const err = new Error('Used disallowed intents');
+        err.code = 'DisallowedIntents';
+        throw err;
+      }
+      // Success on fallback (without MessageContent)
+      if (this.events['ready']) {
+        await this.events['ready']();
+      }
+      return token;
+    }
+    destroy() {
+      this.destroyed = true;
+    }
+  }
+
+  // Inject mock into require cache
+  const originalCache = require.cache[require.resolve('discord.js')];
+  require.cache[require.resolve('discord.js')] = {
+    exports: {
+      Client: MockClient,
+      GatewayIntentBits: {
+        Guilds: 'Guilds',
+        GuildMessages: 'GuildMessages',
+        DirectMessages: 'DirectMessages',
+        MessageContent: 'MessageContent'
+      },
+      Partials: {
+        Channel: 'Channel'
+      }
+    }
+  };
+
+  const { createBotClient } = require('../lib/discordClient');
+
+  let readyCalled = false;
+  const bot = createBotClient({
+    botId: 1,
+    token: 'dummy-token',
+    onReady: () => { readyCalled = true; },
+    onError: () => {}
+  });
+
+  await bot.start();
+
+  assert.strictEqual(readyCalled, true);
+  // Should have created two clients (first with MessageContent, second without)
+  assert.strictEqual(mockClientInstances.length, 2);
+  assert.ok(mockClientInstances[0].options.intents.includes('MessageContent'));
+  assert.ok(!mockClientInstances[1].options.intents.includes('MessageContent'));
+  assert.strictEqual(mockClientInstances[0].destroyed, true);
+
+  // Cleanup cache
+  if (originalCache) {
+    require.cache[require.resolve('discord.js')] = originalCache;
+  } else {
+    delete require.cache[require.resolve('discord.js')];
+  }
+});
+

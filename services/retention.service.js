@@ -7,6 +7,8 @@ const runs = require('../models/run.model');
 const sessions = require('../models/session.model');
 
 const DEFAULT_INTERVAL_MS = 60 * 60 * 1000;
+const INACTIVITY_CHECK_MS = 60 * 1000;        // check every 1 minute
+const INACTIVITY_MINUTES = Number(process.env.CONVERSATION_INACTIVITY_MINUTES || 5);
 
 function sqliteTimestamp(date) {
   return date.toISOString().replace('T', ' ').slice(0, 19);
@@ -57,4 +59,19 @@ function startRetentionJob({ intervalMs = DEFAULT_INTERVAL_MS } = {}) {
   return timer;
 }
 
-module.exports = { runRetentionCleanup, startRetentionJob, cutoffFor };
+function startInactivityJob({ intervalMs = INACTIVITY_CHECK_MS, minutes = INACTIVITY_MINUTES } = {}) {
+  const timer = setInterval(() => {
+    try {
+      const closed = convs.autoCloseInactive(minutes);
+      if (closed > 0) {
+        console.log(`[inactivity] auto-closed ${closed} conversation(s) inactive for >${minutes} minutes`);
+      }
+    } catch (err) {
+      console.error('[inactivity] job failed:', err.message);
+    }
+  }, intervalMs);
+  if (timer.unref) timer.unref();
+  return timer;
+}
+
+module.exports = { runRetentionCleanup, startRetentionJob, startInactivityJob, cutoffFor };

@@ -50,6 +50,7 @@ if (require.main === module) {
   createOpencodeProxy().listen(OPENCODE_UI_PORT, () =>
     console.log(`OpenCode UI proxy listening on port ${OPENCODE_UI_PORT} (admin session required)`));
   retention.startRetentionJob();
+  retention.startInactivityJob();
   require('./services/discord.service').startAll();
 }
 module.exports = { publicApp, adminApp };
