@@ -55,3 +55,17 @@ test('models settings save allowlist and default', async () => {
   assert.strictEqual(settings.get('discord_allowed_models'), 'a/m1\nb/m2');
   assert.strictEqual(settings.get('discord_default_model'), 'a/m1');
 });
+
+test('project save binds a bot and reconciles designated channels', async () => {
+  const b = bots.create({ name: 'Main', token: 't' });
+  const p = projects.create({ slug: 'pay2', name: 'Pay2', keyword: '', system_prompt: '', teams_webhook_url: '' });
+  const channels = require('../models/discordChannel.model');
+  await agent.post(`/admin/projects/${p.id}`).type('form').send({
+    slug: 'pay2', name: 'Pay2', keyword: '', system_prompt: '', teams_webhook_url: '',
+    max_msg_length: '20000', chat_retention_days: '90',
+    discord_bot_id: String(b.id),
+    discord_channel_id: ['111222333'], discord_channel_mode: ['all'],
+  }).expect(302);
+  assert.strictEqual(projects.findById(p.id).discord_bot_id, b.id);
+  assert.strictEqual(channels.findByChannelId('111222333').project_id, p.id);
+});

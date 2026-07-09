@@ -166,6 +166,49 @@
   </section>
   </div>
 
+  <!-- Discord -->
+  <section class="panel" style="margin-bottom:1.25rem">
+    <div class="panel-body">
+      <h2 class="section-heading">Discord</h2>
+      <p style="font-size:0.8125rem;color:var(--color-ink-500);margin-top:0.25rem">
+        Bind a bot (managed on the <a href="/admin/discord">Discord page</a>) and designate the channels it may answer in.
+        Mode <strong>mention</strong> answers only @bot messages; <strong>all</strong> answers every message in the channel.
+      </p>
+      <div style="margin-top:0.75rem;max-width:20rem">
+        <label style="font-size:0.8125rem;font-weight:600">Bot
+          <select class="input" name="discord_bot_id">
+            <option value="">(none — Discord disabled)</option>
+            <% for (const b of discordBots) { %>
+              <option value="<%= b.id %>" <%= project && Number(project.discord_bot_id) === b.id ? 'selected' : '' %>><%= b.name %></option>
+            <% } %>
+          </select>
+        </label>
+      </div>
+      <div id="discord-channel-rows" style="margin-top:0.75rem;display:grid;gap:0.5rem">
+        <% for (const ch of (discordChannels || [])) { %>
+          <div style="display:flex;gap:0.5rem">
+            <input class="input" name="discord_channel_id" value="<%= ch.channel_id %>" placeholder="Channel id (numeric)">
+            <select class="input" name="discord_channel_mode" style="max-width:10rem">
+              <option value="mention" <%= ch.mode === 'mention' ? 'selected' : '' %>>mention</option>
+              <option value="all" <%= ch.mode === 'all' ? 'selected' : '' %>>all</option>
+            </select>
+          </div>
+        <% } %>
+      </div>
+      <button type="button" class="btn btn-secondary" style="margin-top:0.75rem"
+              onclick="const d=document.createElement('div');d.style.cssText='display:flex;gap:0.5rem';d.innerHTML=document.getElementById('discord-row-template').innerHTML;document.getElementById('discord-channel-rows').appendChild(d)">
+        Add channel
+      </button>
+      <template id="discord-row-template">
+        <input class="input" name="discord_channel_id" value="" placeholder="Channel id (numeric)">
+        <select class="input" name="discord_channel_mode" style="max-width:10rem">
+          <option value="mention">mention</option>
+          <option value="all">all</option>
+        </select>
+      </template>
+    </div>
+  </section>
+
 </form>
 
 <script>

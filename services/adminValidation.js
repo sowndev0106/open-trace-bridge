@@ -231,4 +231,35 @@ function validateProjectBundle(body, { existingRepos = [], existingApis = [] } =
   return { values: { project, repos, apis }, errors: allErrors };
 }
 
-module.exports = { validateProjectInput, validateRepoInput, validateApiGroupInput, validateProjectBundle };
+const CHANNEL_ID_RE = /^\d{5,25}$/;
+
+// Discord section of the project form: a bot select plus parallel arrays of
+// channel id / mode rows. Empty channel_id rows are skipped (deleted rows).
+function validateDiscordSection(body) {
+  const errors = [];
+  const rawBot = clean(body.discord_bot_id);
+  const discord_bot_id = rawBot ? Number(rawBot) : null;
+  if (rawBot && !Number.isInteger(discord_bot_id)) errors.push('Discord bot selection is invalid.');
+
+  const ids = [].concat(body.discord_channel_id || []);
+  const modes = [].concat(body.discord_channel_mode || []);
+  const channels = [];
+  let hasChannelInput = false;
+  ids.forEach((raw, i) => {
+    const channel_id = clean(raw);
+    if (!channel_id) return;
+    hasChannelInput = true;
+    if (!CHANNEL_ID_RE.test(channel_id)) {
+      errors.push(`Channel id "${channel_id}" must be the numeric channel snowflake.`);
+      return;
+    }
+    channels.push({ channel_id, mode: clean(modes[i]) === 'all' ? 'all' : 'mention' });
+  });
+  if (hasChannelInput && !discord_bot_id) errors.push('Select a bot before adding Discord channels.');
+  return { values: { discord_bot_id, channels }, errors };
+}
+
+module.exports = {
+  validateProjectInput, validateRepoInput, validateApiGroupInput, validateProjectBundle,
+  validateDiscordSection,
+};

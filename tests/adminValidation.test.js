@@ -78,3 +78,27 @@ test('duplicate API group names are rejected', () => {
   });
   assert.ok(errors.includes('API group names must be unique.'));
 });
+
+test('validateDiscordSection parses bot id and channel rows', () => {
+  const { validateDiscordSection } = require('../services/adminValidation');
+  const r = validateDiscordSection({
+    discord_bot_id: '3',
+    discord_channel_id: ['123456789', ' 987654321 ', ''],
+    discord_channel_mode: ['all', 'mention', 'mention'],
+  });
+  assert.deepStrictEqual(r.errors, []);
+  assert.strictEqual(r.values.discord_bot_id, 3);
+  assert.deepStrictEqual(r.values.channels, [
+    { channel_id: '123456789', mode: 'all' },
+    { channel_id: '987654321', mode: 'mention' },
+  ]);
+});
+
+test('validateDiscordSection rejects non-numeric channel ids and requires a bot when channels exist', () => {
+  const { validateDiscordSection } = require('../services/adminValidation');
+  const r1 = validateDiscordSection({ discord_bot_id: '', discord_channel_id: ['abc'], discord_channel_mode: ['all'] });
+  assert.ok(r1.errors.some((e) => /numeric/i.test(e)));
+  assert.ok(r1.errors.some((e) => /select a bot/i.test(e)));
+  const r2 = validateDiscordSection({});
+  assert.deepStrictEqual(r2, { values: { discord_bot_id: null, channels: [] }, errors: [] });
+});
